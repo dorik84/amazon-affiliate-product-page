@@ -1,46 +1,69 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useCallback } from "react"
+import useEmblaCarousel from "embla-carousel-react"
+import Image from "next/image"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface ProductCarouselProps {
   product: {
-    name: string;
-    images: string[];
+    name: string
+    images: string[]
     variations: Array<{
-      name: string;
-      image: string;
-    }>;
-  };
+      name: string
+      image: string
+    }>
+  }
 }
 
 export default function ProductCarousel({ product }: ProductCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel();
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel()
+  const [selectedIndex, setSelectedIndex] = useState(0)
 
-  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
+  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi])
+  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi])
 
   const onThumbClick = useCallback(
     (index: number) => {
-      if (!emblaApi) return;
-      emblaApi.scrollTo(index);
-      setSelectedIndex(index);
+      if (!emblaApi) return
+      emblaApi.scrollTo(index)
+      setSelectedIndex(index)
     },
-    [emblaApi]
-  );
+    [emblaApi],
+  )
 
   const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+    if (!emblaApi) return
+    setSelectedIndex(emblaApi.selectedScrollSnap())
+  }, [emblaApi])
 
   return (
-    <div className="space-y-4">
-      <div className="relative aspect-square">
+    <div className="flex flex-col-reverse items-center sm:items-start sm:flex-row gap-4 mx-auto md:mx-0">
+      {/* Thumbnails */}
+      <div className="flex flex-shrink-0 p-1 sm:flex-col order-2 sm:order-1 gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[400px]">
+        {product.images.map((src, index) => (
+          <button
+            key={index}
+            onClick={() => onThumbClick(index)}
+            className={`flex-shrink-0 ${
+              index === selectedIndex ? "ring-2 ring-primary" : ""
+            } focus:outline-none focus:ring-2 focus:ring-primary`}
+            aria-label={`View image ${index + 1}`}
+          >
+            <Image
+              src={src || "/placeholder.svg"}
+              alt={`Thumbnail ${index + 1}`}
+              width={60}
+              height={60}
+              className="object-cover aspect-square"
+            />
+          </button>
+        ))}
+      </div>
+
+      {/* Main carousel */}
+      <div className="relative aspect-square w-full order-1 sm:order-2 sm:flex-grow">
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full">
             {product.images.map((src, index) => (
@@ -60,6 +83,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
           size="icon"
           className="absolute top-1/2 left-4 transform -translate-y-1/2"
           onClick={scrollPrev}
+          aria-label="Previous image"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -68,27 +92,12 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
           size="icon"
           className="absolute top-1/2 right-4 transform -translate-y-1/2"
           onClick={scrollNext}
+          aria-label="Next image"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex justify-center gap-2 overflow-x-auto pb-2">
-        {product.images.map((src, index) => (
-          <button
-            key={index}
-            onClick={() => onThumbClick(index)}
-            className={`flex-shrink-0 ${index === selectedIndex ? "ring-2 ring-primary" : ""}`}
-          >
-            <Image
-              src={src || "/placeholder.svg"}
-              alt={`Thumbnail ${index + 1}`}
-              width={60}
-              height={60}
-              className="object-cover aspect-square"
-            />
-          </button>
-        ))}
-      </div>
     </div>
-  );
+  )
 }
+
