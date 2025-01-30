@@ -33,9 +33,11 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
   }, [emblaApi]);
 
   return (
-    <div className="flex flex-col-reverse items-center sm:items-start sm:flex-row gap-4 mx-auto md:mx-0">
+    // <div className="flex flex-col-reverse items-center sm:items-start md:flex-row gap-4 mx-auto md:mx-0">
+    <div className="flex flex-col-reverse items-center sm:items-start  gap-4 mx-auto md:mx-0">
       {/* Thumbnails */}
-      <div className="flex flex-shrink-0 p-1 sm:flex-col order-2 sm:order-1 gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[400px]">
+      <div className="flex flex-shrink-0 p-1 order-2 sm:order-1 gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[400px]">
+        {/* <div className="flex flex-shrink-0 p-1 sm:flex-col order-2 sm:order-1 gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[400px]"> */}
         {product?.images.map((src, index) => (
           <button
             key={index}
@@ -48,9 +50,9 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
             <Image
               src={src || "/placeholder.svg"}
               alt={`Thumbnail ${index + 1}`}
-              width={60}
-              height={60}
-              className="object-cover aspect-square"
+              width={80}
+              height={80}
+              className="object-contain aspect-square"
             />
           </button>
         ))}
@@ -67,7 +69,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
                   alt={`${product.title} - Image ${index + 1}`}
                   fill
                   priority={index === 0} // Add priority to the first image
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
             ))}

@@ -8,6 +8,6 @@ export interface ProductData {
 export interface VariationData {
   name: string;
   price: number;
-  option: string;
   image: string;
+  type: string;
 }

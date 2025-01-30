@@ -1,45 +1,46 @@
-import Image from "next/image";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import type { VariationData } from "@/types/productData";
+import { VariantButton } from "@/components/ui/variant-button";
 
 interface ProductVariationsProps {
   variations: VariationData[] | null | undefined;
-  selectedVariation: number;
-  onVariationChange: (index: number) => void;
+  selectedVariations: Record<string, number>;
+  onVariationChange: (type: string, index: number) => void;
 }
 
 export default function ProductVariations({
   variations,
-  selectedVariation,
+  selectedVariations,
   onVariationChange,
 }: ProductVariationsProps) {
+  // Group variations by type
+  const groupedVariations =
+    variations?.reduce((acc, variation) => {
+      const type = variation.type || "default";
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+      acc[type].push(variation);
+      return acc;
+    }, {} as Record<string, VariationData[]>) || {};
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Options</h3>
-      <RadioGroup
-        value={selectedVariation.toString()}
-        onValueChange={(value) => onVariationChange(Number.parseInt(value))}
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
-      >
-        {variations?.map((variation, index) => (
-          <div className="flex items-center space-x-2" key={index}>
-            <RadioGroupItem value={index.toString()} id={`variant-${variation.option}`} />
-            <Label htmlFor={`variant-${variation.option}`} className="flex items-center cursor-pointer">
-              {variation.image ?? (
-                <Image
-                  src={variation.image || "/placeholder.svg"}
-                  alt={variation.name}
-                  width={50}
-                  height={50}
-                  className="mr-2 rounded-md"
-                />
-              )}
-              <span className="flex-grow">{variation.name}</span>
-            </Label>
+    <div className="space-y-6">
+      {Object.entries(groupedVariations).map(([type, typeVariations]) => (
+        <div key={type} className="space-y-4">
+          <h3 className="text-lg font-semibold capitalize">{type === "default" ? "Options" : type}</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {typeVariations.map((variation, index) => (
+              <VariantButton
+                key={index}
+                name={variation.name}
+                image={variation.image}
+                isSelected={selectedVariations[type] === index}
+                onClick={() => onVariationChange(type, index)}
+              />
+            ))}
           </div>
-        ))}
-      </RadioGroup>
+        </div>
+      ))}
     </div>
   );
 }

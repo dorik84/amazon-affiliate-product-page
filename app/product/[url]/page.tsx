@@ -10,15 +10,15 @@ import ProductVariations from "@/components/ProductVariations";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { fetchAndTransformProduct } from "@/lib/productData-adapter";
-import type { ProductData } from "@/types/productData";
+
+import type { ProductData, VariationData } from "@/types/productData";
 
 export default function ProductPage() {
-  const [selectedVariation, setSelectedVariation] = useState(0);
+  const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>({});
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { theme } = useTheme();
+
   const params = useParams();
 
   useEffect(() => {
@@ -27,8 +27,24 @@ export default function ProductPage() {
         setIsLoading(true);
         setError(null);
         const url = params.url as string;
-        const data = await fetchAndTransformProduct(url);
+        const response = await fetch(`/api/product?url=${encodeURIComponent(url)}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch product data");
+        }
+        const data = await response.json();
         setProductData(data);
+
+        // Initialize selected variations with first option of each type
+        if (data?.variations) {
+          const initialVariations: Record<string, number> = {};
+          data.variations.forEach((variation: VariationData) => {
+            const type = variation.type || "default";
+            if (initialVariations[type] === undefined) {
+              initialVariations[type] = 0;
+            }
+          });
+          setSelectedVariations(initialVariations);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch productData data");
       } finally {
@@ -49,8 +65,27 @@ export default function ProductPage() {
     return <div>Error: {error}</div>;
   }
 
-  const handleVariationChange = (index: number) => {
-    setSelectedVariation(index);
+  const handleVariationChange = (type: string, index: number) => {
+    setSelectedVariations((prev) => ({
+      ...prev,
+      [type]: index,
+    }));
+  };
+
+  // Get the current selected variation's price
+  const getCurrentPrice = () => {
+    if (!productData?.variations) return 0;
+
+    // Find the variation that matches all selected options
+    const selectedVariation = productData.variations.find((variation) => {
+      const type = variation.type || "default";
+      return (
+        selectedVariations[type] ===
+        productData.variations.findIndex((v) => v.type === type && v.name === variation.name)
+      );
+    });
+
+    return selectedVariation?.price || productData.variations[0]?.price || 0;
   };
 
   return (
@@ -71,7 +106,7 @@ export default function ProductPage() {
           <div className="md:col-span-1 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4">
               <p className="text-2xl font-semibold bg-primary/10 text-primary px-4 py-2 rounded-md">
-                ${productData?.variations[selectedVariation].price.toFixed(2)}
+                ${getCurrentPrice().toFixed(2)}
               </p>
               <Button
                 className="flex items-center justify-center gap-2 w-full sm:w-auto"
@@ -85,7 +120,7 @@ export default function ProductPage() {
 
             <ProductVariations
               variations={productData?.variations}
-              selectedVariation={selectedVariation}
+              selectedVariations={selectedVariations}
               onVariationChange={handleVariationChange}
             />
           </div>
