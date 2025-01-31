@@ -16,14 +16,14 @@ const VariantButton = React.forwardRef<HTMLButtonElement, VariantButtonProps>(
         ref={ref}
         variant={isSelected ? "default" : "outline"}
         className={cn(
-          "w-full h-full min-h-[60px] overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-start gap-3 p-1",
+          " overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-start gap-3 p-1",
           isSelected && "ring-2 ring-primary",
           className
         )}
         {...props}
       >
         {image && <Image src={image} alt={name} width={40} height={40} className="rounded-md object-cover" />}
-        <span className="flex-grow text-left">{name}</span>
+        <span className={cn("flex-grow text-center", image && "text-left")}>{name}</span>
       </Button>
     );
   }

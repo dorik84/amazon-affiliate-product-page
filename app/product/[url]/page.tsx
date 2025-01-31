@@ -111,7 +111,7 @@ export default function ProductPage() {
               <Button
                 className="flex items-center justify-center gap-2 w-full sm:w-auto"
                 size="lg"
-                onClick={() => window.open("https://www.amazon.com", "_blank")}
+                onClick={() => window.open(decodeURIComponent(params.url as string), "_blank")}
               >
                 <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" />
                 View on Amazon
