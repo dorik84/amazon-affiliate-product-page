@@ -27,7 +27,9 @@ export default function ProductVariations({
     <div className="space-y-6">
       {Object.entries(groupedVariations).map(([type, typeVariations]) => (
         <div key={type} className="space-y-4">
-          <h3 className="text-lg font-semibold capitalize">{type === "default" ? "Options" : type}</h3>
+          <h3 className="text-lg font-semibold capitalize">
+            {type === "default" ? "Options" : type} : {typeVariations[selectedVariations[type]].name}
+          </h3>
           <div className="grid grid-cols-3 gap-4">
             {typeVariations.map((variation, index) => (
               <VariantButton

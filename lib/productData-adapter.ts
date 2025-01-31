@@ -9,7 +9,8 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     // Fetch the remote page
     const response = await fetch(decodedUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ProductBot/1.0;)",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
       },
     });
     if (!response.ok) {

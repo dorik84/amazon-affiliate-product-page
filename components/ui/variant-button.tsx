@@ -16,7 +16,7 @@ const VariantButton = React.forwardRef<HTMLButtonElement, VariantButtonProps>(
         ref={ref}
         variant={isSelected ? "default" : "outline"}
         className={cn(
-          " overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-start gap-3 p-1",
+          "truncate whitespace-nowrap flex items-center justify-start gap-3 p-1",
           isSelected && "ring-2 ring-primary",
           className
         )}
