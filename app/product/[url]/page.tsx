@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTheme } from "next-themes";
 import { useParams } from "next/navigation";
 import AffiliateMessage from "@/components/AffiliateMessage";
 import ProductCarousel from "@/components/ProductCarousel";
@@ -90,13 +89,13 @@ export default function ProductPage() {
 
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
-      <div className="flex justify-between items-center mb-4 sm:mb-6">
+      <div className="flex justify-between items-center mb-4 gap-4 sm:mb-6">
         <AffiliateMessage />
         <ThemeToggle />
       </div>
 
       <div className="space-y-6">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">{productData?.title}</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center">{productData?.title}</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
           <div className="md:col-span-1">
@@ -108,8 +107,9 @@ export default function ProductPage() {
               <p className="text-2xl font-semibold bg-primary/10 text-primary px-4 py-2 rounded-md">
                 ${getCurrentPrice().toFixed(2)}
               </p>
+
               <Button
-                className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto ring-2 ring-primary"
                 size="lg"
                 onClick={() => window.open(decodeURIComponent(params.url as string), "_blank")}
               >

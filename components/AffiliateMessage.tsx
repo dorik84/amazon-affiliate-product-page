@@ -1,5 +1,5 @@
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Info } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 export default function AffiliateMessage() {
   return (
@@ -9,6 +9,5 @@ export default function AffiliateMessage() {
         As an Amazon Associate, we earn from qualifying purchases. Thank you for supporting our store!
       </AlertDescription>
     </Alert>
-  )
+  );
 }
-

@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductData } from "@/types/productData";
+import CarouselThumbnails from "./CarouselThumbnails";
 
 interface ProductCarouselProps {
   product: ProductData | null;
 }
 
 export default function ProductCarousel({ product }: ProductCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel();
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
@@ -32,34 +33,21 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
+  // Add event listener for slide changes when emblaApi is available
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.on('select', onSelect);
+      return () => emblaApi.off('select', onSelect);
+    }
+  }, [emblaApi, onSelect]);
+
   return (
-    // <div className="flex flex-col-reverse items-center sm:items-start md:flex-row gap-4 mx-auto md:mx-0">
     <div className="flex flex-col-reverse items-center sm:items-start  gap-4 mx-auto md:mx-0">
       {/* Thumbnails */}
-      <div className="flex flex-shrink-0 p-1 order-2 sm:order-1 gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[400px]">
-        {/* <div className="flex flex-shrink-0 p-1 sm:flex-col order-2 sm:order-1 gap-2 overflow-x-auto sm:overflow-x-visible sm:overflow-y-auto sm:max-h-[400px]"> */}
-        {product?.images.map((src, index) => (
-          <button
-            key={index}
-            onClick={() => onThumbClick(index)}
-            className={`flex-shrink-0 ${
-              index === selectedIndex ? "ring-2 ring-primary" : ""
-            } focus:outline-none focus:ring-2 focus:ring-primary`}
-            aria-label={`View image ${index + 1}`}
-          >
-            <Image
-              src={src || "/placeholder.svg"}
-              alt={`Thumbnail ${index + 1}`}
-              width={80}
-              height={80}
-              className="object-contain aspect-square"
-            />
-          </button>
-        ))}
-      </div>
+      <CarouselThumbnails product={product} selectedIndex={selectedIndex} onThumbClick={onThumbClick} />
 
       {/* Main carousel */}
-      <div className="relative aspect-square w-full order-1 sm:order-2 sm:flex-grow">
+      <div className="relative aspect-video w-full order-1 sm:order-2 sm:flex-grow">
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full">
             {product?.images.map((src, index) => (
