@@ -72,6 +72,51 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     });
 
     // Extract variations from all possible variation containers
+
+    // First check twister_feature_div container
+    const twisterFeatureDiv = doc.getElementById("twister_feature_div");
+    if (twisterFeatureDiv) {
+      const variationTypeDivs = twisterFeatureDiv.querySelectorAll('div[id^="variation_"][id$="_name"]');
+
+      variationTypeDivs.forEach((div) => {
+        const divId = div.getAttribute("id") || "";
+        const variationType = divId.replace("variation_", "").replace("_name", "");
+
+        // Check for select element first
+        const select = div.querySelector("select");
+        if (select) {
+          const options = select.querySelectorAll("option");
+          options.forEach((option) => {
+            if (option.value && option.value !== "" && option.textContent?.trim().toLowerCase() !== "select") {
+              product.variations.push({
+                name: option.textContent?.trim() || "",
+                type: variationType,
+                price: product.defaultPrice,
+                image: "",
+                disabled: option.disabled || false,
+              });
+            }
+          });
+        } else {
+          // Check for ul with twisterTextDiv
+          const twisterDivs = div.querySelectorAll(".twisterTextDiv");
+          twisterDivs.forEach((twisterDiv) => {
+            const nameElement = twisterDiv.querySelector("p");
+            if (nameElement) {
+              product.variations.push({
+                name: nameElement.textContent?.trim() || "",
+                type: variationType,
+                price: product.defaultPrice,
+                image: "",
+                disabled: false,
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // Then check inline-twister-row containers
     const variationContainers = doc.querySelectorAll('[id^="inline-twister-row-"]');
     variationContainers.forEach((container) => {
       const containerId = container.getAttribute("id") || "";
