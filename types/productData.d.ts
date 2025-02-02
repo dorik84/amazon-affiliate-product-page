@@ -3,6 +3,7 @@ export interface ProductData {
   description: string;
   variations: VariationData[];
   images: string[];
+  defaultPrice: number;
 }
 
 export interface VariationData {
@@ -10,4 +11,5 @@ export interface VariationData {
   price: number;
   image: string;
   type: string;
+  disabled?: boolean;
 }

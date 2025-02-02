@@ -18,17 +18,17 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     }
 
     const html = await response.text();
+    // Save HTML to file for debugging
+    const fs = require("fs");
+    fs.writeFileSync("product-page.txt", html);
 
     // Create virtual console to suppress CSS errors
     const virtualConsole = new VirtualConsole();
-
-    // Optional: forward other console messages but ignore CSS errors
     virtualConsole.sendTo(console, { omitJSDOMErrors: true });
 
     // Create JSDOM instance with the virtual console
     const dom = new JSDOM(html, {
       virtualConsole,
-      // Disable resource loading and running scripts
       resources: "usable",
       runScripts: "outside-only",
     });
@@ -41,7 +41,20 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
       description: "",
       variations: [],
       images: [],
+      defaultPrice: 0,
     };
+
+    // Extract default price from the apex_desktop container
+    const apexDesktop = doc.querySelector("#apex_desktop");
+    if (apexDesktop) {
+      const wholePart = apexDesktop.querySelector(".a-price .a-price-whole");
+      const fractionPart = apexDesktop.querySelector(".a-price .a-price-fraction");
+      if (wholePart) {
+        const whole = parseFloat(wholePart.textContent?.replace(/[^0-9.-]+/g, "") || "0");
+        const fraction = parseFloat(fractionPart?.textContent?.replace(/[^0-9.-]+/g, "") || "0");
+        product.defaultPrice = whole + fraction / 100;
+      }
+    }
 
     // Extract title from h1#title span
     const titleElement = doc.querySelector("#title span");
@@ -49,12 +62,10 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
 
     // Extract images from altImages div
     const altImagesDiv = doc.getElementById("altImages");
-
     const imageElements = altImagesDiv?.querySelectorAll("li.item img") || [];
     imageElements.forEach((elem) => {
       const imgSrc = elem.getAttribute("src");
       if (imgSrc) {
-        // Convert thumbnail URL to full-size image URL
         const fullSizeUrl = imgSrc.replace(/\._.*_\./, "._AC_SX679_.");
         product.images.push(fullSizeUrl);
       }
@@ -72,27 +83,233 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
 
       const variationElements = container.querySelectorAll("li");
       variationElements.forEach((li) => {
+        const isDisabled = li.classList.contains("unavailable") || li.classList.contains("discontinued");
+
+        // Extract image and price information
         const img = li.querySelector("img");
         const imgAlt = img?.getAttribute("alt");
         const imgUrl = img?.getAttribute("src");
         const priceText =
           li.querySelector('.a-text-price span[aria-hidden="true"]')?.textContent?.replace("$", "").trim() || "0";
 
-        const name = li.querySelector(".swatch-title-text")?.textContent;
-        const nameSpare = li.querySelector("swatch-title-text-display")?.textContent;
+        // First try to get text from data-a-html-content as it often contains the complete information
+        let dataContentElements: Element[] = [];
+        const dataAHtmlContent = li.getAttribute("data-a-html-content");
+        if (dataAHtmlContent) {
+          try {
+            const tempDiv = doc.createElement("div");
+            tempDiv.innerHTML = dataAHtmlContent;
+            dataContentElements = Array.from(tempDiv.querySelectorAll(".swatch-title-text-display"));
+          } catch (err) {
+            console.error("Error parsing data-a-html-content:", err);
+          }
+        }
 
-        const variation: VariationData = {
-          name: name || nameSpare || imgAlt || "",
-          price: parseFloat(priceText),
-          image: imgUrl || "",
-          type: variationType,
-        };
+        // Search for all variation-related elements using multiple strategies
+        const swatchTitleDisplayElements = [
+          // First priority: elements from data-a-html-content
+          ...dataContentElements,
+          // Direct class match on the li element itself
+          ...Array.from(li.getElementsByClassName("swatch-title-text-display")),
+          // Nested within button or its children
+          ...Array.from(li.querySelectorAll("button .swatch-title-text-display")),
+          // Deep search in all nested spans
+          ...Array.from(li.querySelectorAll("span.swatch-title-text-display")),
+          // Look for elements with inline styles that might hide the text
+          ...Array.from(li.querySelectorAll("[style*='display: none'] .swatch-title-text-display")),
+        ];
 
-        product.variations.push(variation);
+        // Log what we found for debugging
+        console.log(`Found ${swatchTitleDisplayElements.length} swatch display elements in variation:`, {
+          texts: swatchTitleDisplayElements.map((el) => el.textContent?.trim()),
+          html: li.innerHTML,
+        });
+
+        // Get text content from elements, ensuring we check all possible locations
+        const swatchTitleDisplay = swatchTitleDisplayElements.map((el) => el.textContent?.trim()).filter(Boolean)[0];
+        const swatchTitleText = li.querySelector(".swatch-title-text")?.textContent?.trim();
+
+        // Look for additional text content in the root element
+        const rootTextContent = li.textContent?.trim()?.replace(/Select\s+/i, "");
+
+        // Extract button-related text
+        const button = li.querySelector("button");
+        const buttonSpan = button?.querySelector("span");
+        const buttonText = button?.textContent
+          ?.trim()
+          ?.replace(buttonSpan?.textContent || "", "")
+          .trim();
+        const buttonLabel = button?.getAttribute("aria-label");
+        const selectionText = button?.querySelector(".selection")?.textContent?.trim();
+
+        // Extract additional size information
+        const sizeElement = li.querySelector("[class*='size'], [class*='dimension']");
+        const sizeText = sizeElement?.textContent?.trim();
+
+        // Determine the variation name using all available sources
+        const variationName =
+          swatchTitleDisplay ||
+          swatchTitleText ||
+          imgAlt ||
+          buttonText ||
+          buttonLabel ||
+          selectionText ||
+          sizeText ||
+          rootTextContent ||
+          "";
+
+        // Only add variation if there's at least a name or image
+        if (variationName || imgUrl) {
+          product.variations.push({
+            name: variationName || "Unnamed Variation",
+            price: parseFloat(priceText) || product.defaultPrice,
+            image: imgUrl?.replace(/\._.*_\./, "._AC_SX679_.") || "",
+            type: variationType,
+            disabled: isDisabled,
+          });
+        }
+        const dropdownText = li.querySelector(".a-dropdown-prompt")?.textContent?.trim();
+
+        // Get various attributes that might contain size info
+        const defaultAsin = li.getAttribute("data-defaultasin");
+        const dataDpUrl = li.getAttribute("data-dp-url");
+
+        // Extract size from URL if present
+        let sizeFromUrl = "";
+        if (dataDpUrl) {
+          const sizeMatch = dataDpUrl.match(/size=([^&]+)/i);
+          if (sizeMatch) {
+            sizeFromUrl = decodeURIComponent(sizeMatch[1]);
+          }
+        }
+
+        // Process HTML content from data attributes
+        let dataContentSize = "";
+        if (dataAHtmlContent) {
+          try {
+            const tempDiv = doc.createElement("div");
+            tempDiv.innerHTML = dataAHtmlContent;
+
+            // Look for size information in specific order
+            dataContentSize =
+              // First try specific swatch display text
+              tempDiv.querySelector(".swatch-title-text-display")?.textContent?.trim() ||
+              // Then try spans that might contain size info
+              Array.from(tempDiv.querySelectorAll("span"))
+                .map((span) => span.textContent?.trim())
+                .filter((text) => text && !text.includes("Select"))
+                .join(" ") ||
+              // Then try size-specific classes
+              tempDiv.querySelector("[class*='size']")?.textContent?.trim() ||
+              // Finally use any text content that's not "Select"
+              tempDiv.textContent?.trim()?.replace(/Select\s*/g, "") ||
+              "";
+          } catch (err) {
+            console.error("Error parsing data-a-html-content:", err);
+          }
+        }
+
+        // Extract text from button more carefully
+        let buttonContent = "";
+        if (button) {
+          try {
+            // Remove all child element texts from button's text content
+            const childTexts = Array.from(button.children)
+              .map((child) => child.textContent?.trim() || "")
+              .filter(Boolean);
+
+            buttonContent = button.textContent?.trim() || "";
+            childTexts.forEach((childText) => {
+              buttonContent = buttonContent.replace(childText, "").trim();
+            });
+            buttonContent = buttonContent.replace(/Select\s*/g, "").trim();
+          } catch (err) {
+            console.error("Error extracting button content:", err);
+          }
+        }
+
+        // For size variations, prioritize specific size-related content
+        const isSizeVariation = variationType.toLowerCase().includes("size");
+
+        // Clean and prepare potential names
+        const cleanButtonLabel = buttonLabel
+          ?.split(" - ")?.[0]
+          ?.replace(/^Select\s+/i, "")
+          ?.trim();
+        const cleanDropdownText = dropdownText?.replace(/^Select\s+/i, "")?.trim();
+        const cleanRootText = rootTextContent?.replace(/^Select\s+/i, "")?.trim();
+
+        console.log("Potential variation names:", {
+          swatchTitleDisplay,
+          swatchTitleText,
+          sizeText,
+          buttonContent,
+          cleanButtonLabel,
+          selectionText,
+          cleanDropdownText,
+          dataContentSize,
+          sizeFromUrl,
+          cleanRootText,
+        });
+
+        // Extract direct button text (ignoring nested elements)
+        const directButtonText = button?.childNodes?.[0]?.textContent?.trim()?.replace(/Select\s*/g, "") || "";
+
+        // Extract any aria-label that doesn't contain "Select"
+        const ariaLabels = Array.from(li.querySelectorAll("[aria-label]"))
+          .map((el) => el.getAttribute("aria-label"))
+          .filter((label) => label && !label.includes("Select"))
+          .map((label) => label?.split(" - ")[0]?.trim())
+          .filter(Boolean);
+
+        // Build the name with proper priority order for size variations
+        let potentialNames = isSizeVariation
+          ? [
+              swatchTitleDisplay,
+              dataContentSize,
+              directButtonText,
+              sizeText,
+              ...ariaLabels,
+              buttonContent,
+              cleanButtonLabel,
+              selectionText,
+              cleanDropdownText,
+              sizeFromUrl,
+              cleanRootText,
+            ]
+          : [
+              swatchTitleDisplay,
+              swatchTitleText,
+              directButtonText,
+              buttonContent,
+              cleanButtonLabel,
+              selectionText,
+              ...ariaLabels,
+              cleanDropdownText,
+              dataContentSize,
+              cleanRootText,
+            ];
+
+        // Filter out empty values and "Select"
+        potentialNames = potentialNames.filter((text) => text && text !== "Select");
+
+        // Use the first valid name or default to ASIN if nothing else is available
+        const name = potentialNames[0] || defaultAsin || "";
+
+        // Create variation if we have a valid name
+        if (name) {
+          const variation: VariationData = {
+            name,
+            price: parseFloat(priceText),
+            image: imgUrl || "",
+            type: variationType,
+          };
+          product.variations.push(variation);
+        }
       });
     });
 
-    // Extract description from feature bullets or product description
+    // Extract description
     const bulletElements = doc.querySelectorAll("#feature-bullets ul li");
     const featureBullets = Array.from(bulletElements).map((el) => el.textContent?.trim() || "");
     const productDescriptionElement = doc.querySelector("#productDescription p");

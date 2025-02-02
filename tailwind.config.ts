@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       backgroundImage: {
-        "custom-radial": "radial-gradient(hsl(var(--accent)) 1%, #0000001f 15%)",
+        "custom-radial": "radial-gradient(hsl(var(--secondary)) 1%, hsl(var(--background)) 15%)",
       },
       backgroundSize: {
         "custom-size": "16px 16px",

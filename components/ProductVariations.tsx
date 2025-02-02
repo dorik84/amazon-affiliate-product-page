@@ -38,8 +38,11 @@ export default function ProductVariations({
                 name={variation.name}
                 image={variation.image}
                 isSelected={selectedVariations[type] === index}
-                onClick={() => onVariationChange(type, index)}
-              />
+                disabled={variation.disabled}
+                onClick={() => !variation.disabled && onVariationChange(type, index)}
+              >
+                <span className="text-sm break-words">{variation.name}</span>
+              </VariantButton>
             ))}
           </div>
         </div>
