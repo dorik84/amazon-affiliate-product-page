@@ -1,5 +1,9 @@
+"use client";
+
 import type { VariationData } from "@/types/productData";
-import { VariantButton } from "@/components/ui/variant-button";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CustomSelectItem } from "@/components/ui/custom-select-item";
+import Image from "next/image";
 
 interface ProductVariationsProps {
   variations: VariationData[] | null | undefined;
@@ -30,21 +34,40 @@ export default function ProductVariations({
           <h3 className="text-lg font-semibold capitalize">
             {type === "default" ? "Options" : type} : {typeVariations[selectedVariations[type]].name}
           </h3>
-          <div className="grid grid-cols-3 gap-4">
-            {typeVariations.map((variation, index) => (
-              <VariantButton
-                className="justify-self-stratch rounded-sm"
-                key={index}
-                name={variation.name}
-                image={variation.image}
-                isSelected={selectedVariations[type] === index}
-                disabled={variation.disabled}
-                onClick={() => !variation.disabled && onVariationChange(type, index)}
-              >
-                <span className="text-sm break-words">{variation.name}</span>
-              </VariantButton>
-            ))}
-          </div>
+
+          <Select
+            value={selectedVariations[type].toString()}
+            onValueChange={(value) => onVariationChange(type, Number.parseInt(value))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue>
+                {typeVariations[selectedVariations[type]].image && (
+                  <div className="relative w-6 h-6 mr-2 inline-block align-middle">
+                    <Image
+                      src={typeVariations[selectedVariations[type]].image || "/placeholder.svg"}
+                      alt={typeVariations[selectedVariations[type]].name}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-sm"
+                    />
+                  </div>
+                )}
+                <span className="align-middle">{typeVariations[selectedVariations[type]].name}</span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {typeVariations.map((variation, index) => (
+                <CustomSelectItem
+                  key={index}
+                  value={index.toString()}
+                  disabled={variation.disabled}
+                  image={variation.image}
+                >
+                  {variation.name}
+                </CustomSelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       ))}
     </div>
