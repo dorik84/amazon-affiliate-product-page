@@ -93,13 +93,16 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
                 type: variationType,
                 price: product.defaultPrice,
                 image: "",
-                disabled: option.disabled || false,
+                disabled: option.className.toLowerCase().includes("unavailable") || false,
               });
             }
           });
         } else {
-          // Check for ul with twisterTextDiv
+          // Check for ul with twisterTextDiv or li elements with images
           const twisterDivs = div.querySelectorAll(".twisterTextDiv");
+          const liElements = div.querySelectorAll("li");
+
+          // Handle twisterTextDiv elements
           twisterDivs.forEach((twisterDiv) => {
             const nameElement = twisterDiv.querySelector("p");
             if (nameElement) {
@@ -110,6 +113,26 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
                 image: "",
                 disabled: false,
               });
+            }
+          });
+
+          // Handle li elements with images
+          liElements.forEach((li) => {
+            const img = li.querySelector("img");
+            if (img) {
+              const imgSrc = img.getAttribute("src");
+              const imgAlt = img.getAttribute("alt");
+              const isDisabled = li.className.toLowerCase().includes("unavailable");
+
+              if (imgAlt) {
+                product.variations.push({
+                  name: imgAlt.trim(),
+                  type: variationType,
+                  price: product.defaultPrice,
+                  image: imgSrc || "",
+                  disabled: isDisabled,
+                });
+              }
             }
           });
         }
