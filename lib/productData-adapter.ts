@@ -60,6 +60,48 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     const titleElement = doc.querySelector("#title span");
     product.title = titleElement?.textContent?.trim() || "";
 
+    // Extract description from product description and facts
+    let description = "";
+
+    // Get additional information from product facts
+    const productFactsDiv = doc.querySelector("#productFactsDesktop_feature_div");
+    if (productFactsDiv) {
+      const sections = productFactsDiv.querySelectorAll("h3, h4, h5");
+      sections.forEach((section) => {
+        description += section.outerHTML + "\n";
+        const ulElement = section.nextElementSibling;
+        if (ulElement?.tagName.toLowerCase() === "ul") {
+          const liElements = ulElement.querySelectorAll("li");
+          description += "<ul>\n";
+          liElements.forEach((li) => {
+            const detailsDiv = li.querySelector(".product-facts-detail");
+            if (detailsDiv) {
+              // Keep the original structure but ensure consistent styling
+              const label = detailsDiv.querySelector(".a-col-left")?.textContent?.trim() || "";
+              const value = detailsDiv.querySelector(".a-col-right")?.textContent?.trim() || "";
+              description += `  <li>\n    <div class="product-facts-detail" style="display:grid;grid-template-columns:140px 1fr;gap:1rem">\n      <div style="font-weight:600">${label}</div>\n      <div style="font-weight:400">${value}</div>\n    </div>\n  </li>\n`;
+            } else {
+              description += `  ${li.outerHTML}\n`;
+            }
+          });
+          description += "</ul>\n";
+        }
+        description += "\n";
+      });
+    }
+
+    // Get all paragraphs from product description
+    const productDescriptionDiv = doc.querySelector("#productDescription");
+    if (productDescriptionDiv) {
+      const paragraphs = productDescriptionDiv.querySelectorAll("p");
+      description += '<h3 class="product-facts-title"> Product Description </h3>';
+      paragraphs.forEach((p) => {
+        description += p.outerHTML + "\n";
+      });
+    }
+
+    product.description = description.trim();
+
     // Extract images from altImages div
     const altImagesDiv = doc.getElementById("altImages");
     const imageElements = altImagesDiv?.querySelectorAll("li.item img") || [];
@@ -376,14 +418,6 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
         }
       });
     });
-
-    // Extract description
-    const bulletElements = doc.querySelectorAll("#feature-bullets ul li");
-    const featureBullets = Array.from(bulletElements).map((el) => el.textContent?.trim() || "");
-    const productDescriptionElement = doc.querySelector("#productDescription p");
-    const productDescription = productDescriptionElement?.textContent?.trim() || "";
-    product.description =
-      featureBullets.length > 0 ? featureBullets.join("\n") : productDescription || "No description available";
 
     return product;
   } catch (error) {

@@ -81,3 +81,8 @@
     scrollbar-width: none;
   }
 }
+
+/* Product Facts Desktop Styling */
+h3.product-facts-title {
+  @apply text-lg font-semibold mt-4 mb-2 pb-2 border-b border-primary/20;
+}
