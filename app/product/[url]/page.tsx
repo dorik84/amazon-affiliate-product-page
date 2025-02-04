@@ -9,6 +9,7 @@ import ProductVariations from "@/components/ProductVariations";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { AnimatedButton } from "@/components/ui/AnimatedButton";
 
 import type { ProductData, VariationData } from "@/types/productData";
 
@@ -108,14 +109,10 @@ export default function ProductPage() {
                 ${getCurrentPrice().toFixed(2)}
               </p>
 
-              <Button
-                className="flex items-center justify-center gap-2 w-full sm:w-auto ring-2 ring-primary"
-                size="lg"
-                onClick={() => window.open(decodeURIComponent(params.url as string), "_blank")}
-              >
+              <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(params.url as string), "_blank")}>
                 <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" />
                 View on Amazon
-              </Button>
+              </AnimatedButton>
             </div>
 
             <ProductVariations
