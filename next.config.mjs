@@ -7,6 +7,7 @@ try {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  optimizeFonts: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -18,6 +19,7 @@ const nextConfig = {
   },
   experimental: {
     webpackBuildWorker: true,
+    optimizeFonts: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
