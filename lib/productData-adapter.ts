@@ -72,13 +72,14 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     // Get information from feature bullets
     const featureBulletsDiv = doc.querySelector("#feature-bullets");
     if (featureBulletsDiv) {
+      const title = featureBulletsDiv.querySelector("h1")?.textContent?.trim();
       const bulletItems = featureBulletsDiv.querySelectorAll("li span");
       if (bulletItems.length > 0) {
-        description += '<h3 class="product-facts-title">Product Features</h3>\n<ul>\n';
+        description += `<h3 class="product-facts-title">${title}</h3>\n<ul>\n`;
         bulletItems.forEach((span) => {
           const bulletText = span.textContent?.trim() || "";
           if (bulletText) {
-            description += `  <li>${bulletText}</li>\n`;
+            description += `<li>${bulletText}</li>\n`;
           }
         });
         description += "</ul>\n\n";

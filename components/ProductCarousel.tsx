@@ -5,6 +5,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import type { ProductData } from "@/types/productData";
 import CarouselThumbnails from "./CarouselThumbnails";
 
@@ -43,7 +44,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
   }, [emblaApi, onSelect]);
 
   return (
-    <div className="flex flex-col-reverse items-center sm:items-start  gap-4 mx-auto md:mx-0">
+    <div className="flex flex-col-reverse items-center sm:items-start gap-4 mx-auto md:mx-0">
       {/* Thumbnails */}
       <CarouselThumbnails product={product} selectedIndex={selectedIndex} onThumbClick={onThumbClick} />
 
@@ -52,15 +53,29 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full">
             {product?.images.map((src, index) => (
-              <div className="flex-[0_0_100%] min-w-0 relative h-full" key={index}>
-                <Image
-                  src={src || "/placeholder.svg"}
-                  alt={`${product.title} - Image ${index + 1}`}
-                  fill
-                  priority={index === 0} // Add priority to the first image
-                  className="object-contain"
-                />
-              </div>
+              <Dialog key={index}>
+                <DialogTrigger asChild>
+                  <div className="flex-[0_0_100%] min-w-0 relative h-full cursor-pointer">
+                    <Image
+                      src={src || "/placeholder.svg"}
+                      alt={`${product.title} - Image ${index + 1}`}
+                      fill
+                      priority={index === 0}
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+                  <div className="relative w-full h-full min-h-[80vh]">
+                    <Image
+                      src={src || "/placeholder.svg"}
+                      alt={`${product.title} - Image ${index + 1}`}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
             ))}
           </div>
         </div>
