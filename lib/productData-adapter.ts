@@ -1,5 +1,6 @@
 import type { ProductData, VariationData } from "@/types/productData";
 import { JSDOM, VirtualConsole } from "jsdom";
+import { getRandomUserAgent } from "./utils";
 
 export async function fetchAndTransformProduct(url: string): Promise<ProductData> {
   try {
@@ -9,10 +10,12 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     // Fetch the remote page
     const response = await fetch(decodedUrl, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
+        "User-Agent": getRandomUserAgent(),
       },
+      cache: "no-store",
+      // cache: "force-cache",
     });
+    console.log("fetchAndTransformProduct");
     if (!response.ok) {
       throw new Error(`Failed to fetch product page: ${response.statusText}`);
     }
@@ -42,7 +45,10 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
       variations: [],
       images: [],
       defaultPrice: 0,
+      url: "",
     };
+
+    product.url = url;
 
     // Extract default price from the apex_desktop container
     const apexDesktop = doc.querySelector("#apex_desktop");
@@ -229,12 +235,6 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
           ...Array.from(li.querySelectorAll("[style*='display: none'] .swatch-title-text-display")),
         ];
 
-        // Log what we found for debugging
-        console.log(`Found ${swatchTitleDisplayElements.length} swatch display elements in variation:`, {
-          texts: swatchTitleDisplayElements.map((el) => el.textContent?.trim()),
-          html: li.innerHTML,
-        });
-
         // Get text content from elements, ensuring we check all possible locations
         const swatchTitleDisplay = swatchTitleDisplayElements.map((el) => el.textContent?.trim()).filter(Boolean)[0];
         const swatchTitleText = li.querySelector(".swatch-title-text")?.textContent?.trim();
@@ -348,19 +348,6 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
           ?.trim();
         const cleanDropdownText = dropdownText?.replace(/^Select\s+/i, "")?.trim();
         const cleanRootText = rootTextContent?.replace(/^Select\s+/i, "")?.trim();
-
-        console.log("Potential variation names:", {
-          swatchTitleDisplay,
-          swatchTitleText,
-          sizeText,
-          buttonContent,
-          cleanButtonLabel,
-          selectionText,
-          cleanDropdownText,
-          dataContentSize,
-          sizeFromUrl,
-          cleanRootText,
-        });
 
         // Extract direct button text (ignoring nested elements)
         const directButtonText = button?.childNodes?.[0]?.textContent?.trim()?.replace(/Select\s*/g, "") || "";
