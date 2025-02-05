@@ -36,8 +36,8 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
   // Add event listener for slide changes when emblaApi is available
   useEffect(() => {
     if (emblaApi) {
-      emblaApi.on('select', onSelect);
-      return () => emblaApi.off('select', onSelect);
+      emblaApi.on("select", onSelect);
+      return () => emblaApi.off("select", onSelect);
     }
   }, [emblaApi, onSelect]);
 
