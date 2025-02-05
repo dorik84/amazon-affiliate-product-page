@@ -1,0 +1,31 @@
+import type { Metadata } from "next";
+import type { ProductData } from "@/types/productData";
+import { fetchAndTransformProduct } from "@/lib/productData-adapter";
+import React from "react";
+
+export async function getServerSideProps({ params }: { params: { url: string } }) {
+  // Fetch data based on the URL parameter
+  const data = await fetchAndTransformProduct(params.url);
+  return {
+    props: {
+      data,
+    },
+    revalidate: 0,
+  };
+}
+
+// This function generates metadata for the page
+export async function generateMetadata({ params }: { params: { url: string } }): Promise<Metadata> {
+  const product = await fetchAndTransformProduct(params.url);
+
+  return {
+    title: product.title,
+    description: product.description,
+  };
+}
+
+export default async function ProductLayout({ children, data }: { children: React.ReactElement; data: ProductData }) {
+  {
+    React.cloneElement(children, { data });
+  }
+}
