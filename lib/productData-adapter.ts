@@ -69,6 +69,46 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     // Extract description from product description and facts
     let description = "";
 
+    // Get information from feature bullets
+    const featureBulletsDiv = doc.querySelector("#feature-bullets");
+    if (featureBulletsDiv) {
+      const bulletItems = featureBulletsDiv.querySelectorAll("li span");
+      if (bulletItems.length > 0) {
+        description += '<h3 class="product-facts-title">Product Features</h3>\n<ul>\n';
+        bulletItems.forEach((span) => {
+          const bulletText = span.textContent?.trim() || "";
+          if (bulletText) {
+            description += `  <li>${bulletText}</li>\n`;
+          }
+        });
+        description += "</ul>\n\n";
+      }
+    }
+
+    // Get information from detail bullets
+    const detailBulletsDiv = doc.querySelector("#detailBulletsWrapper_feature_div #detailBullets_feature_div");
+    if (detailBulletsDiv) {
+      const listItems = detailBulletsDiv.querySelectorAll("li");
+      if (listItems.length > 0) {
+        description += '<h3 class="product-facts-title">Product Details</h3>\n<ul>\n';
+        listItems.forEach((li) => {
+          const itemSpan = li.querySelector("span.a-list-item");
+          if (itemSpan) {
+            const labelSpan = itemSpan.querySelector("span.a-text-bold");
+            const valueSpan = labelSpan?.nextElementSibling;
+
+            const label = labelSpan?.textContent?.replace(/[:\u200E\u200F]/g, "").trim() || "";
+            const value = valueSpan?.textContent?.trim() || "";
+
+            if (label && value) {
+              description += `  <li><div class="product-facts-detail" style="display:grid;grid-template-columns:auto 1fr;gap:1rem;"><span class="label">${label}:</span><span class="value">${value}</span></div></li>\n`;
+            }
+          }
+        });
+        description += "</ul>\n\n";
+      }
+    }
+
     // Get additional information from product facts
     const productFactsDiv = doc.querySelector("#productFactsDesktop_feature_div");
     if (productFactsDiv) {
@@ -199,7 +239,9 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
 
       const variationElements = container.querySelectorAll("li");
       variationElements.forEach((li) => {
-        const isDisabled = li.classList.contains("unavailable") || li.classList.contains("discontinued");
+        // li classList migth contain the following sadasdUnavailable. check for "Unavailable" string match below
+
+        const isDisabled = li.getAttribute("data-initiallyunavailable") == "true";
 
         // Extract image and price information
         const img = li.querySelector("img");
