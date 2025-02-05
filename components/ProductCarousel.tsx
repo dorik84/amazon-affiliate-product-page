@@ -13,6 +13,7 @@ interface ProductCarouselProps {
 }
 
 export default function ProductCarousel({ product }: ProductCarouselProps) {
+  if (!product?.images) return null;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel();
 
