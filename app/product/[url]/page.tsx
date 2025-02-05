@@ -1,63 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import AffiliateMessage from "@/components/AffiliateMessage";
 import ProductCarousel from "@/components/ProductCarousel";
 import ProductDescription from "@/components/ProductDescription";
 import ProductVariations from "@/components/ProductVariations";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
 
-import type { ProductData, VariationData } from "@/types/productData";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { useProductData } from "./useProductData";
 
 export default function ProductPage() {
-  const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>({});
-  const [productData, setProductData] = useState<ProductData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const params = useParams();
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const url = params.url as string;
-        const response = await fetch(`/api/product?url=${encodeURIComponent(url)}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch product data");
-        }
-        const data = await response.json();
-        setProductData(data);
-
-        // Initialize selected variations with first option of each type
-        if (data?.variations) {
-          const initialVariations: Record<string, number> = {};
-          data.variations.forEach((variation: VariationData) => {
-            const type = variation.type || "default";
-            if (initialVariations[type] === undefined) {
-              initialVariations[type] = 0;
-            }
-          });
-          setSelectedVariations(initialVariations);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch productData data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [params.url]);
-
+  // Custom hook to fetch product data
+  let { selectedVariations, setSelectedVariations, productData, isLoading, error } = useProductData(
+    params.url as string
+  );
   // Fallback loading state
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   // Error state
