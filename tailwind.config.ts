@@ -10,12 +10,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      boxShadow: {
+        "custom-shadow": "var(--custom-shadow)",
+      },
       backgroundImage: {
         "custom-radial": "radial-gradient(hsl(var(--secondary), 0.1) 5%, hsl(var(--background)) 15%)",
       },
       backgroundSize: {
         "custom-size": "16px 16px",
       },
+
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -94,6 +98,7 @@ const config: Config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        scroll: "scroll 30s linear infinite",
       },
     },
   },
