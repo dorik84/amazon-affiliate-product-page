@@ -111,7 +111,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
+            className="absolute left-[-0.5rem] top-1/2 -translate-y-1/2 "
             onClick={() => scroll("left")}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -121,7 +121,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
+            className="absolute right-[-0.5rem] top-1/2 -translate-y-1/2 "
             onClick={() => scroll("right")}
           >
             <ChevronRight className="h-4 w-4" />
