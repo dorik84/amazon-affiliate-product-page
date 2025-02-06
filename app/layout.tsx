@@ -3,15 +3,15 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
-  display: 'swap',
+  display: "swap",
   preload: true,
 });
 
 export const metadata: Metadata = {
-  title: "Premium Wireless Headphones",
-  description: "Experience crystal-clear audio with our premium wireless headphones.",
+  title: "Best Choice Goods",
+  description: "The best choice goods for you",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
