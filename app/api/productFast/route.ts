@@ -1,7 +1,7 @@
-import dbConnect from "@/db/db";
-import Product from "@/db/models";
-
+import { getProduct } from "@/lib/server-actions";
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -12,11 +12,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await dbConnect();
-    const data = await Product.findOne({ url }).lean();
+    const data = await getProduct(url);
 
     return NextResponse.json(data);
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ error: "Failed to fetch product data" }, { status: 500 });
   }
 }

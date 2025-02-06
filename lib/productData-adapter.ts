@@ -1,25 +1,8 @@
 import type { ProductData, VariationData } from "@/types/productData";
 import { JSDOM, VirtualConsole } from "jsdom";
-import { getRandomUserAgent } from "./utils";
 
-export async function fetchAndTransformProduct(url: string): Promise<ProductData> {
+export async function transformProduct(response: any, url: string): Promise<ProductData> {
   try {
-    // Decode the URL if it's encoded
-    const decodedUrl = decodeURIComponent(url);
-
-    // Fetch the remote page
-    const response = await fetch(decodedUrl, {
-      headers: {
-        "User-Agent": getRandomUserAgent(),
-      },
-      cache: "no-store",
-      // cache: "force-cache",
-    });
-    console.log("fetchAndTransformProduct");
-    if (!response.ok) {
-      throw new Error(`Failed to fetch product page: ${response.statusText}`);
-    }
-
     const html = await response.text();
     // Save HTML to file for debugging
     const fs = require("fs");

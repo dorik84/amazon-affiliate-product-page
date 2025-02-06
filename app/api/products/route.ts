@@ -1,14 +1,12 @@
-import dbConnect from "@/db/db";
-import Product from "@/db/models";
+import { getRelatedProducts } from "@/lib/server-actions";
+import { NextResponse } from "next/server";
 
-import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    await dbConnect();
-    const data = await Product.find({}).limit(10).lean();
-    // console.log(" in products route");
-    // console.log(data);
+    const data = await getRelatedProducts();
+
     return NextResponse.json(data);
   } catch (error) {
     console.log(error);

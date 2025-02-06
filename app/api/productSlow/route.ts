@@ -1,7 +1,11 @@
-import dbConnect from "@/db/db";
-import ProductData from "@/db/models";
-import { fetchAndTransformProduct } from "@/lib/productData-adapter";
+import { updateProduct } from "@/lib/component-actions";
+import { updateProduct as updateProductDB } from "@/lib/server-actions";
+import { transformProduct } from "@/lib/productData-adapter";
+import { getAmazonProduct } from "@/lib/server-actions";
+
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -12,29 +16,28 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const data = await fetchAndTransformProduct(url);
-    return NextResponse.json(data);
+    // Fetch the remote page
+    const response = await getAmazonProduct(url);
+    const product = await transformProduct(response, url);
+
+    // Call backend POST to update the product in DB
+    updateProduct(product);
+
+    return NextResponse.json(product);
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch product data" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
-  await dbConnect();
-
   try {
     const body = await req.json();
-    // console.log("body");
-    // console.log(body);
-    const newProduct = new ProductData(body);
-    // console.log("newProduct!!");
-    // console.log(newProduct);
-    // const result = await newProduct.save();
-    const options = { new: true, upsert: true }; // Create if doesn't exist
 
-    const updatedProduct = await ProductData.findOneAndUpdate({ url: body.url }, body, options);
-    console.log("updatedProduct");
-    console.log(updatedProduct);
+    if (!body.url) {
+      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
+    }
+    await updateProductDB(body);
+
     return NextResponse.json({ message: "Product added successfully" }, { status: 201 });
   } catch (error) {
     console.log(error);
