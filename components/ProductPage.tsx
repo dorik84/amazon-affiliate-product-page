@@ -1,18 +1,31 @@
 "use client";
 
-import AffiliateMessage from "@/components/AffiliateMessage";
 import ProductCarousel from "@/components/ProductCarousel";
 import ProductDescription from "@/components/ProductDescription";
 import ProductVariations from "@/components/ProductVariations";
-import ThemeToggle from "@/components/ThemeToggle";
 import Image from "next/image";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
-import { useProductData } from "./useProductData";
-import { ProductData } from "@/types/productData";
+import { useState, useEffect } from "react";
+import type { ProductData, VariationData } from "@/types/productData";
+import { getUpdatedProduct } from "@/lib/component-actions";
+import { getInitialVariations } from "@/lib/utils";
 
 export default function ProductPage({ product, url }: { product: ProductData; url: string }) {
-  // Custom hook to fetch product data
-  let { selectedVariations, setSelectedVariations, productData } = useProductData(url, product);
+  const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>(getInitialVariations(product));
+  const [productData, setProductData] = useState<ProductData | null>(product);
+
+  useEffect(() => {
+    const fetchSlowProduct = async () => {
+      try {
+        const product = await getUpdatedProduct(url);
+        setProductData(product);
+      } catch (err) {
+        console.log("Failed to fetch productData data from amazon:", err);
+      }
+    };
+
+    fetchSlowProduct();
+  }, [url]);
 
   const handleVariationChange = (type: string, index: number) => {
     setSelectedVariations((prev) => ({
@@ -39,11 +52,6 @@ export default function ProductPage({ product, url }: { product: ProductData; ur
 
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
-      <div className="flex justify-between items-center mb-4 gap-4 sm:mb-6">
-        <AffiliateMessage />
-        <ThemeToggle />
-      </div>
-
       <div className="space-y-6">
         <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-center">{productData?.title}</h1>
 
