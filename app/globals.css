@@ -32,12 +32,14 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
 
+    --custom-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 203, 37%, 22%;
-    --foreground: 44, 97%, 63%;
+    --background: 203 37% 22%;
+    --foreground: 44 97% 63%;
 
     --card: 280 50% 5%;
     --card-foreground: 60 30% 96%;
@@ -45,24 +47,26 @@
     --popover: 280 50% 5%;
     --popover-foreground: 60 30% 96%;
 
-    --primary: 24, 99%, 59%;
+    --primary: 24 99% 59%;
     --primary-foreground: 60 30% 96%;
 
-    --secondary: 90, 34%, 63%;
+    --secondary: 90 34% 63%;
     --secondary-foreground: 60 30% 96%;
 
     --muted: 280 30% 20%;
     --muted-foreground: 60 10% 80%;
 
-    --accent: 90, 34%, 63%;
+    --accent: 90 34% 63%;
     --accent-foreground: 280 50% 5%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 60 30% 96%;
 
-    --border: 201, 100%, 90%;
-    --input: 44, 97%, 63%;
+    --border: 201 100% 90%;
+    --input: 44 97% 63%;
     --ring: 280 100% 50%;
+
+    --custom-shadow: 0 4px 6px rgba(252, 203, 69, 0.1);
   }
 }
 
@@ -107,7 +111,7 @@ h3.product-facts-title {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(calc(-1 * var(--scroll-width) / 2));
+    transform: translateX(calc(-1 * var(--scroll-width)));
   }
 }
 
@@ -115,6 +119,6 @@ h3.product-facts-title {
   animation: scroll 30s linear infinite;
 }
 
-.animate-scroll:hover {
+.hover\:animation-play-state-paused:hover {
   animation-play-state: paused;
 }
