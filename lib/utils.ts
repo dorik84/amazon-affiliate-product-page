@@ -1,3 +1,4 @@
+import { ProductData, VariationData } from "@/types/productData";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -20,3 +21,16 @@ export function getRandomUserAgent() {
   ];
   return options[Math.floor(Math.random() * options.length)];
 }
+
+export const getInitialVariations = (productData: ProductData) => {
+  if (!productData) return {};
+  const getInitialVariations: Record<string, number> = {};
+  productData.variations.forEach((variation: VariationData) => {
+    const type = variation.type || "default";
+    if (!getInitialVariations[type]) {
+      getInitialVariations[type] = 0;
+    }
+  });
+
+  return getInitialVariations;
+};
