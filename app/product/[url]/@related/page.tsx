@@ -1,11 +1,8 @@
-import React, { lazy, Suspense } from "react";
-
-const RelatedProductsWidget = lazy(() => import("@/components/RelatedProductsWidget"));
+import RelatedProductsWidget from "@/components/RelatedProductsWidget";
+import { getRelatedProducts } from "@/lib/component-actions";
+import React from "react";
 
 export default async function Page({}) {
-  return (
-    <Suspense fallback={<div>Loading related products...</div>}>
-      <RelatedProductsWidget />
-    </Suspense>
-  );
+  const relatedProducts = await getRelatedProducts();
+  return <RelatedProductsWidget relatedProducts={relatedProducts} />;
 }

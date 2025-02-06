@@ -20,15 +20,15 @@ export async function generateMetadata({ params }: { params: { url: string } }):
 }
 
 export default async function Layout({
-  children,
+  product,
   related,
 }: {
-  children: React.ReactElement;
+  product: React.ReactElement;
   related: React.ReactElement;
 }) {
   return (
     <>
-      {children}
+      {product}
       {related}
     </>
   );
