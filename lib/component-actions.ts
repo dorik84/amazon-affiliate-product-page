@@ -5,8 +5,7 @@ const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function fetchCache(endpoint: string, options = {}) {
   const response = await fetch(`${baseUrl}${endpoint}`, {
-    cache: "force-cache",
-    next: { revalidate: 60 * 60 * 24 },
+    next: { revalidate: 6 },
     ...options,
   });
   if (!response.ok) {

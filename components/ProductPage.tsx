@@ -5,29 +5,13 @@ import ProductDescription from "@/components/ProductDescription";
 import ProductVariations from "@/components/ProductVariations";
 import Image from "next/image";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { ProductData } from "@/types/productData";
-import { getAmazonProduct } from "@/lib/component-actions";
-import { deepEqual, getInitialVariations, sanitizeProductData } from "@/lib/utils";
+import { getInitialVariations } from "@/lib/utils";
 
-export default function ProductPage({ product }: { product: ProductData }) {
+export default function ProductPage({ product }: { product: ProductData | undefined }) {
+  if (!product) return null;
   const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>(getInitialVariations(product));
-  const [productData, setProductData] = useState<ProductData | null>(product);
-
-  useEffect(() => {
-    const fetchSlowProduct = async () => {
-      try {
-        const product = await getAmazonProduct(productData?.url);
-        if (!deepEqual(product, sanitizeProductData(productData))) {
-          setProductData(product);
-        }
-      } catch (err) {
-        console.log("Failed to fetch productData data from amazon:", err);
-      }
-    };
-
-    fetchSlowProduct();
-  }, [productData]);
 
   const handleVariationChange = (type: string, index: number) => {
     setSelectedVariations((prev) => ({
@@ -38,28 +22,27 @@ export default function ProductPage({ product }: { product: ProductData }) {
 
   // Get the current selected variation's price
   const getCurrentPrice = () => {
-    if (!productData?.variations) return 0;
+    if (!product?.variations) return 0;
 
     // Find the variation that matches all selected options
-    const selectedVariation = productData.variations.find((variation) => {
+    const selectedVariation = product.variations.find((variation) => {
       const type = variation.type || "default";
       return (
-        selectedVariations[type] ===
-        productData.variations.findIndex((v) => v.type === type && v.name === variation.name)
+        selectedVariations[type] === product.variations.findIndex((v) => v.type === type && v.name === variation.name)
       );
     });
 
-    return selectedVariation?.price || (productData?.defaultPrice ?? 0);
+    return selectedVariation?.price || (product?.defaultPrice ?? 0);
   };
 
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
       <div className="space-y-6">
-        <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-center">{productData?.title}</h1>
+        <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-center">{product?.title}</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
           <div className="md:col-span-1">
-            <ProductCarousel product={productData} />
+            <ProductCarousel product={product} />
           </div>
 
           <div className="md:col-span-1 space-y-6">
@@ -68,24 +51,21 @@ export default function ProductPage({ product }: { product: ProductData }) {
                 ${getCurrentPrice().toFixed(2)}
               </p>
 
-              <AnimatedButton
-                size="lg"
-                onClick={() => window.open(decodeURIComponent(productData?.url || ""), "_blank")}
-              >
+              <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(product?.url || ""), "_blank")}>
                 <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" />
                 View on Amazon
               </AnimatedButton>
             </div>
 
             <ProductVariations
-              variations={productData?.variations}
+              variations={product?.variations}
               selectedVariations={selectedVariations}
               onVariationChange={handleVariationChange}
             />
           </div>
 
           <div className="md:col-span-2">
-            <ProductDescription description={productData?.description} />
+            <ProductDescription description={product?.description} />
           </div>
         </div>
       </div>
