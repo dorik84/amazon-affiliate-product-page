@@ -1,22 +1,8 @@
 import type { ProductData, VariationData } from "@/types/productData";
 import { JSDOM, VirtualConsole } from "jsdom";
 
-export async function fetchAndTransformProduct(url: string): Promise<ProductData> {
+export async function transformProduct(response: any, url: string): Promise<ProductData> {
   try {
-    // Decode the URL if it's encoded
-    const decodedUrl = decodeURIComponent(url);
-
-    // Fetch the remote page
-    const response = await fetch(decodedUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch product page: ${response.statusText}`);
-    }
-
     const html = await response.text();
     // Save HTML to file for debugging
     const fs = require("fs");
@@ -42,7 +28,10 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
       variations: [],
       images: [],
       defaultPrice: 0,
+      url: "",
     };
+
+    product.url = url;
 
     // Extract default price from the apex_desktop container
     const apexDesktop = doc.querySelector("#apex_desktop");
@@ -66,13 +55,14 @@ export async function fetchAndTransformProduct(url: string): Promise<ProductData
     // Get information from feature bullets
     const featureBulletsDiv = doc.querySelector("#feature-bullets");
     if (featureBulletsDiv) {
+      const title = featureBulletsDiv.querySelector("h1")?.textContent?.trim();
       const bulletItems = featureBulletsDiv.querySelectorAll("li span");
       if (bulletItems.length > 0) {
-        description += '<h3 class="product-facts-title">Product Features</h3>\n<ul>\n';
+        description += `<h3 class="product-facts-title">${title}</h3>\n<ul>\n`;
         bulletItems.forEach((span) => {
           const bulletText = span.textContent?.trim() || "";
           if (bulletText) {
-            description += `  <li>${bulletText}</li>\n`;
+            description += `<li>${bulletText}</li>\n`;
           }
         });
         description += "</ul>\n\n";

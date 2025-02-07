@@ -1,69 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import AffiliateMessage from "@/components/AffiliateMessage";
 import ProductCarousel from "@/components/ProductCarousel";
 import ProductDescription from "@/components/ProductDescription";
 import ProductVariations from "@/components/ProductVariations";
-import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
+import { useState, useEffect } from "react";
+import type { ProductData } from "@/types/productData";
+import { getUpdatedProduct } from "@/lib/component-actions";
+import { deepEqual, getInitialVariations, sanitizeProductData } from "@/lib/utils";
 
-import type { ProductData, VariationData } from "@/types/productData";
-
-export default function ProductPage() {
-  const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>({});
-  const [productData, setProductData] = useState<ProductData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const params = useParams();
+export default function ProductPage({ product, url }: { product: ProductData; url: string }) {
+  const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>(getInitialVariations(product));
+  const [productData, setProductData] = useState<ProductData | null>(product);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchSlowProduct = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        const url = params.url as string;
-        const response = await fetch(`/api/product?url=${encodeURIComponent(url)}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch product data");
-        }
-        const data = await response.json();
-        setProductData(data);
-
-        // Initialize selected variations with first option of each type
-        if (data?.variations) {
-          const initialVariations: Record<string, number> = {};
-          data.variations.forEach((variation: VariationData) => {
-            const type = variation.type || "default";
-            if (initialVariations[type] === undefined) {
-              initialVariations[type] = 0;
-            }
-          });
-          setSelectedVariations(initialVariations);
+        const product = await getUpdatedProduct(url);
+        if (!deepEqual(product, sanitizeProductData(productData))) {
+          setProductData(product);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch productData data");
-      } finally {
-        setIsLoading(false);
+        console.log("Failed to fetch productData data from amazon:", err);
       }
     };
 
-    fetchProduct();
-  }, [params.url]);
-
-  // Fallback loading state
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  // Error state
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+    fetchSlowProduct();
+  }, [url]);
 
   const handleVariationChange = (type: string, index: number) => {
     setSelectedVariations((prev) => ({
@@ -90,11 +54,6 @@ export default function ProductPage() {
 
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
-      <div className="flex justify-between items-center mb-4 gap-4 sm:mb-6">
-        <AffiliateMessage />
-        <ThemeToggle />
-      </div>
-
       <div className="space-y-6">
         <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-center">{productData?.title}</h1>
 
@@ -109,7 +68,7 @@ export default function ProductPage() {
                 ${getCurrentPrice().toFixed(2)}
               </p>
 
-              <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(params.url as string), "_blank")}>
+              <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(url), "_blank")}>
                 <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" />
                 View on Amazon
               </AnimatedButton>

@@ -11,6 +11,8 @@ interface CarouselThumbnailsProps {
 }
 
 export default function CarouselThumbnails({ product, selectedIndex, onThumbClick }: CarouselThumbnailsProps) {
+  if (product?.images.length === 0) return null;
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -80,7 +82,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
       <div className="absolute inset-0 bg-gradient-to-r from-background/10 to-background/5 backdrop-blur-sm rounded-lg" />
       <div
         ref={scrollContainerRef}
-        className="relative flex gap-4 p-4 overflow-x-auto max-h-[120px] rounded-lg scrollbar-thin no-scrollbar scrollbar-thumb-primary scrollbar-track-background/20"
+        className="relative flex justify-center gap-4 p-4 overflow-x-auto max-h-[120px] rounded-lg scrollbar-thin no-scrollbar scrollbar-thumb-primary scrollbar-track-background/20"
       >
         {product?.images.map((src, index) => (
           <button
@@ -109,7 +111,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
+            className="absolute left-[-0.5rem] top-1/2 -translate-y-1/2 "
             onClick={() => scroll("left")}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -119,7 +121,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background"
+            className="absolute right-[-0.5rem] top-1/2 -translate-y-1/2 "
             onClick={() => scroll("right")}
           >
             <ChevronRight className="h-4 w-4" />

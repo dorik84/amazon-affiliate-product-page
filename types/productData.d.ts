@@ -4,6 +4,7 @@ export interface ProductData {
   variations: VariationData[];
   images: string[];
   defaultPrice: number;
+  url: string;
 }
 
 export interface VariationData {

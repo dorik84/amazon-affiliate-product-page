@@ -16,6 +16,8 @@ export default function ProductVariations({
   selectedVariations,
   onVariationChange,
 }: ProductVariationsProps) {
+  if (!variations || !selectedVariations) return null;
+
   // Group variations by type
   const groupedVariations =
     variations?.reduce((acc, variation) => {
@@ -32,27 +34,27 @@ export default function ProductVariations({
       {Object.entries(groupedVariations).map(([type, typeVariations]) => (
         <div key={type} className="space-y-4">
           <h3 className="text-lg font-semibold capitalize">
-            {type === "default" ? "Options" : type} : {typeVariations[selectedVariations[type]].name}
+            {type === "default" ? "Options" : type} : {typeVariations[selectedVariations[type]]?.name}
           </h3>
 
           <Select
-            value={selectedVariations[type].toString()}
+            value={selectedVariations[type]?.toString()}
             onValueChange={(value) => onVariationChange(type, Number.parseInt(value))}
           >
             <SelectTrigger className="w-full">
               <SelectValue>
-                {typeVariations[selectedVariations[type]].image && (
+                {typeVariations[selectedVariations[type]]?.image && (
                   <div className="relative w-6 h-6 mr-2 inline-block align-middle">
                     <Image
-                      src={typeVariations[selectedVariations[type]].image || "/placeholder.svg"}
-                      alt={typeVariations[selectedVariations[type]].name}
+                      src={typeVariations[selectedVariations[type]]?.image || "/placeholder.svg"}
+                      alt={typeVariations[selectedVariations[type]]?.name}
                       layout="fill"
-                      objectFit="cover"
                       className="rounded-sm"
+                      style={{ objectFit: "cover" }}
                     />
                   </div>
                 )}
-                <span className="align-middle">{typeVariations[selectedVariations[type]].name}</span>
+                <span className="align-middle">{typeVariations[selectedVariations[type]]?.name}</span>
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
