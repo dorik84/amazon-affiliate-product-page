@@ -5,5 +5,5 @@ import ProductPage from "@/components/ProductPage";
 export default async function ProductProvider({ params }: { params: { url: string } }) {
   const product = await getProduct(params.url);
 
-  return <ProductPage product={product} url={params.url} />;
+  return <ProductPage product={product} />;
 }

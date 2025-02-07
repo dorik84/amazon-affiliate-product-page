@@ -7,17 +7,17 @@ import Image from "next/image";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
 import { useState, useEffect } from "react";
 import type { ProductData } from "@/types/productData";
-import { getUpdatedProduct } from "@/lib/component-actions";
+import { getAmazonProduct } from "@/lib/component-actions";
 import { deepEqual, getInitialVariations, sanitizeProductData } from "@/lib/utils";
 
-export default function ProductPage({ product, url }: { product: ProductData; url: string }) {
+export default function ProductPage({ product }: { product: ProductData }) {
   const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>(getInitialVariations(product));
   const [productData, setProductData] = useState<ProductData | null>(product);
 
   useEffect(() => {
     const fetchSlowProduct = async () => {
       try {
-        const product = await getUpdatedProduct(url);
+        const product = await getAmazonProduct(productData?.url);
         if (!deepEqual(product, sanitizeProductData(productData))) {
           setProductData(product);
         }
@@ -27,7 +27,7 @@ export default function ProductPage({ product, url }: { product: ProductData; ur
     };
 
     fetchSlowProduct();
-  }, [url]);
+  }, [productData]);
 
   const handleVariationChange = (type: string, index: number) => {
     setSelectedVariations((prev) => ({
@@ -68,7 +68,10 @@ export default function ProductPage({ product, url }: { product: ProductData; ur
                 ${getCurrentPrice().toFixed(2)}
               </p>
 
-              <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(url), "_blank")}>
+              <AnimatedButton
+                size="lg"
+                onClick={() => window.open(decodeURIComponent(productData?.url || ""), "_blank")}
+              >
                 <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" />
                 View on Amazon
               </AnimatedButton>
