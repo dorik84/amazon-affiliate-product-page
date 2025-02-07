@@ -1,3 +1,4 @@
+"use server";
 import dbConnect from "@/db/db";
 import Product from "@/db/models";
 import { getRandomUserAgent } from "./utils";
@@ -14,6 +15,7 @@ export async function getRelatedProducts() {
       console.log("No products found in DB");
       return [];
     }
+    console.log("getRelatedProducts | products fetched from DB");
     return data;
   } catch (err) {
     console.log(err);
@@ -22,51 +24,49 @@ export async function getRelatedProducts() {
 }
 
 export async function getProduct(url: string) {
-  try {
-    await dbConnect();
-    const data = await Product.findOne({ url }).lean();
+  const getCachedProduct = unstable_cache(
+    async (url: string) => {
+      try {
+        await dbConnect();
+        const data = await Product.findOne({ url }).lean();
 
-    if (!data) {
-      console.log("No products found in DB");
-      return [];
+        if (!data) {
+          console.log("No products found in DB");
+          return [];
+        }
+        console.log("getProduct | product fetched from DB");
+        return data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [`mongodb-${url}`], // add the ID to the cache key
+    {
+      tags: ["mongodb-url"],
+      revalidate: 60, // revalidate every 60 seconds
     }
-    return data;
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
+  );
+  return getCachedProduct(url);
 }
 
-export async function updateProduct(body: ProductData) {
+export async function updateProductDB(product: ProductData | undefined) {
+  if (!product) {
+    console.log("updateProductDB | No product data provided");
+    return;
+  }
   try {
     const options = { new: true, upsert: true }; // Create if doesn't exist
-    const res = await Product.findOneAndUpdate({ url: body.url }, body, options);
+    const res = await Product.findOneAndUpdate({ url: product.url }, product, options);
+    console.log("updateProduct | product updated in DB");
+    return res;
   } catch (err) {
     console.log(err);
-  }
-}
-
-export async function getAmazonProduct(url: string) {
-  try {
-    const response = await fetch(`${decodeURIComponent(url)}`, {
-      cache: "no-store",
-      headers: {
-        "User-Agent": getRandomUserAgent(),
-      },
-    });
-    if (!response.ok) {
-      throw new Error("Amazon response was not ok");
-    }
-
-    return response;
-  } catch (error) {
-    console.log("Error fetching amazon product", error);
   }
 }
 
 // Cached function to fetch and strip data
 export const fetchAndTransformAmazonProduct = (url: string) => {
-  const getCachedProduct = unstable_cache(
+  const getCachedAmazonProduct = unstable_cache(
     async (url: string) => {
       try {
         // Simulate fetching large data from 3rd party API
@@ -84,17 +84,17 @@ export const fetchAndTransformAmazonProduct = (url: string) => {
         // Parse the large response
         // Strip down the data to essential information
         const strippedData = transformProduct(response, url);
-
+        console.log("fetchAndTransformAmazonProduct | data fetched and stripped");
         return strippedData;
       } catch (error) {
         console.error("Error fetching or stripping data:", error);
       }
     },
-    [url], // add the user ID to the cache key
+    [`amazon-${url}`], // add the ID to the cache key
     {
-      tags: ["url"],
-      revalidate: 60,
+      tags: ["amazon-url"],
+      revalidate: 60 * 60 * 24, // revalidate every 24 hours
     }
   );
-  return getCachedProduct(url);
+  return getCachedAmazonProduct(url);
 };
