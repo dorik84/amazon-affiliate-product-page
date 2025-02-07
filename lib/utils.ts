@@ -35,6 +35,7 @@ export const getInitialVariations = (productData: ProductData) => {
   return getInitialVariations;
 };
 
+// NOT USED
 export function deepEqual(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) {
     return true;
@@ -64,7 +65,7 @@ export function sanitizeProductData(obj: any): ProductData {
   const sanitized: ProductData = {
     title: obj.title,
     description: obj.description,
-    variations: obj.variations.map((variation: any) => ({
+    variations: obj.variations?.map((variation: any) => ({
       name: variation.name,
       price: variation.price,
       image: variation.image,
