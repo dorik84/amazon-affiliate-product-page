@@ -1,7 +1,6 @@
 import { updateProduct } from "@/lib/component-actions";
 import { updateProduct as updateProductDB } from "@/lib/server-actions";
-import { transformProduct } from "@/lib/productData-adapter";
-import { getAmazonProduct } from "@/lib/server-actions";
+import { fetchAndTransformAmazonProduct } from "@/lib/server-actions";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,8 +16,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Fetch the remote page
-    const response = await getAmazonProduct(url);
-    const product = await transformProduct(response, url);
+    const product = await fetchAndTransformAmazonProduct(url);
 
     // Call backend POST to update the product in DB
     updateProduct(product);

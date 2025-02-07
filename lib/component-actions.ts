@@ -3,7 +3,11 @@ import { ProductData } from "@/types/productData";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function fetchCache(endpoint: string, options = {}) {
-  const response = await fetch(`${baseUrl}${endpoint}`, { next: { revalidate: 60 * 60 * 24 }, ...options });
+  const response = await fetch(`${baseUrl}${endpoint}`, {
+    cache: "force-cache",
+    next: { revalidate: 60 * 60 * 24 },
+    ...options,
+  });
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
@@ -23,14 +27,17 @@ export async function fetchNoCache(endpoint: string, options = {}) {
 }
 
 export async function getProduct(url: string) {
+  if (!url) return;
   return fetchNoCache(`/api/productFast?url=${encodeURIComponent(url)}`);
 }
 
-export async function getUpdatedProduct(url: string) {
+export async function getAmazonProduct(url: string | undefined) {
+  if (!url) return;
   return fetchNoCache(`/api/productSlow?url=${encodeURIComponent(url)}`);
 }
 
-export async function updateProduct(product: ProductData) {
+export async function updateProduct(product: ProductData | undefined) {
+  if (!product) return;
   return await fetchNoCache("/api/productSlow", {
     method: "POST",
     headers: {
