@@ -6,9 +6,9 @@ import ProductVariations from "@/components/ProductVariations";
 import Image from "next/image";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
 import { useState, useEffect } from "react";
-import type { ProductData, VariationData } from "@/types/productData";
+import type { ProductData } from "@/types/productData";
 import { getUpdatedProduct } from "@/lib/component-actions";
-import { getInitialVariations } from "@/lib/utils";
+import { deepEqual, getInitialVariations, sanitizeProductData } from "@/lib/utils";
 
 export default function ProductPage({ product, url }: { product: ProductData; url: string }) {
   const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>(getInitialVariations(product));
@@ -18,7 +18,9 @@ export default function ProductPage({ product, url }: { product: ProductData; ur
     const fetchSlowProduct = async () => {
       try {
         const product = await getUpdatedProduct(url);
-        setProductData(product);
+        if (!deepEqual(product, sanitizeProductData(productData))) {
+          setProductData(product);
+        }
       } catch (err) {
         console.log("Failed to fetch productData data from amazon:", err);
       }

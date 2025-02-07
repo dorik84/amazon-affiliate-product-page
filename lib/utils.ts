@@ -34,3 +34,47 @@ export const getInitialVariations = (productData: ProductData) => {
 
   return getInitialVariations;
 };
+
+export function deepEqual(obj1: any, obj2: any): boolean {
+  if (obj1 === obj2) {
+    return true;
+  }
+
+  if (obj1 == null || obj2 == null || typeof obj1 !== "object" || typeof obj2 !== "object") {
+    return false;
+  }
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+
+  for (const key of keys1) {
+    if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function sanitizeProductData(obj: any): ProductData {
+  const sanitized: ProductData = {
+    title: obj.title,
+    description: obj.description,
+    variations: obj.variations.map((variation: any) => ({
+      name: variation.name,
+      price: variation.price,
+      image: variation.image,
+      type: variation.type,
+      disabled: variation.disabled,
+    })),
+    images: obj.images,
+    defaultPrice: obj.defaultPrice,
+    url: obj.url,
+  };
+
+  return sanitized;
+}
