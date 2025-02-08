@@ -18,7 +18,7 @@ export default function RelatedProductsWidget({ relatedProducts }: { relatedProd
 
   return (
     <div className="w-full overflow-hidden pb-4">
-      <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Related Products</h2>
+      <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 px-4">Related Products</h2>
       <div
         ref={scrollRef}
         className="flex space-x-3 sm:space-x-4 animate-scroll hover:animation-play-state-paused"

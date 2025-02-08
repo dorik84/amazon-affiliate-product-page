@@ -71,7 +71,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute top-1/2 left-4 transform -translate-y-1/2"
+          className="absolute top-1/2 left-[-0.5rem] transform -translate-y-1/2 bg-primary/10"
           onClick={scrollPrev}
           aria-label="Previous image"
         >
@@ -80,7 +80,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute top-1/2 right-4 transform -translate-y-1/2"
+          className="absolute  top-1/2 right-[-0.5rem] transform -translate-y-1/2 bg-primary/10"
           onClick={scrollNext}
           aria-label="Next image"
         >

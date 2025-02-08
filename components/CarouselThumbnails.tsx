@@ -113,7 +113,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-[-0.5rem] top-1/2 -translate-y-1/2 "
+            className="absolute left-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10"
             onClick={() => scroll("left")}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -123,7 +123,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-[-0.5rem] top-1/2 -translate-y-1/2 "
+            className="absolute right-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10"
             onClick={() => scroll("right")}
           >
             <ChevronRight className="h-4 w-4" />

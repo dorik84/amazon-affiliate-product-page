@@ -17,7 +17,7 @@ export default function ProductCard({ product }: { product: ProductData }) {
           <ProductImage title={product.title} src={product.images[0]} index={0} className="w-full h-full" />
         </div>
         <div className="p-4 truncate">
-          <h3 className="text-sm md:text-lg font-semibold mb-2 truncate">{product.title}</h3>
+          <h3 className="text-xs md:text-lg font-semibold mb-2 truncate">{product.title}</h3>
           <p className="text-gray-600">${product.defaultPrice.toFixed(2)}</p>
         </div>
       </Link>
