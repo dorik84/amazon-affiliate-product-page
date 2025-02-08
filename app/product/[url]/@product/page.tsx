@@ -1,8 +1,9 @@
 "use server";
-import { getProduct } from "@/lib/component-actions";
-import ProductPage from "@/components/ProductPage";
 
-export default async function ProductProvider({ params }: { params: { url: string } }) {
+import ProductPage from "@/components/ProductPage";
+import { getProduct } from "@/lib/component-actions";
+
+export default async function CarouselPage({ params }: { params: { url: string } }) {
   const product = await getProduct(params.url);
 
   return <ProductPage product={product} />;

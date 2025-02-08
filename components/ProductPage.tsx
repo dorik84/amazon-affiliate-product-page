@@ -65,7 +65,7 @@ export default function ProductPage({ product }: { product: ProductData | undefi
           </div>
 
           <div className="md:col-span-2">
-            <ProductDescription description={product?.description} />
+            <ProductDescription product={product} />
           </div>
         </div>
       </div>

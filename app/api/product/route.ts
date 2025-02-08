@@ -2,6 +2,7 @@ import { fetchAndTransformAmazonProduct, getProduct, updateProductDB } from "@/l
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  "use cache";
   const searchParams = request.nextUrl.searchParams;
   const url = searchParams.get("url");
 
