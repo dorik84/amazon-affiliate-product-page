@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import type React from "react"; // Added import for React
-import "../../styles/button-animation.css";
 
 interface AnimatedButtonProps {
   className?: string;

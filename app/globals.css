@@ -14,6 +14,7 @@
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 221.2 83.2% 53.3%;
+    --primary-copy: 221.2, 83.2%, 53.3%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -48,6 +49,7 @@
     --popover-foreground: 60 30% 96%;
 
     --primary: 24 99% 59%;
+    --primary-copy: 24, 99%, 59%;
     --primary-foreground: 60 30% 96%;
 
     --secondary: 90 34% 63%;
@@ -121,4 +123,20 @@ h3.product-facts-title {
 
 .hover\:animation-play-state-paused:hover {
   animation-play-state: paused;
+}
+
+@keyframes pulse-shadow {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--primary-copy)); /* Replace with your primary RGB values */
+  }
+  70% {
+    box-shadow: 0 0 0 10px hsla(var(--primary-copy), 0.7); /* Replace with your primary RGB values */
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsla(var(--primary-copy), 0); /* Replace with your primary RGB values */
+  }
+}
+
+.animate-shadow {
+  animation: pulse-shadow 2s infinite;
 }
