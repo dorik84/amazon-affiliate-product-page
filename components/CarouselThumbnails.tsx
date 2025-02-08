@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { ProductData } from "@/types/productData";
 import { Button } from "@/components/ui/button";
+import ProductImage from "./ProductImage";
 
 interface CarouselThumbnailsProps {
   product: ProductData | null;
@@ -95,13 +96,14 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
             } focus:outline-none focus:ring-2 focus:ring-primary rounded-md overflow-hidden`}
             aria-label={`View image ${index + 1}`}
           >
-            <Image
-              src={src || "/placeholder.svg"}
+            <ProductImage
+              title={product.title}
+              src={src}
+              index={index}
               alt={`Thumbnail ${index + 1}`}
               width={80}
               height={80}
-              className="object-cover aspect-square"
-              draggable={false}
+              // draggable={false}
             />
           </button>
         ))}

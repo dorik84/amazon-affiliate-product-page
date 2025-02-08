@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ProductData } from "@/types/productData";
+import ProductImage from "@/components/ProductImage";
 
 export default function ProductCard({ product }: { product: ProductData }) {
   return (
@@ -14,13 +14,7 @@ export default function ProductCard({ product }: { product: ProductData }) {
     >
       <Link href={`/product/${product.url}`}>
         <div className="relative h-24 md:h-48">
-          <Image
-            src={product.images[0] || "/placeholder.svg"}
-            alt={product.title}
-            fill
-            style={{ objectFit: "contain" }}
-            className="w-full h-full"
-          />
+          <ProductImage title={product.title} src={product.images[0]} index={0} className="w-full h-full" />
         </div>
         <div className="p-4 truncate">
           <h3 className="text-sm md:text-lg font-semibold mb-2 truncate">{product.title}</h3>

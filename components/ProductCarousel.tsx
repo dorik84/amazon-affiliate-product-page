@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import type { ProductData } from "@/types/productData";
 import CarouselThumbnails from "./CarouselThumbnails";
+import ProductImage from "./ProductImage";
 
 interface ProductCarouselProps {
-  product: ProductData | null;
+  product: ProductData | undefined;
 }
 
 export default function ProductCarousel({ product }: ProductCarouselProps) {
@@ -37,10 +38,9 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
 
   // Add event listener for slide changes when emblaApi is available
   useEffect(() => {
-    if (emblaApi) {
-      emblaApi.on("select", onSelect);
-      return () => emblaApi.off("select", onSelect);
-    }
+    if (!emblaApi) return;
+    emblaApi.on("select", onSelect);
+    return () => emblaApi.off("select", onSelect);
   }, [emblaApi, onSelect]);
 
   return (
@@ -56,23 +56,12 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
               <Dialog key={index}>
                 <DialogTrigger asChild>
                   <div className="flex-[0_0_100%] min-w-0 relative h-full cursor-pointer">
-                    <Image
-                      src={src || "/placeholder.svg"}
-                      alt={`${product.title} - Image ${index + 1}`}
-                      fill
-                      priority={index === 0}
-                      className="object-contain"
-                    />
+                    <ProductImage title={product.title} src={src} index={index} />
                   </div>
                 </DialogTrigger>
                 <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
                   <div className="relative w-full h-full min-h-[80vh]">
-                    <Image
-                      src={src || "/placeholder.svg"}
-                      alt={`${product.title} - Image ${index + 1}`}
-                      fill
-                      className="object-contain"
-                    />
+                    <ProductImage title={product.title} src={src} index={index} priority={index === 0} />
                   </div>
                 </DialogContent>
               </Dialog>
