@@ -36,6 +36,12 @@ export default function ProductImage({
         src={src || "/placeholder.svg"}
         alt={alt || `${name} - Image ${index ? index + 1 : ""}`}
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        onLoad={() => setIsLoading(false)}
+        onError={() => setIsLoading(false)}
+        priority={priority}
+        width={width || 500}
+        height={height || 500}
+        draggable={false}
         className={`
           object-contain 
           transition-opacity 
@@ -43,11 +49,6 @@ export default function ProductImage({
           ${isLoading ? "opacity-0" : "opacity-100"}
           ${className}
         `}
-        onLoad={() => setIsLoading(false)}
-        onError={() => setIsLoading(false)}
-        priority={priority}
-        width={width || 500}
-        height={height || 500}
       />
     </div>
   );
