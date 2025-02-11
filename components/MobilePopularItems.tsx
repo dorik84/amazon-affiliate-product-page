@@ -74,7 +74,7 @@ export function MobilePopularItems({ items }: { items: ProductData[] }) {
           <div key={slideIndex} className="w-full flex-shrink-0">
             <div className="grid grid-cols-2 gap-4">
               {items.slice(slideIndex * itemsPerSlide, (slideIndex + 1) * itemsPerSlide).map((item) => (
-                <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div key={item.url} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="relative h-32">
                     <Image src={item.image || "/placeholder.svg"} alt={item.name} layout="fill" objectFit="cover" />
                   </div>
