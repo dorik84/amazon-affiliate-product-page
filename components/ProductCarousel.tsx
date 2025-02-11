@@ -2,13 +2,13 @@
 
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import type { ProductData } from "@/types/productData";
-import CarouselThumbnails from "./CarouselThumbnails";
-import ProductImage from "./ProductImage";
+import CarouselThumbnails from "@/components/ProductCarouselThumbnails";
+import ProductImage from "@/components/ProductImage";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ProductCarouselProps {
   product: ProductData | undefined;
@@ -59,7 +59,8 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
                     <ProductImage name={product.name} src={src} index={index} />
                   </div>
                 </DialogTrigger>
-                <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+                <DialogContent aria-describedby={undefined} className="max-w-[90vw] max-h-[90vh] p-0">
+                  <DialogTitle className="text-center">{product.name}</DialogTitle>
                   <div className="relative w-full h-full min-h-[80vh]">
                     <ProductImage name={product.name} src={src} index={index} priority={index === 0} />
                   </div>
