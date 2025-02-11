@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { ProductData } from "@/types/productData";
 import { Button } from "@/components/ui/button";
-import ProductImage from "./ProductImage";
+import ProductImage from "@/components/ProductImage";
 
 interface CarouselThumbnailsProps {
   product: ProductData | null;
@@ -97,13 +97,13 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
             aria-label={`View image ${index + 1}`}
           >
             <ProductImage
-              title={product.title}
+              name={product.name}
               src={src}
               index={index}
               alt={`Thumbnail ${index + 1}`}
               width={80}
               height={80}
-              // draggable={false}
+              className="object-contain"
             />
           </button>
         ))}
@@ -113,7 +113,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10"
+            className="absolute left-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10 rounded-full shadow-md"
             onClick={() => scroll("left")}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -123,7 +123,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10"
+            className="absolute right-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10 rounded-full shadow-md"
             onClick={() => scroll("right")}
           >
             <ChevronRight className="h-4 w-4" />
