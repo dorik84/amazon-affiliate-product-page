@@ -5,6 +5,7 @@ export interface ProductData {
   images: string[];
   defaultPrice: number;
   url: string;
+  category?: string;
 }
 
 export interface VariationData {

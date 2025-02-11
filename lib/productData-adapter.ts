@@ -29,6 +29,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
       images: [],
       defaultPrice: 0,
       url: "",
+      category: "",
     };
 
     product.url = url;
