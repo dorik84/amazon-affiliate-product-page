@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MobilePopularItems } from "./MobilePopularItems";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { ItemCard } from "@/components/ItemCard";
 
 const scrollbarHideClass = "scrollbar-hide";
 
@@ -84,7 +85,7 @@ const popularItems: Item[] = [
   },
 ];
 
-const FilmStrip = ({ items, index }: { items: Item[]; index: number }) => {
+export const FilmStrip = ({ items, index }: { items: Item[]; index: number }) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollSpeed] = useState(() => 0.5 + Math.random() * 0.5);
@@ -133,20 +134,12 @@ const FilmStrip = ({ items, index }: { items: Item[]; index: number }) => {
         {duplicatedItems.map((item, i) => (
           <motion.div
             key={`${item.id}-${i}`}
-            className="w-full h-[300px] flex-shrink-0 p-4 bg-white rounded-lg shadow-md overflow-hidden"
+            className="w-full flex-shrink-0"
             /*style={{
               boxShadow: "0 0 0 8px #000, 0 0 0 10px #fff, 0 0 0 12px #000",
             }}*/
           >
-            <div className="relative h-32">
-              <Image src={item.image || "/placeholder.svg"} alt={item.name} layout="fill" objectFit="cover" />
-            </div>
-            <div className="mt-2">
-              <h3 className="text-lg font-semibold mb-1 truncate">{item.name}</h3>
-              <p className="text-sm text-gray-600 mb-1">{item.category}</p>
-              <p className="text-gray-800 font-bold mb-2">${item.price.toFixed(2)}</p>
-              <Button className="w-full">Add to Cart</Button>
-            </div>
+            <ItemCard item={item} />
           </motion.div>
         ))}
       </div>
