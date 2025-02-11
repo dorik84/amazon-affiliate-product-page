@@ -22,7 +22,7 @@ export function ItemCard({ item }: { item: Item }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Image src={item.image || "/placeholder.svg"} alt={item.name} layout="fill" objectFit="cover" />
+      <ProductImage name={product.name} src={product.images[0]} index={0} className="object-cover h-full w-full" />
       <AnimatePresence>
         {isHovered && (
           <motion.div

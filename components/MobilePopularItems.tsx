@@ -92,17 +92,17 @@ export function MobilePopularItems({ items }: { items: Item[] }) {
       </div>
       <button
         onClick={prevSlide}
-        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md bg-primary/10"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+        className="absolute top-1/2 right-2  transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md bg-primary/10"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {Array.from({ length: totalSlides }).map((_, index) => (
           <div
             key={index}
