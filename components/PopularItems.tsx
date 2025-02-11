@@ -1,19 +1,20 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { MobilePopularItems } from "./MobilePopularItems"
+import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { MobilePopularItems } from "./MobilePopularItems";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-const scrollbarHideClass = "scrollbar-hide"
+const scrollbarHideClass = "scrollbar-hide";
 
 interface Item {
-  id: number
-  name: string
-  price: number
-  image: string
-  category: string
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
 }
 
 const popularItems: Item[] = [
@@ -81,37 +82,45 @@ const popularItems: Item[] = [
     image: "/placeholder.svg?height=300&width=300",
     category: "Electronics",
   },
-]
+];
 
 const FilmStrip = ({ items, index }: { items: Item[]; index: number }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [scrollSpeed] = useState(() => 0.5 + Math.random() * 0.5)
-  const [scrollPosition, setScrollPosition] = useState(0)
+  const [isHovered, setIsHovered] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scrollSpeed] = useState(() => 0.5 + Math.random() * 0.5);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const animationRef = useRef<number | null>(null);
+
+  const animate = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const totalHeight = container.scrollHeight;
+    const visibleHeight = container.clientHeight;
+
+    const newScrollPosition = (scrollPosition + scrollSpeed) % (totalHeight - visibleHeight);
+    setScrollPosition(newScrollPosition);
+    container.scrollTop = newScrollPosition;
+
+    animationRef.current = requestAnimationFrame(animate);
+  }, [scrollPosition, scrollSpeed]);
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const totalHeight = container.scrollHeight
-    const visibleHeight = container.clientHeight
-
-    const handleScroll = () => {
-      const newScrollPosition = (scrollPosition + scrollSpeed) % (totalHeight - visibleHeight)
-      setScrollPosition(newScrollPosition)
-      container.scrollTop = newScrollPosition
-    }
-
-    let interval: NodeJS.Timeout
     if (!isHovered) {
-      interval = setInterval(handleScroll, 16) // Approximately 60 FPS
+      animationRef.current = requestAnimationFrame(animate);
+    } else if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
     }
 
-    return () => clearInterval(interval)
-  }, [isHovered, scrollSpeed, scrollPosition])
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isHovered, animate]);
 
   // Duplicate items to create a seamless loop
-  const duplicatedItems = [...items, ...items, ...items, ...items, ...items]
+  const duplicatedItems = [...items, ...items, ...items, ...items, ...items];
 
   return (
     <div
@@ -142,26 +151,39 @@ const FilmStrip = ({ items, index }: { items: Item[]; index: number }) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export function PopularItems() {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [key, setKey] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setKey((prevKey) => prevKey + 1);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const filmStrips = Array.from({ length: 5 }, (_, i) => (
-    <FilmStrip key={i} items={popularItems.slice(i * 2, (i + 1) * 2).concat(popularItems.slice(0, i * 2))} index={i} />
-  ))
+    <FilmStrip
+      key={`${i}-${key}`}
+      items={popularItems.slice(i * 2, (i + 1) * 2).concat(popularItems.slice(0, i * 2))}
+      index={i}
+    />
+  ));
 
   return (
     <section className="bg-gray-100 py-16">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Popular Items</h2>
         {/* Desktop version */}
-        <div className="hidden md:flex md:flex-row gap-4 w-full">{filmStrips}</div>
+        {isDesktop && <div className="flex flex-row gap-4 w-full">{filmStrips}</div>}
         {/* Mobile version */}
-        <div className="md:hidden">
-          <MobilePopularItems items={popularItems} />
-        </div>
+        {!isDesktop && <MobilePopularItems items={popularItems} />}
       </div>
     </section>
-  )
+  );
 }
-
