@@ -1,5 +1,5 @@
-import Link from "next/link"
-import { Facebook, Twitter, Instagram } from "lucide-react"
+import Link from "next/link";
+import { Facebook, Twitter, Instagram } from "lucide-react";
 
 export function Footer() {
   return (
@@ -12,7 +12,7 @@ export function Footer() {
               MegaStore is your one-stop shop for all your needs, from electronics to fashion and beyond.
             </p>
           </div>
-          <div>
+          {/* <div>
             <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
             <ul className="space-y-2">
               <li>
@@ -36,8 +36,8 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <h3 className="text-lg font-semibold mb-4">Shop</h3>
             <ul className="space-y-2">
               <li>
@@ -61,8 +61,8 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white">
@@ -75,13 +75,12 @@ export function Footer() {
                 <Instagram size={24} />
               </a>
             </div>
-          </div>
+          </div> */}
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
           <p>&copy; 2025 MegaStore. All rights reserved.</p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
-
