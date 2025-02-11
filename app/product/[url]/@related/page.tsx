@@ -1,4 +1,4 @@
-import RelatedProductsWidget from "@/components/RelatedProductsWidget";
+import RelatedProductsWidget from "@/components/RelatedProducts";
 import { getRelatedProducts } from "@/lib/component-actions";
 import React from "react";
 
