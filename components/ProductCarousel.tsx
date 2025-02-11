@@ -56,12 +56,12 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
               <Dialog key={index}>
                 <DialogTrigger asChild>
                   <div className="flex-[0_0_100%] min-w-0 relative h-full cursor-pointer">
-                    <ProductImage title={product.title} src={src} index={index} />
+                    <ProductImage name={product.name} src={src} index={index} />
                   </div>
                 </DialogTrigger>
                 <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
                   <div className="relative w-full h-full min-h-[80vh]">
-                    <ProductImage title={product.title} src={src} index={index} priority={index === 0} />
+                    <ProductImage name={product.name} src={src} index={index} priority={index === 0} />
                   </div>
                 </DialogContent>
               </Dialog>

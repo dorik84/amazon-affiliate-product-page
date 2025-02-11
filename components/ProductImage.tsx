@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export default function ProductImage({
-  title,
+  name,
   src,
   index,
   className,
@@ -14,7 +14,7 @@ export default function ProductImage({
   width,
   height,
 }: {
-  title: string;
+  name: string;
   src?: string;
   index: number;
   className?: string;
@@ -34,7 +34,7 @@ export default function ProductImage({
       )}
       <Image
         src={src || "/placeholder.svg"}
-        alt={alt || `${title} - Image ${index ? index + 1 : ""}`}
+        alt={alt || `${name} - Image ${index ? index + 1 : ""}`}
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         className={`
           object-contain 

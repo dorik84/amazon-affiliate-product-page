@@ -23,7 +23,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
 
     // Transform HTML content into structured data
     const product: ProductData = {
-      title: "",
+      name: "",
       description: "",
       variations: [],
       images: [],
@@ -44,10 +44,12 @@ export async function transformProduct(response: any, url: string): Promise<Prod
         product.defaultPrice = whole + fraction / 100;
       }
     }
+    //Extract category from breadcrumbs
+    product.category = doc.querySelector("#nav-subnav")?.getAttribute("data-category") || "";
 
-    // Extract title from h1#title span
+    // Extract name from h1#title span
     const titleElement = doc.querySelector("#title span");
-    product.title = titleElement?.textContent?.trim() || "";
+    product.name = titleElement?.textContent?.trim() || "";
 
     // Extract description from product description and facts
     let description = "";

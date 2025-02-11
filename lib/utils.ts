@@ -63,7 +63,7 @@ export function deepEqual(obj1: any, obj2: any): boolean {
 
 export function sanitizeProductData(obj: any): ProductData {
   const sanitized: ProductData = {
-    title: obj.title,
+    name: obj.name,
     description: obj.description,
     variations: obj.variations?.map((variation: any) => ({
       name: variation.name,

@@ -38,7 +38,7 @@ export default function ProductPage({ product }: { product: ProductData | undefi
   return (
     <div className="container mx-auto px-4 py-4 sm:py-8">
       <div className="space-y-6">
-        <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-center">{product?.title}</h1>
+        <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-center">{product?.name}</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
           <div className="md:col-span-1">

@@ -1,5 +1,5 @@
 export interface ProductData {
-  title: string;
+  name: string;
   description: string;
   variations: VariationData[];
   images: string[];
