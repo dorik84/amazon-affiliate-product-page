@@ -1,19 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { ProductData } from "@/types/productData";
+import ProductImage from "./ProductImage";
+import Link from "next/link";
 
-interface Item {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
-
-export function ItemCard({ item }: { item: Item }) {
+export function ItemCard({ product }: { product: ProductData }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -32,12 +26,14 @@ export function ItemCard({ item }: { item: Item }) {
             className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center"
           >
             <div className="text-white text-center p-4">
-              <h3 className="text-lg font-semibold mb-1">{item.name}</h3>
-              <p className="text-sm mb-1">{item.category}</p>
-              <p className="text-xl font-bold mb-2">${item.price.toFixed(2)}</p>
-              <Button variant="secondary" size="sm">
-                Add to Cart
-              </Button>
+              <h3 className="text-xs font-semibold mb-1 truncate">{product.name}</h3>
+              <p className="text-xs mb-1 truncate">{product.category}</p>
+              <p className="text-xl font-bold mb-2">${product.defaultPrice.toFixed(2)}</p>
+              <Link href={`/product/${product.url}`}>
+                <Button variant="secondary" size="sm">
+                  View product
+                </Button>
+              </Link>
             </div>
           </motion.div>
         )}
