@@ -1,71 +1,73 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ProductData } from "@/types/productData";
+import Link from "next/link";
 
 interface Item {
-  id: number
-  name: string
-  price: number
-  image: string
-  category: string
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
 }
 
-export function MobilePopularItems({ items }: { items: Item[] }) {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const slideRef = useRef<HTMLDivElement>(null)
-  const itemsPerSlide = 6
-  const totalSlides = Math.ceil(items.length / itemsPerSlide)
+export function MobilePopularItems({ items }: { items: ProductData[] }) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slideRef = useRef<HTMLDivElement>(null);
+  const itemsPerSlide = 6;
+  const totalSlides = Math.ceil(items.length / itemsPerSlide);
 
   const nextSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides)
-  }
+    setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides);
+  };
 
   const prevSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide - 1 + totalSlides) % totalSlides)
-  }
+    setCurrentSlide((prevSlide) => (prevSlide - 1 + totalSlides) % totalSlides);
+  };
 
   useEffect(() => {
     if (slideRef.current) {
-      slideRef.current.style.transform = `translateX(-${currentSlide * 100}%)`
+      slideRef.current.style.transform = `translateX(-${currentSlide * 100}%)`;
     }
-  }, [currentSlide])
+  }, [currentSlide]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0]
-    const startX = touch.clientX
-    let hasMoved = false
+    const touch = e.touches[0];
+    const startX = touch.clientX;
+    let hasMoved = false;
 
     const handleTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0]
-      const diffX = touch.clientX - startX
+      const touch = e.touches[0];
+      const diffX = touch.clientX - startX;
 
       if (Math.abs(diffX) > 50 && !hasMoved) {
         if (diffX > 0) {
-          prevSlide()
+          prevSlide();
         } else {
-          nextSlide()
+          nextSlide();
         }
-        hasMoved = true
+        hasMoved = true;
       }
-    }
+    };
 
     const handleTouchEnd = () => {
-      document.removeEventListener("touchmove", handleTouchMove)
-      document.removeEventListener("touchend", handleTouchEnd)
-    }
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
 
-    document.addEventListener("touchmove", handleTouchMove)
-    document.addEventListener("touchend", handleTouchEnd)
-  }
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
+  };
 
   return (
     <div className="relative w-full overflow-hidden" onTouchStart={handleTouchStart}>
       <div
         ref={slideRef}
-        className="flex transition-transform duration-300 ease-in-out"
+        className="flex transition-transform duration-300 ease-in-out pb-4"
         style={{ width: `${totalSlides * 100}%` }}
       >
         {Array.from({ length: totalSlides }).map((_, slideIndex) => (
@@ -79,10 +81,12 @@ export function MobilePopularItems({ items }: { items: Item[] }) {
                   <div className="p-2">
                     <h3 className="text-sm font-semibold mb-1 truncate">{item.name}</h3>
                     <p className="text-xs text-gray-600 mb-1">{item.category}</p>
-                    <p className="text-gray-800 font-bold mb-2">${item.price.toFixed(2)}</p>
-                    <Button className="w-full text-xs py-1" size="sm">
-                      Add to Cart
-                    </Button>
+                    <p className="text-gray-800 font-bold mb-2">${item.defaultPrice.toFixed(2)}</p>
+                    <Link href={`/product/${item.url}`}>
+                      <Button className="w-full text-xs py-1" size="sm">
+                        View Product
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -111,6 +115,5 @@ export function MobilePopularItems({ items }: { items: Item[] }) {
         ))}
       </div>
     </div>
-  )
+  );
 }
-

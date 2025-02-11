@@ -23,6 +23,23 @@ export async function getRelatedProducts() {
   }
 }
 
+export async function getPopularProducts() {
+  try {
+    await dbConnect();
+    const data = await Product.find({}).limit(20).lean();
+
+    if (!data) {
+      console.log("getPopularProducts | No products found in DB");
+      return [];
+    }
+    console.log("getRelatedProducts | products fetched from DB");
+    return data;
+  } catch (err) {
+    console.log("getPopularProducts | ", err);
+    return [];
+  }
+}
+
 export async function getProduct(url: string) {
   const getCachedProduct = unstable_cache(
     async (url: string) => {
