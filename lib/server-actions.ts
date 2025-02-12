@@ -32,7 +32,7 @@ export async function getPopularProducts() {
       console.log("getPopularProducts | No products found in DB");
       return [];
     }
-    console.log("getRelatedProducts | products fetched from DB");
+    console.log("getPopularProducts | products fetched from DB");
     return data;
   } catch (err) {
     console.log("getPopularProducts | ", err);
