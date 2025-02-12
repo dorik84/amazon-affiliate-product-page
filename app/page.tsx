@@ -11,6 +11,7 @@ import { sanitizeProductData } from "@/lib/utils";
 export default async function Home() {
   const data = await getPopularProducts();
   const popularItems = data.map(sanitizeProductData);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
