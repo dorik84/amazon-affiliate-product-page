@@ -31,8 +31,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
       url: "",
       category: "",
     };
-
-    product.url = url;
+    product.url = encodeURIComponent(url);
 
     // Extract default price from the apex_desktop container
     const apexDesktop = doc.querySelector("#apex_desktop");
