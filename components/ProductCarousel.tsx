@@ -10,7 +10,6 @@ import CarouselThumbnails from "@/components/ProductCarouselThumbnails";
 import ProductImage from "@/components/ProductImage";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useTheme } from "next-themes";
-import { cn } from "@/lib/utils";
 
 interface ProductCarouselProps {
   product: ProductData | undefined;
@@ -75,7 +74,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute top-1/2 left-[-0.5rem] transform -translate-y-1/2 bg-primary/10 rounded-full shadow-md"
+          className="absolute top-1/2 left-[-0.5rem] transform -translate-y-1/2 text-accent-foreground sm:text-inherit md:text-accent-foreground bg-primary/30 sm:bg-primary/10 md:bg-primary/30 rounded-full shadow-md"
           onClick={scrollPrev}
           aria-label="Previous image"
         >
@@ -84,7 +83,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute  top-1/2 right-[-0.5rem] transform -translate-y-1/2 bg-primary/10 rounded-full shadow-md"
+          className="absolute  top-1/2 right-[-0.5rem] transform -translate-y-1/2 text-accent-foreground sm:text-inherit md:text-accent-foreground bg-primary/30 sm:bg-primary/10 md:bg-primary/30 rounded-full shadow-md"
           onClick={scrollNext}
           aria-label="Next image"
         >
