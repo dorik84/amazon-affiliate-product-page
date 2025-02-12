@@ -70,7 +70,7 @@
     --input: 44 97% 63%;
     --ring: 280 100% 50%;
 
-    --custom-shadow: 0 4px 6px rgba(252, 203, 69, 0.1);
+    --custom-shadow: 0 4px 10px rgba(252, 203, 69, 0.5);
   }
 }
 
