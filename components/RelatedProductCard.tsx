@@ -4,23 +4,32 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ProductData } from "@/types/productData";
 import ProductImage from "@/components/ProductImage";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export default function ProductCard({ product }: { product: ProductData }) {
+export default function ProductCard({ product, className }: { product: ProductData; className?: string }) {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
       transition={{ duration: 0.2 }}
-      className="flex-shrink-0 w-32 md:w-64 bg-white rounded-lg shadow-custom-shadow overflow-hidden"
+      // className="flex-shrink-0 w-32 md:w-64 rounded-lg overflow-hidden shadow-custom-shadow "
+      className={cn("flex-shrink-0  rounded-lg overflow-hidden shadow-custom-shadow ", className)}
     >
-      <Link href={`/product/${product.url}`}>
-        <div className="relative h-24 md:h-48">
-          <ProductImage name={product.name} src={product.images[0]} index={0} className="w-full h-full" />
-        </div>
-        <div className="p-4 truncate">
-          <h3 className="text-xs md:text-lg font-semibold mb-2 text-black truncate">{product.name}</h3>
-          <p className="text-gray-600">${product.defaultPrice.toFixed(2)}</p>
-        </div>
-      </Link>
+      {/* <Link href={`/product/${product.url}`}> */}
+      <div className="relative h-24 md:h-48">
+        <ProductImage name={product.name} src={product.images[0]} index={0} className="w-full h-full object-cover" />
+      </div>
+      <div className="p-4">
+        <h3 className="text-xs md:text-lg font-semibold mb-2 line-clamp-2">{product.name}</h3>
+        {/* <p className="text-xs text-gray-600 mb-1">{item.category}</p> */}
+        {/* <p className="font-bold mb-2">${item.defaultPrice.toFixed(2)}</p> */}
+        <Link href={`/product/${product.url}`}>
+          <Button className="w-full text-xs " size="sm">
+            View Product
+          </Button>
+        </Link>
+      </div>
+      {/* </Link> */}
     </motion.div>
   );
 }

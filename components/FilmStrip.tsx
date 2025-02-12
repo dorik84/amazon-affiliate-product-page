@@ -48,7 +48,7 @@ export const FilmStrip = ({ items }: { items: ProductData[] }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="absolute top-0 left-0 w-full flex flex-col gap-1">
+      <div className="absolute top-0 left-0 w-full flex flex-col gap-4">
         {duplicatedItems.map((item, i) => (
           <motion.div key={`${item.url}-${i}`} className="w-full flex-shrink-0">
             <ItemCard product={item} />

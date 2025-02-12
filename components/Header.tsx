@@ -9,10 +9,10 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-background shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-gray-800">
+          <Link href="/" className="text-2xl font-bold ">
             BestChoice
           </Link>
           <div className="flex items-center">
@@ -46,7 +46,7 @@ export function Header() {
             </div>
           </div>
         </div>
-        {isMenuOpen && (
+        {/* {isMenuOpen && (
           <nav className="md:hidden mt-4">
             <div className="flex flex-col space-y-2">
               <Link href="/electronics" className="text-gray-600 hover:text-gray-800 py-2">
@@ -63,7 +63,7 @@ export function Header() {
               </Link>
             </div>
           </nav>
-        )}
+        )} */}
       </div>
     </header>
   );

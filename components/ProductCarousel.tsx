@@ -9,6 +9,8 @@ import type { ProductData } from "@/types/productData";
 import CarouselThumbnails from "@/components/ProductCarouselThumbnails";
 import ProductImage from "@/components/ProductImage";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 interface ProductCarouselProps {
   product: ProductData | undefined;
@@ -18,6 +20,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
   if (!product?.images) return null;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel();
+  const { theme, setTheme } = useTheme();
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);

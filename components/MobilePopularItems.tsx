@@ -6,14 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductData } from "@/types/productData";
 import Link from "next/link";
-
-interface Item {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
+import { motion } from "framer-motion";
+import ProductCard from "./RelatedProductCard";
 
 export function MobilePopularItems({ items }: { items: ProductData[] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -64,7 +58,7 @@ export function MobilePopularItems({ items }: { items: ProductData[] }) {
   };
 
   return (
-    <div className="relative w-full overflow-hidden" onTouchStart={handleTouchStart}>
+    <div className="relative w-full overflow-hidden px-4" onTouchStart={handleTouchStart}>
       <div
         ref={slideRef}
         className="flex transition-transform duration-300 ease-in-out pb-4"

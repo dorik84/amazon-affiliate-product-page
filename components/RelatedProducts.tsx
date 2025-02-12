@@ -30,7 +30,7 @@ export default function RelatedProductsWidget({ relatedProducts }: { relatedProd
         }
       >
         {duplicatedProducts.map((product, index) => (
-          <ProductCard key={`${product.url}-${index}`} product={product} />
+          <ProductCard key={`${product.url}-${index}`} product={product} className="w-32 md:w-64" />
         ))}
       </div>
     </div>

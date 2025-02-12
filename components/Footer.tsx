@@ -3,13 +3,13 @@ import { Facebook, Twitter, Instagram } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-gray-800 text-white">
+    <footer className="bg-background ">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-lg font-semibold mb-4">About Us</h3>
             <p className="text-gray-400">
-              MegaStore is your one-stop shop for all your needs, from electronics to fashion and beyond.
+              {process.env.STORE_NAME} is your one-stop shop for all your needs, from electronics to fashion and beyond.
             </p>
           </div>
           {/* <div>
@@ -78,7 +78,9 @@ export function Footer() {
           </div> */}
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
-          <p>&copy; 2025 MegaStore. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} {process.env.STORE_NAME}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

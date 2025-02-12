@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { MobilePopularItems } from "./MobilePopularItems";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ProductData } from "@/types/productData";
-import { FilmStrip } from "@/components/FilmStrip";
+
+import { DesktopPopularItems } from "@/components/DesktopPopularItems";
 
 export function PopularItems({ popularItems }: { popularItems: ProductData[] }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -19,19 +20,14 @@ export function PopularItems({ popularItems }: { popularItems: ProductData[] }) 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const filmStrips = Array.from({ length: 5 }, (_, i) => (
-    <FilmStrip
-      key={`${i}-${key}`}
-      items={popularItems.slice(i * 2, (i + 1) * 2).concat(popularItems.slice(0, i * 2))} //creating a rotating or cyclic view of popular items
-    />
-  ));
+  if (!popularItems) return null;
 
   return (
-    <section className="bg-background py-16">
-      <div className="container mx-auto px-4">
+    <section className="bg-background py-8">
+      <div className="container mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">Popular Items</h2>
         {/* Desktop version */}
-        {isDesktop && <div className="flex flex-row gap-4 w-full">{filmStrips}</div>}
+        {isDesktop && <DesktopPopularItems key={key} items={popularItems} />}
         {/* Mobile version */}
         {!isDesktop && <MobilePopularItems items={popularItems} />}
       </div>
