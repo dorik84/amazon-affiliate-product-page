@@ -4,30 +4,32 @@ import { sanitizeProductData } from "./utils";
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function fetcher(endpoint: string, options = {}) {
+  console.log("component-actions | fetcher | start");
   const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
   });
   if (!response.ok) {
-    throw new Error("Network response was not ok");
+    throw new Error("component-actions | fetcher | Network response was not ok");
   }
+  console.log("component-actions | fetcher | success");
   return response.json();
 }
 
 const getProductEnclosure = () => {
-  let productPromise: Promise<any> | null = null;
+  let productPromise: Promise<ProductData> | null = null;
 
   return (url: string) => {
     if (!url) {
-      console.log("getProduct | no url provided");
+      console.log("component-actions | getProduct | no url provided");
       return;
     }
 
     if (!productPromise) {
-      console.log("getProduct | fetching product data");
+      console.log("component-actions | getProduct | fetching product data");
       productPromise = fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
         next: { revalidate: 60 },
       })
-        .then((productDB) => {
+        .then((productDB: typeof Product) => {
           productPromise = null; // Reset the promise after it resolves
           return sanitizeProductData(productDB);
         })
@@ -36,7 +38,7 @@ const getProductEnclosure = () => {
           throw error;
         });
     } else {
-      console.log("getProduct | product data already fetching");
+      console.log("component-actions | getProduct | product data already fetching");
     }
 
     return productPromise;

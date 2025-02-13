@@ -12,10 +12,10 @@ export async function getRelatedProducts() {
     const data = await Product.find({}).limit(10).lean();
 
     if (!data) {
-      console.log("No products found in DB");
+      console.log("server-actions | getRelatedProducts | No products found in DB");
       return [];
     }
-    console.log("getRelatedProducts | products fetched from DB");
+    console.log("server-actions | getRelatedProducts | products fetched from DB");
     return data;
   } catch (err) {
     console.log(err);
@@ -29,13 +29,13 @@ export async function getPopularProducts() {
     const data = await Product.find({}).limit(20).lean();
 
     if (!data) {
-      console.log("getPopularProducts | No products found in DB");
+      console.log("server-actions | getPopularProducts | No products found in DB");
       return [];
     }
-    console.log("getPopularProducts | products fetched from DB");
+    console.log("server-actions | getPopularProducts | products fetched from DB");
     return data;
   } catch (err) {
-    console.log("getPopularProducts | ", err);
+    console.log("server-actions | getPopularProducts | ", err);
     return [];
   }
 }
@@ -48,13 +48,14 @@ export async function getProduct(url: string) {
         const data = await Product.findOne({ url }).lean();
 
         if (!data) {
-          console.log("No products found in DB");
-          return [];
+          console.log("server-actions | getProduct | No products found in DB");
+          return null;
         }
-        console.log("getProduct | product fetched from DB");
+        console.log("server-actions | getProduct | product fetched from DB");
         return data;
       } catch (err) {
-        console.log(err);
+        console.log("server-actions | getProduct | ", err);
+        return null;
       }
     },
     [`mongodb-${url}`], // add the ID to the cache key
@@ -66,18 +67,18 @@ export async function getProduct(url: string) {
   return getCachedProduct(url);
 }
 
-export async function updateProductDB(product: ProductData | undefined) {
+export async function updateProduct(product: ProductData | undefined) {
   if (!product) {
-    console.log("updateProductDB | No product data provided");
+    console.log("server-actions | updateProduct | No product data provided");
     return;
   }
   try {
     const options = { new: true, upsert: true }; // Create if doesn't exist
     const res = await Product.findOneAndUpdate({ url: product.url }, product, options);
-    console.log("updateProduct | product updated in DB");
+    console.log("server-actions | updateProduct | product updated in DB");
     return res;
   } catch (err) {
-    console.log(err);
+    console.log("server-actions | updateProduct | ", err);
   }
 }
 

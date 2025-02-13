@@ -11,7 +11,7 @@ interface AnimatedButtonProps {
 export function AnimatedButton({ className, size = "default", onClick, children }: AnimatedButtonProps) {
   return (
     <Button
-      className={`flex items-center justify-center gap-2 w-full sm:w-auto animate-shadow ${className}`}
+      className={`flex items-center justify-center gap-2 w-full sm:w-auto animate-shadow  ${className}`}
       size={size}
       onClick={onClick}
     >
