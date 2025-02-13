@@ -46,8 +46,8 @@ export async function transformProduct(response: any, url: string): Promise<Prod
       }
     }
     //Extract category from breadcrumbs
-    product.category = doc.querySelector("#nav-subnav")?.getAttribute("data-category") || "";
-
+    product.category = doc.querySelector("#nav-subnav")?.querySelector("span.nav-a-content")?.textContent?.trim() || "";
+    console.log("product.category=", product.category);
     // Extract name from h1#title span
     const titleElement = doc.querySelector("#title span");
     product.name = titleElement?.textContent?.trim() || "";

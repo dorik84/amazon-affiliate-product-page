@@ -17,6 +17,7 @@ const productSchema = new Schema<ProductData>(
     images: { type: [String], required: true }, // Array of strings for images
     defaultPrice: { type: Number, required: true },
     url: { type: String, required: true },
+    category: { type: String, required: false },
   },
   {
     timestamps: true,
