@@ -58,10 +58,10 @@ export async function getProduct(url: string) {
         return null;
       }
     },
-    [`mongodb-${url}`], // add the ID to the cache key
+    [`product-${url}`], // More specific cache key
     {
-      tags: ["mongodb-url"],
-      revalidate: 60, // revalidate every 60 seconds
+      tags: ["products"],
+      revalidate: 3600,
     }
   );
   return getCachedProduct(url);
@@ -84,6 +84,7 @@ export async function updateProduct(product: ProductData | undefined) {
 
 // Cached function to fetch and strip data
 export const fetchAndTransformAmazonProduct = (url: string) => {
+  console.log("server-actions | fetchAndTransformAmazonProduct | start");
   const getCachedAmazonProduct = unstable_cache(
     async (url: string) => {
       try {
@@ -96,16 +97,16 @@ export const fetchAndTransformAmazonProduct = (url: string) => {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch amazon product data");
+          throw new Error("server-actions | fetchAndTransformAmazonProduct | Failed to fetch amazon product data");
         }
 
         // Parse the large response
         // Strip down the data to essential information
         const strippedData = transformProduct(response, url);
-        console.log("fetchAndTransformAmazonProduct | data fetched and stripped");
+        console.log("server-actions | fetchAndTransformAmazonProduct | data fetched and stripped");
         return strippedData;
       } catch (error) {
-        console.error("Error fetching or stripping data:", error);
+        console.error("server-actions | fetchAndTransformAmazonProduct | Error fetching or stripping data:", error);
       }
     },
     [`amazon-${url}`], // add the ID to the cache key

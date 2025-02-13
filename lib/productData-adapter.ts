@@ -2,6 +2,7 @@ import type { ProductData, VariationData } from "@/types/productData";
 import { JSDOM, VirtualConsole } from "jsdom";
 
 export async function transformProduct(response: any, url: string): Promise<ProductData> {
+  console.log("productData-adapter | transformProduct | start");
   try {
     const html = await response.text();
     // Save HTML to file for debugging
@@ -32,7 +33,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
       category: "",
     };
     product.url = encodeURIComponent(url);
-
+    console.log("productData-adapter | transformProduct | product.url", product.url);
     // Extract default price from the apex_desktop container
     const apexDesktop = doc.querySelector("#apex_desktop");
     if (apexDesktop) {
