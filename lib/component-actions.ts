@@ -1,5 +1,6 @@
-import { cache } from "react";
+import { ProductData } from "@/types/productData";
 import { sanitizeProductData } from "./utils";
+import Product from "@/db/models";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -65,7 +66,8 @@ const getProductEnclosure = () => {
     if (!productPromise) {
       console.log("component-actions | getProduct | fetching product data");
       productPromise = fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
-        next: { revalidate: 60 },
+        cache: "no-store",
+        // next: { revalidate: 60 },
       })
         .then((productDB: typeof Product) => {
           productPromise = null; // Reset the promise after it resolves
@@ -83,19 +85,34 @@ const getProductEnclosure = () => {
   };
 };
 
-export const getProduct = cache(getProductEnclosure());
+export const getProduct = getProductEnclosure();
 
-export async function getRelatedProducts() {
-  try {
-    const relatedProducts = await fetcher("/api/products", { cache: "no-store" });
+const getRelatedProductsEnclosure = () => {
+  let productPromise: Promise<any> | null = null;
 
-    if (!relatedProducts) {
-      console.log("No products found in DB");
-      return [];
+  return () => {
+    if (!productPromise) {
+      console.log("component-actions | getRelatedProducts | start fetching");
+      productPromise = fetcher("/api/products", {
+        cache: "no-store",
+        // next: { revalidate: 60 },
+      })
+        .then((productDB) => {
+          productPromise = null; // Reset the promise after it resolves
+          console.log("component-actions | getRelatedProducts | success");
+          return productDB;
+        })
+        .catch((error) => {
+          productPromise = null; // Reset the promise if there's an error
+          console.log("component-actions | getRelatedProducts | error", error);
+          throw error;
+        });
+    } else {
+      console.log("component-actions | getRelatedProducts | products data already fetching");
     }
-    return relatedProducts;
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
-}
+
+    return productPromise;
+  };
+};
+
+export const getRelatedProducts = getRelatedProductsEnclosure();
