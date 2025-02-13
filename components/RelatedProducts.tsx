@@ -5,7 +5,6 @@ import ProductCard from "./RelatedProductCard";
 import type { ProductData } from "@/types/productData";
 
 export default function RelatedProductsWidget({ relatedProducts }: { relatedProducts: ProductData[] }) {
-  console.log("relatedProducts[0].name", relatedProducts[0].name);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollWidth, setScrollWidth] = useState(0);
 

@@ -7,15 +7,13 @@ import ProductImage from "@/components/ProductImage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export default function ProductCard({ product, className }: { product: ProductData; className?: string }) {
+export const ProductCard = ({ product, className }: { product: ProductData; className?: string }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
       transition={{ duration: 0.2 }}
-      // className="flex-shrink-0 w-32 md:w-64 rounded-lg overflow-hidden shadow-custom-shadow "
       className={cn("flex-shrink-0  rounded-lg overflow-hidden shadow-custom-shadow ", className)}
     >
-      {/* <Link href={`/product/${product.url}`}> */}
       <div className="relative h-24 md:h-48">
         <ProductImage name={product.name} src={product.images[0]} index={0} className="w-full h-full object-cover" />
       </div>
@@ -29,7 +27,8 @@ export default function ProductCard({ product, className }: { product: ProductDa
           </Button>
         </Link>
       </div>
-      {/* </Link> */}
     </motion.div>
   );
-}
+};
+
+export default ProductCard;

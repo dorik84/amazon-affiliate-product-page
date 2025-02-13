@@ -1,8 +1,7 @@
-import { fetchAndTransformAmazonProduct, getProduct, updateProductDB } from "@/lib/server-actions";
+import { fetchAndTransformAmazonProduct, getProduct, updateProduct } from "@/lib/server-actions";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  "use cache";
   const searchParams = request.nextUrl.searchParams;
   const url = searchParams.get("url");
 
@@ -36,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (!product?.name || !product?.url || !product?.images || !product?.defaultPrice) {
       return NextResponse.json({ error: "Product structure is not valid" }, { status: 400 });
     }
-    const result = await updateProductDB(product);
+    const result = await updateProduct(product);
     if (!result._id) {
       return NextResponse.json({ error: "Failed to save product data" }, { status: 500 });
     }

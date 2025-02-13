@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductData } from "@/types/productData";
-import Link from "next/link";
-import { motion } from "framer-motion";
 import ProductCard from "./RelatedProductCard";
 
 export function MobilePopularItems({ items }: { items: ProductData[] }) {

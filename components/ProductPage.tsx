@@ -48,12 +48,13 @@ export default function ProductPage({ product }: { product: ProductData | undefi
           <div className="md:col-span-1 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4">
               <p className="text-2xl font-semibold bg-primary/10 text-primary px-4 py-2 rounded-md">
-                ${getCurrentPrice().toFixed(2)}
+                {/* ${getCurrentPrice().toFixed(2)} */}
+                Check the latest price on Amazon
               </p>
 
               <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(product?.url || ""), "_blank")}>
                 <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" />
-                View on Amazon
+                Check on Amazon
               </AnimatedButton>
             </div>
 
