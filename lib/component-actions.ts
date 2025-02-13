@@ -15,6 +15,44 @@ export async function fetcher(endpoint: string, options = {}) {
   return response.json();
 }
 
+const updateProductEnclosure = () => {
+  let productPromiseMap: Map<String, Promise<ProductData> | null> = new Map(null);
+
+  return (url: string) => {
+    if (!url) {
+      console.log("component-actions | updateProduct | no url provided");
+      return;
+    }
+
+    if (!productPromiseMap.has(url)) {
+      console.log("component-actions | updateProduct | start");
+      productPromiseMap.set(
+        url,
+        fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
+          method: "POST",
+          cache: "no-store",
+          // next: { revalidate: 60 },
+        })
+          .then((product) => {
+            console.log("component-actions | updateProduct | product updated");
+            productPromiseMap.delete(url);
+            return product;
+          })
+          .catch((error) => {
+            productPromiseMap.delete(url);
+            throw new Error("component-actions | updateProduct | error", error);
+          })
+      );
+    } else {
+      console.log("component-actions | updateProduct | product data already updating");
+    }
+
+    return productPromiseMap.get(url);
+  };
+};
+
+export const updateProduct = updateProductEnclosure();
+
 const getProductEnclosure = () => {
   let productPromise: Promise<ProductData> | null = null;
 

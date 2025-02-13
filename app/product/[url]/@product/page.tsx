@@ -1,10 +1,12 @@
 "use server";
 
 import ProductPage from "@/components/ProductPage";
-import { getProduct } from "@/lib/component-actions";
+import { getProduct, updateProduct } from "@/lib/component-actions";
+
+import { ProductData } from "@/types/productData";
 
 export default async function CarouselPage({ params }: { params: { url: string } }) {
-  const product = await getProduct(params.url);
-
-  return <ProductPage product={product} />;
+  let product = await getProduct(params.url);
+  updateProduct(params.url);
+  return <ProductPage product={product as ProductData} />;
 }
