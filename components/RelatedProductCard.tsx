@@ -15,7 +15,7 @@ export const ProductCard = ({ product, className }: { product: ProductData; clas
       className={cn("flex-shrink-0  rounded-lg overflow-hidden shadow-custom-shadow ", className)}
     >
       <div className="relative h-24 md:h-48">
-        <ProductImage name={product.name} src={product.images[0]} index={0} className="w-full h-full object-cover" />
+        <ProductImage name={product.name} src={product.images[0]} index={0} style={{ objectFit: "cover" }} />
       </div>
       <div className="p-4">
         <h3 className="text-xs md:text-lg font-semibold mb-2 line-clamp-2">{product.name}</h3>

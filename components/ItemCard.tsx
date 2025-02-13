@@ -16,7 +16,7 @@ export function ItemCard({ product }: { product: ProductData }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <ProductImage name={product.name} src={product.images[0]} index={0} className="object-cover h-full w-full" />
+      <ProductImage name={product.name} src={product.images[0]} index={0} style={{ objectFit: "cover" }} />
       <AnimatePresence>
         {isHovered && (
           <motion.div
@@ -25,7 +25,7 @@ export function ItemCard({ product }: { product: ProductData }) {
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-primary/70 flex items-center justify-center "
           >
-            <div className="text-white text-center p-4">
+            <div className="text-center p-4">
               <h3 className="text-xs font-semibold mb-1 line-clamp-3 select-none">{product.name}</h3>
               {/* <p className="text-xs mb-1 truncate">{product.category}</p> */}
               {/* <p className="text-xl font-bold mb-2">${product.defaultPrice.toFixed(2)}</p> */}

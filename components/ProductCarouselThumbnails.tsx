@@ -1,4 +1,5 @@
-import Image from "next/image";
+"use client";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { ProductData } from "@/types/productData";
@@ -12,7 +13,7 @@ interface CarouselThumbnailsProps {
 }
 
 export default function CarouselThumbnails({ product, selectedIndex, onThumbClick }: CarouselThumbnailsProps) {
-  if (product?.images.length === 0) return null;
+  if (!product || product.images.length === 0) return null;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -85,11 +86,11 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
         ref={scrollContainerRef}
         className="relative flex justify-center gap-4 p-4 overflow-x-auto max-h-[120px] rounded-lg scrollbar-thin no-scrollbar scrollbar-thumb-primary scrollbar-track-background/20"
       >
-        {product?.images.map((src, index) => (
+        {product.images.map((src, index) => (
           <button
             key={index}
             onClick={() => handleThumbClick(index)}
-            className={`flex-shrink-0 transition-all duration-200 ease-in-out ${
+            className={`flex-shrink-0 transition-all duration-200 ease-in-out w-20 h-20 relative ${
               index === selectedIndex
                 ? "ring-2 ring-primary shadow-lg scale-105"
                 : "hover:ring-2 hover:ring-primary/50 hover:scale-105"
@@ -108,28 +109,26 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
           </button>
         ))}
       </div>
-      <div className="absolute left-0 right-0 bottom-0 flex justify-between">
-        {showLeftArrow && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10 rounded-full shadow-md"
-            onClick={() => scroll("left")}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        )}
-        {showRightArrow && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-[-0.5rem] top-1/2 -translate-y-1/2 bg-primary/10 rounded-full shadow-md"
-            onClick={() => scroll("right")}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      {showLeftArrow && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-primary/30 rounded-full shadow-md"
+          onClick={() => scroll("left")}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+      )}
+      {showRightArrow && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary/30 rounded-full shadow-md"
+          onClick={() => scroll("right")}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }

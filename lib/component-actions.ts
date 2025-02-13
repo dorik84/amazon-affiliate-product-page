@@ -29,7 +29,7 @@ const updateProductEnclosure = () => {
       console.log("component-actions | updateProduct | start");
       productPromiseMap.set(
         url,
-        fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
+        fetcher(`/api/product?url=${url}`, {
           method: "POST",
           cache: "no-store",
           // next: { revalidate: 60 },
@@ -41,7 +41,7 @@ const updateProductEnclosure = () => {
           })
           .catch((error) => {
             productPromiseMap.delete(url);
-            throw new Error("component-actions | updateProduct | error", error);
+            throw Error("component-actions | updateProduct | error", error);
           })
       );
     } else {

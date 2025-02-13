@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function ProductImage({
   name,
@@ -13,6 +14,7 @@ export default function ProductImage({
   priority = false,
   width,
   height,
+  style,
 }: {
   name: string;
   src?: string;
@@ -22,6 +24,7 @@ export default function ProductImage({
   priority?: boolean;
   width?: number;
   height?: number;
+  style?: React.CSSProperties;
 }) {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,20 +38,24 @@ export default function ProductImage({
       <Image
         src={src || "/placeholder.svg"}
         alt={alt || `${name} - Image ${index ? index + 1 : ""}`}
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         onLoad={() => setIsLoading(false)}
         onError={() => setIsLoading(false)}
         priority={priority}
-        width={width || 500}
-        height={height || 500}
+        // width={width || 500}
+        // height={height || 500}
         draggable={false}
-        className={`
-          object-contain 
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 768px) 80vw, 70vw"
+        style={style || { objectFit: "contain" }}
+        className={cn(
+          `
           transition-opacity 
-          duration-300 
-          ${isLoading ? "opacity-0" : "opacity-100"}
+          ${isLoading ? "opacity-0" : "opacity-100"}`,
+          `
           ${className}
-        `}
+        `
+        )}
       />
     </div>
   );

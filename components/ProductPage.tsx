@@ -11,6 +11,7 @@ import { getInitialVariations } from "@/lib/utils";
 
 export default function ProductPage({ product }: { product: ProductData | undefined }) {
   if (!product) return null;
+  console.log("url =", decodeURIComponent(product?.url));
   const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>(getInitialVariations(product));
 
   const handleVariationChange = (type: string, index: number) => {
