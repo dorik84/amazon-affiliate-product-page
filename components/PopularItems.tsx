@@ -8,6 +8,8 @@ import { ProductData } from "@/types/productData";
 import { DesktopPopularItems } from "@/components/DesktopPopularItems";
 
 export function PopularItems({ popularItems }: { popularItems: ProductData[] }) {
+  if (!popularItems) return <div>Error fetching products</div>;
+
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [key, setKey] = useState(0);
 
@@ -20,7 +22,7 @@ export function PopularItems({ popularItems }: { popularItems: ProductData[] }) 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!popularItems) return null;
+  if (popularItems?.length === 0) return null;
 
   return (
     <section className="bg-background py-8">

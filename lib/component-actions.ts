@@ -40,7 +40,7 @@ const updateProductEnclosure = () => {
           })
           .catch((error) => {
             productPromiseMap.delete(url);
-            throw Error("component-actions | updateProduct | error", error);
+            throw new Error("component-actions | updateProduct | error", error);
           })
       );
     } else {
@@ -76,7 +76,8 @@ const getProductEnclosure = () => {
           })
           .catch((error) => {
             productPromiseMap.delete(url);
-            throw Error("component-actions | getProduct | error", error);
+            console.log("component-actions | getProduct | error", error);
+            return null;
           })
       );
     } else {

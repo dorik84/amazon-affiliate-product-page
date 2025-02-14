@@ -31,31 +31,26 @@ export default function ProductImage({
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       {isLoading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-primary/10">
           <Loader2 className="animate-spin text-primary" size={32} />
         </div>
       )}
       <Image
         src={src || "/placeholder.svg"}
         alt={alt || `${name} - Image ${index ? index + 1 : ""}`}
-        // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         onLoad={() => setIsLoading(false)}
         onError={() => setIsLoading(false)}
         priority={priority}
-        // width={width || 500}
-        // height={height || 500}
         draggable={false}
         fill
         sizes="(max-width: 640px) 100vw, (max-width: 768px) 80vw, 70vw"
-        style={style || { objectFit: "contain" }}
-        className={cn(
-          `
-          transition-opacity 
-          ${isLoading ? "opacity-0" : "opacity-100"}`,
-          `
-          ${className}
-        `
-        )}
+        style={{
+          objectFit: "contain",
+          maxWidth: "100%",
+          maxHeight: "100%",
+          ...style,
+        }}
+        className={cn(`transition-opacity ${isLoading ? "opacity-0" : "opacity-100"}`, `${className}`)}
       />
     </div>
   );

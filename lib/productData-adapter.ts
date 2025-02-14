@@ -1,6 +1,19 @@
 import type { ProductData, VariationData } from "@/types/productData";
 import { JSDOM, VirtualConsole } from "jsdom";
 
+function sanitizeHTML(text: string): string {
+  return text.replace(/[&<>"']/g, (match) => {
+    const entities: { [key: string]: string } = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+    return entities[match];
+  });
+}
+
 export async function transformProduct(response: any, url: string): Promise<ProductData> {
   console.log("productData-adapter | transformProduct | start");
   try {
@@ -58,7 +71,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
     // Get information from feature bullets
     const featureBulletsDiv = doc.querySelector("#feature-bullets");
     if (featureBulletsDiv) {
-      const title = featureBulletsDiv.querySelector("h1")?.textContent?.trim();
+      const title = featureBulletsDiv.querySelector("h1")?.textContent?.trim() || "About product";
       const bulletItems = featureBulletsDiv.querySelectorAll("li span");
       if (bulletItems.length > 0) {
         description += `<h3 class="product-facts-title">${title}</h3>\n<ul>\n`;
@@ -94,6 +107,51 @@ export async function transformProduct(response: any, url: string): Promise<Prod
         });
         description += "</ul>\n\n";
       }
+    }
+
+    // Get the main product details container
+    const productDetailsDiv = doc.querySelector("#productDetails_feature_div");
+
+    if (productDetailsDiv) {
+      // Find all tables and their associated headers
+      const sections = productDetailsDiv.querySelectorAll("h1, table");
+      let currentHeader = "";
+
+      sections.forEach((element) => {
+        if (element.tagName.toLowerCase() === "h1") {
+          // Store the header text
+          currentHeader = element.textContent?.trim() || "";
+          // Add header to description
+          description += `<h3 class="product-facts-title">${currentHeader}</h3>`;
+        } else if (element.tagName.toLowerCase() === "table") {
+          // Check if the table has an id and if it contains 'detailBullets'
+          const tableId = element.getAttribute("id") || "";
+          if (!tableId.includes("detailBullets")) {
+            // Start new table
+            description += '<table class="w-full">';
+
+            // Process each row in the table
+            element
+              .querySelectorAll(
+                'tr class=" hover:bg-muted/50 transition-colors even:bg-muted/20 odd:bg-background cursor-default"'
+              )
+              .forEach((row) => {
+                const th = row.querySelector("th")?.textContent?.trim();
+                const td = row.querySelector("td class=px-4 py-3 text-sm")?.textContent?.trim();
+
+                if (th && td) {
+                  description += `
+                  <tr>
+                    <th>${sanitizeHTML(th)}</th>
+                    <td>${sanitizeHTML(td)}</td>
+                  </tr>`;
+                }
+              });
+
+            description += "</table>";
+          }
+        }
+      });
     }
 
     // Get additional information from product facts
