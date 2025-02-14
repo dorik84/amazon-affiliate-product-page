@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
     const product = await fetchAndTransformAmazonProduct(url);
 
     // Call backend POST to update the product in DB
-    if (!product?.name || !product?.url || !product?.images || !product?.defaultPrice) {
-      return NextResponse.json({ error: "Product structure is not valid" }, { status: 400 });
+    if (!product || !product?.name || !product?.url || !product?.images || !product?.defaultPrice) {
+      return NextResponse.json({ error: "Product structure is not valid or URL is incorrect" }, { status: 400 });
     }
     const result = await updateProduct(product);
     if (!result._id) {
