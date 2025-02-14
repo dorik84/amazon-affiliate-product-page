@@ -4,14 +4,14 @@ import ProductCarousel from "@/components/ProductCarousel";
 import ProductDescription from "@/components/ProductDescription";
 import ProductVariations from "@/components/ProductVariations";
 import Image from "next/image";
-import { AnimatedButton } from "@/components/ui/AnimatedButton";
+import { AnimatedButton } from "@/components/AnimatedButton";
 import { useState } from "react";
 import type { ProductData } from "@/types/productData";
 import { getInitialVariations } from "@/lib/utils";
 
 export default function ProductPage({ product }: { product: ProductData | undefined }) {
   if (!product) return null;
-  console.log("url =", decodeURIComponent(product?.url));
+
   const [selectedVariations, setSelectedVariations] = useState<Record<string, number>>(getInitialVariations(product));
 
   const handleVariationChange = (type: string, index: number) => {

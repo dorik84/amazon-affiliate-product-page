@@ -1,6 +1,5 @@
 import { ProductData } from "@/types/productData";
 import { sanitizeProductData } from "./utils";
-import Product from "@/db/models";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -17,12 +16,12 @@ export async function fetcher(endpoint: string, options = {}) {
 }
 
 const updateProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<ProductData> | null> = new Map(null);
+  let productPromiseMap: Map<String, Promise<ProductData> | null> = new Map();
 
   return (url: string) => {
     if (!url) {
       console.log("component-actions | updateProduct | no url provided");
-      return;
+      return null;
     }
 
     if (!productPromiseMap.has(url)) {
@@ -55,40 +54,43 @@ const updateProductEnclosure = () => {
 export const updateProduct = updateProductEnclosure();
 
 const getProductEnclosure = () => {
-  let productPromise: Promise<ProductData> | null = null;
+  let productPromiseMap: Map<String, Promise<ProductData | null>> = new Map();
 
   return (url: string) => {
     if (!url) {
       console.log("component-actions | getProduct | no url provided");
-      return;
+      return null;
     }
 
-    if (!productPromise) {
-      console.log("component-actions | getProduct | fetching product data");
-      productPromise = fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
-        cache: "no-store",
-        // next: { revalidate: 60 },
-      })
-        .then((productDB: typeof Product) => {
-          productPromise = null; // Reset the promise after it resolves
-          return sanitizeProductData(productDB);
+    if (!productPromiseMap.has(url)) {
+      console.log("component-actions | updateProduct | start");
+      productPromiseMap.set(
+        url,
+        fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
+          cache: "no-store",
+          // next: { revalidate: 60 },
         })
-        .catch((error) => {
-          productPromise = null; // Reset the promise if there's an error
-          throw error;
-        });
+          .then((productDB) => {
+            productPromiseMap.delete(url);
+            return sanitizeProductData(productDB);
+          })
+          .catch((error) => {
+            productPromiseMap.delete(url);
+            throw Error("component-actions | getProduct | error", error);
+          })
+      );
     } else {
       console.log("component-actions | getProduct | product data already fetching");
     }
 
-    return productPromise;
+    return productPromiseMap.get(url);
   };
 };
 
 export const getProduct = getProductEnclosure();
 
 const getRelatedProductsEnclosure = () => {
-  let productPromise: Promise<any> | null = null;
+  let productPromise: Promise<ProductData[]> | null = null;
 
   return () => {
     if (!productPromise) {
@@ -100,12 +102,12 @@ const getRelatedProductsEnclosure = () => {
         .then((productDB) => {
           productPromise = null; // Reset the promise after it resolves
           console.log("component-actions | getRelatedProducts | success");
-          return productDB;
+          return productDB.map(sanitizeProductData).filter((p: ProductData | null) => p != null);
         })
         .catch((error) => {
           productPromise = null; // Reset the promise if there's an error
           console.log("component-actions | getRelatedProducts | error", error);
-          throw error;
+          return null;
         });
     } else {
       console.log("component-actions | getRelatedProducts | products data already fetching");

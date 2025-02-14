@@ -61,9 +61,10 @@ export function deepEqual(obj1: any, obj2: any): boolean {
   return true;
 }
 
-export function sanitizeProductData(obj: any): ProductData {
+export function sanitizeProductData(obj: any): ProductData | null {
   if (obj === null || typeof obj !== "object") {
-    throw Error("utils | sanitizeProductData | Input is not an object");
+    console.log("utils | sanitizeProductData | Input is not an object");
+    return null;
   }
 
   console.log("utils | sanitizeProductData | run");

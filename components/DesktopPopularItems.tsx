@@ -6,7 +6,7 @@ export const DesktopPopularItems = ({ items }: { items: ProductData[] }) => (
     {Array.from({ length: 5 }, (_, i) => (
       <FilmStrip
         key={i}
-        items={items.slice(i * 2, (i + 1) * 2).concat(items.slice(0, i * 2))} //creating a rotating or cyclic view of popular items
+        items={items?.slice(i * 2, (i + 1) * 2).concat(items?.slice(0, i * 2))} //creating a rotating or cyclic view of popular items
       />
     ))}
   </div>

@@ -13,13 +13,14 @@ export async function getRelatedProducts() {
 
     if (!data) {
       console.log("server-actions | getRelatedProducts | No products found in DB");
-      return [];
+      return;
     }
+
     console.log("server-actions | getRelatedProducts | products fetched from DB");
     return data;
   } catch (err) {
     console.log(err);
-    return [];
+    return;
   }
 }
 
