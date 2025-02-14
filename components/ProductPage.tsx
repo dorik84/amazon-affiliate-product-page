@@ -8,6 +8,7 @@ import { AnimatedButton } from "@/components/AnimatedButton";
 import { useState } from "react";
 import type { ProductData } from "@/types/productData";
 import { getInitialVariations } from "@/lib/utils";
+import { RedirectIcon } from "@/components/RedirectIcon";
 
 export default function ProductPage({ product }: { product: ProductData | undefined }) {
   if (!product) return null;
@@ -50,12 +51,13 @@ export default function ProductPage({ product }: { product: ProductData | undefi
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-4">
               <p className="text-2xl sm:text-lg md:text-sm font-semibold bg-primary/10 text-primary px-4 py-2 rounded-md">
                 {/* ${getCurrentPrice().toFixed(2)} */}
-                Check the latest price on Amazon
+                See Price on Amazon
               </p>
 
               <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(product?.url || ""), "_blank")}>
-                <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" />
-                Check on Amazon
+                {/* <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" /> */}
+                View Product on Amazon
+                <RedirectIcon />
               </AnimatedButton>
             </div>
 
