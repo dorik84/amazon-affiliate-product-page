@@ -113,43 +113,62 @@ export async function transformProduct(response: any, url: string): Promise<Prod
     const productDetailsDiv = doc.querySelector("#productDetails_feature_div");
 
     if (productDetailsDiv) {
-      // Find all tables and their associated headers
-      const sections = productDetailsDiv.querySelectorAll("h1, table");
+      // Find all elements (h1 and tables) in order of appearance
+      const allElements = productDetailsDiv.querySelectorAll("h1, table");
       let currentHeader = "";
 
-      sections.forEach((element) => {
+      // Iterate through elements in order
+      allElements.forEach((element) => {
         if (element.tagName.toLowerCase() === "h1") {
-          // Store the header text
+          // Store the header text for the next table
           currentHeader = element.textContent?.trim() || "";
-          // Add header to description
-          description += `<h3 class="product-facts-title">${currentHeader}</h3>`;
         } else if (element.tagName.toLowerCase() === "table") {
-          // Check if the table has an id and if it contains 'detailBullets'
           const tableId = element.getAttribute("id") || "";
-          if (!tableId.includes("detailBullets")) {
+
+          // Only process tables with productDetails_techSpec in their id
+          if (tableId.includes("productDetails_techSpec")) {
+            // Add the stored header
+            if (currentHeader) {
+              description += `<h3 class="product-facts-title">${currentHeader}</h3>`;
+            }
+
             // Start new table
-            description += '<table class="w-full">';
+            description +=
+              '<table class="w-full text-sm border-separate border-spacing-0 rounded-lg overflow-hidden"><tbody className="divide-y">';
 
             // Process each row in the table
-            element
-              .querySelectorAll(
-                'tr class=" hover:bg-muted/50 transition-colors even:bg-muted/20 odd:bg-background cursor-default"'
-              )
-              .forEach((row) => {
-                const th = row.querySelector("th")?.textContent?.trim();
-                const td = row.querySelector("td class=px-4 py-3 text-sm")?.textContent?.trim();
+            element.querySelectorAll("tr").forEach((row) => {
+              const th = row.querySelector("th")?.textContent?.trim();
+              const td = row.querySelector("td")?.textContent?.trim();
 
-                if (th && td) {
-                  description += `
-                  <tr>
-                    <th>${sanitizeHTML(th)}</th>
-                    <td>${sanitizeHTML(td)}</td>
-                  </tr>`;
-                }
-              });
+              if (th && td) {
+                description += `
+              <tr class="hover:bg-muted/50 transition-colors">
+                <th class="
+                  px-4 py-1 
+                  text-left 
+                  font-medium 
+                  text-muted-foreground 
+                  text-xs sm:text-sm
+                  bg-muted/20 
+                  w-1/3
+                  border-r
+                  border-border/50
+                  ">${sanitizeHTML(th)}</th>
+                <td class="
+                  px-4 py-1 
+                  text-foreground 
+                  text-xs sm:text-sm
+                  w-2/3
+                    ">${sanitizeHTML(td)}</td>
+              </tr>`;
+              }
+            });
 
             description += "</table>";
           }
+          // Reset the header after processing a table (regardless of its type)
+          currentHeader = "";
         }
       });
     }
