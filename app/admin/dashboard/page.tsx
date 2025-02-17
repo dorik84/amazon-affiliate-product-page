@@ -10,6 +10,9 @@ export default async function DashboardPage() {
   if (!session) {
     redirect("/api/auth/signin?callbackUrl=%2Fadmin%2Fdashboard");
   }
+  if (session.user.role !== "ADMIN") {
+    redirect("/unauthorized");
+  }
   const products = await getRelatedProducts();
 
   return <AdminDashboard allProducts={products} />;

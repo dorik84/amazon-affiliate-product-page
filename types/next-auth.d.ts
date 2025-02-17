@@ -3,7 +3,7 @@ import "next-auth";
 declare module "next-auth" {
   interface User {
     id: string;
-    role?: string;
+    role: "ADMIN" | "USER";
     // Add any additional fields you want to store
     email?: string;
   }
@@ -11,7 +11,7 @@ declare module "next-auth" {
   interface Session {
     user: User & {
       id: string;
-      role?: string;
+      role: "ADMIN" | "USER";
     };
   }
 }
@@ -22,3 +22,10 @@ declare module "next-auth/jwt" {
     role?: string;
   }
 }
+
+// interface Session {
+//   user: {
+//     id: string;
+//     role: 'ADMIN' | 'USER' | 'MANAGER';
+//   } & DefaultSession['user']
+// }
