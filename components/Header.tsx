@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import ProfileDropdown from "@/components/ProfileDropdown";
+import { AdminLink } from "@/components/AdminLink";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,7 +19,10 @@ export function Header() {
             BestChoice
           </Link>
           <div className="flex items-center">
-            <div className="hidden md:flex md:items-center md:space-x-8">
+            <div className="md:flex md:items-center md:space-x-8">
+              <AdminLink href="/admin/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
+                Dashboard
+              </AdminLink>
               {/* <Link href="/electronics" className="text-gray-600 hover:text-gray-800">
                 Electronics
               </Link>
@@ -34,11 +39,12 @@ export function Header() {
             <div className="flex items-center space-x-4 ml-4">
               {/* <button aria-label="Search" className="text-gray-600 hover:text-gray-800">
                 <Search size={20} />
-              </button>
-              <button aria-label="User account" className="text-gray-600 hover:text-gray-800">
+              </button> */}
+              {/* <button aria-label="User account" className="text-gray-600 hover:text-gray-800">
                 <User size={20} />
-              </button>
-              <button aria-label="Shopping cart" className="text-gray-600 hover:text-gray-800">
+              </button> */}
+              <ProfileDropdown />
+              {/* <button aria-label="Shopping cart" className="text-gray-600 hover:text-gray-800">
                 <ShoppingCart size={20} />
               </button>
               <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
