@@ -1,4 +1,6 @@
-import { fetchAndTransformAmazonProduct, getProduct, updateProduct } from "@/lib/server-actions";
+import { authOptions } from "@/auth";
+import { deleteProduct, fetchAndTransformAmazonProduct, getProduct, updateProduct } from "@/lib/server-actions";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -20,6 +22,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const url = searchParams.get("url");
 
@@ -44,5 +51,27 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.log(error);
     return NextResponse.json({ error: "Failed to save product data" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  }
+
+  const searchParams = request.nextUrl.searchParams;
+  const url = searchParams.get("url");
+
+  if (!url) {
+    return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
+  }
+
+  try {
+    const result = await deleteProduct(url);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error: "Failed to delete product data" }, { status: 500 });
   }
 }
