@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import ProductImage from "@/components/ProductImage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

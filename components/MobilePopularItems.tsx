@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import ProductCard from "./RelatedProductCard";
 
 export function MobilePopularItems({ items }: { items: ProductData[] }) {

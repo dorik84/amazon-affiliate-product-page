@@ -1,4 +1,4 @@
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ItemCard } from "@/components/ItemCard";

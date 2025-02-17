@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
-import type { ProductData } from "@/types/productData";
+import type { ProductData } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import ProductImage from "@/components/ProductImage";
 

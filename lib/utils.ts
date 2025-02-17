@@ -1,4 +1,4 @@
-import { ProductData, VariationData } from "@/types/productData";
+import { ProductData, VariationData } from "@/types/product";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

@@ -6,7 +6,7 @@ import ProductVariations from "@/components/ProductVariations";
 import Image from "next/image";
 import { AnimatedButton } from "@/components/AnimatedButton";
 import { useState } from "react";
-import type { ProductData } from "@/types/productData";
+import type { ProductData } from "@/types/product";
 import { getInitialVariations } from "@/lib/utils";
 import { RedirectIcon } from "@/components/RedirectIcon";
 

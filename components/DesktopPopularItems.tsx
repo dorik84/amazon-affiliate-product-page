@@ -1,4 +1,4 @@
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import { FilmStrip } from "./FilmStrip";
 
 export const DesktopPopularItems = ({ items }: { items: ProductData[] }) => (

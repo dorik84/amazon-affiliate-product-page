@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import ProductImage from "./ProductImage";
 import Link from "next/link";
 

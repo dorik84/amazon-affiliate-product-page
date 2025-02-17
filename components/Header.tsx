@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AuthButton from "@/components/AuthButton";
+
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,7 +18,6 @@ export function Header() {
           </Link>
           <div className="flex items-center">
             <div className="hidden md:flex md:items-center md:space-x-8">
-              <AuthButton />
               {/* <Link href="/electronics" className="text-gray-600 hover:text-gray-800">
                 Electronics
               </Link>

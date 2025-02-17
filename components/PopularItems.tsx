@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { MobilePopularItems } from "./MobilePopularItems";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 
 import { DesktopPopularItems } from "@/components/DesktopPopularItems";
 

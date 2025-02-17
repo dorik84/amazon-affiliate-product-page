@@ -1,4 +1,4 @@
-import { ProductData, VariationData } from "@/types/productData";
+import { ProductData, VariationData } from "@/types/product";
 import { Schema, model, models, Document } from "mongoose";
 
 const variationSchema = new Schema<VariationData>({

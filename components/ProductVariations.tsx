@@ -1,6 +1,6 @@
 "use client";
 
-import type { VariationData } from "@/types/productData";
+import type { VariationData } from "@/types/product";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CustomSelectItem } from "@/components/ui/custom-select-item";
 import Image from "next/image";

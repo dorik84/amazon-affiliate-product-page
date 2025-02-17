@@ -2,7 +2,7 @@
 import dbConnect from "@/db/db";
 import Product from "@/db/models";
 import { getRandomUserAgent } from "./utils";
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
 import { transformProduct } from "./productData-adapter";
 

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import ProductCard from "./RelatedProductCard";
-import type { ProductData } from "@/types/productData";
+import type { ProductData } from "@/types/product";
 
 export default function RelatedProductsWidget({ relatedProducts }: { relatedProducts: ProductData[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);

@@ -1,4 +1,4 @@
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import { sanitizeProductData } from "./utils";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;

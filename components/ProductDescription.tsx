@@ -1,4 +1,4 @@
-import type { ProductData } from "@/types/productData";
+import type { ProductData } from "@/types/product";
 
 export default function ProductDescription({ product }: { product: ProductData | undefined }) {
   return (

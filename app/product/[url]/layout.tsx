@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { Metadata } from "next";
-import { ProductData } from "@/types/productData";
+import { ProductData } from "@/types/product";
 import { getProduct } from "@/lib/component-actions";
 
 export async function generateMetadata({ params }: { params: { url: string } }): Promise<Metadata> {

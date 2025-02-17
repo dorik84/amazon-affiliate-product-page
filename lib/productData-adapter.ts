@@ -1,4 +1,4 @@
-import type { ProductData, VariationData } from "@/types/productData";
+import type { ProductData, VariationData } from "@/types/product";
 import { JSDOM, VirtualConsole } from "jsdom";
 
 function sanitizeHTML(text: string): string {

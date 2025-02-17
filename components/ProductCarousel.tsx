@@ -5,7 +5,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import type { ProductData } from "@/types/productData";
+import type { ProductData } from "@/types/product";
 import CarouselThumbnails from "@/components/ProductCarouselThumbnails";
 import ProductImage from "@/components/ProductImage";
 import { DialogTitle } from "@radix-ui/react-dialog";
