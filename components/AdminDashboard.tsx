@@ -6,8 +6,7 @@ import { AddProductForm } from "@/components/AddProductForm";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProductData } from "@/types/product";
-import { getRelatedProducts, updateProduct } from "@/lib/component-actions";
-import { useSession } from "next-auth/react";
+import { deleteProduct, getRelatedProducts, updateProduct } from "@/lib/component-actions";
 
 export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) {
   const [products, setProducts] = useState<ProductData[]>(allProducts);
@@ -16,7 +15,9 @@ export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) 
 
   const handleAddProduct = async (url: string) => {
     console.log("Adding product:", url);
+    url = encodeURIComponent(url);
     const updatedroduct = await updateProduct(url);
+    console.log(updatedroduct);
     // After adding, you should update the products state
     if (updatedroduct) {
       const products = await getRelatedProducts();
@@ -28,8 +29,9 @@ export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) 
 
   const handleRefreshProduct = async (url: string) => {
     // Implement the logic to refresh a product here
-    const updatedroduct = await updateProduct(url);
     console.log("Refreshing product:", url);
+    const res = await updateProduct(url);
+    console.log(res);
     // After refreshing, you should update the products state
     const products = await getRelatedProducts();
     setProducts(products);
