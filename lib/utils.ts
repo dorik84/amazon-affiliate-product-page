@@ -82,6 +82,7 @@ export function sanitizeProductData(obj: any): ProductData | null {
     images: obj.images,
     defaultPrice: obj.defaultPrice,
     url: obj.url,
+    category: obj.category,
   };
 
   return sanitized;
