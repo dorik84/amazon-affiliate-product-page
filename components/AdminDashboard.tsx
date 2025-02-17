@@ -38,7 +38,11 @@ export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) 
   const handleDeleteProduct = async (url: string) => {
     // Implement the logic to delete a product here
     console.log("Deleting product:", url);
+    const res = await deleteProduct(url);
+    console.log(res);
     // After deleting, you should update the products state
+    const products = await getRelatedProducts();
+    setProducts(products);
   };
 
   const sortedProducts = [...products].sort((a, b) => {

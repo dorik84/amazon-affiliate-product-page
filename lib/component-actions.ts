@@ -119,3 +119,41 @@ const getRelatedProductsEnclosure = () => {
 };
 
 export const getRelatedProducts = getRelatedProductsEnclosure();
+
+const deleteProductEnclosure = () => {
+  let productPromiseMap: Map<String, Promise<ProductData | null>> = new Map();
+
+  return (url: string) => {
+    if (!url) {
+      console.log("component-actions | deleteProduct | no url provided");
+      return null;
+    }
+
+    if (!productPromiseMap.has(url)) {
+      console.log("component-actions | deleteProduct | start");
+      productPromiseMap.set(
+        url,
+        fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
+          method: "DELETE",
+          cache: "no-store",
+        })
+          .then((resut) => {
+            productPromiseMap.delete(url);
+            console.log("component-actions | deleteProduct | product deleted");
+            return resut;
+          })
+          .catch((error) => {
+            productPromiseMap.delete(url);
+            console.log("component-actions | deleteProduct | error", error);
+            return null;
+          })
+      );
+    } else {
+      console.log("component-actions | deleteProduct | product deletiion already fetching");
+    }
+
+    return productPromiseMap.get(url);
+  };
+};
+
+export const deleteProduct = deleteProductEnclosure();

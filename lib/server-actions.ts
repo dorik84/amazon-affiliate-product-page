@@ -83,6 +83,21 @@ export async function updateProduct(product: ProductData | undefined) {
   }
 }
 
+export async function deleteProduct(url: string) {
+  if (!url) {
+    console.log("server-actions | deleteProduct | No url provided");
+    return;
+  }
+  try {
+    const res = await Product.deleteOne({ url });
+    console.log(res);
+    console.log("server-actions | deleteProduct | product deleted from DB");
+    return res;
+  } catch (err) {
+    console.log("server-actions | deleteProduct | ", err);
+  }
+}
+
 // Cached function to fetch and strip data
 export const fetchAndTransformAmazonProduct = (url: string) => {
   console.log("server-actions | fetchAndTransformAmazonProduct | start");
