@@ -5,8 +5,8 @@ import type { Metadata } from "next";
 import { ProductData } from "@/types/product";
 import { getProduct } from "@/lib/component-actions";
 
-export async function generateMetadata({ params }: { params: { url: string } }): Promise<Metadata> {
-  const product = await getProduct(params.url);
+export async function generateMetadata({ params }: { params: { encodedUrl: string } }): Promise<Metadata> {
+  const product = await getProduct(params.encodedUrl);
 
   if (!product) {
     console.log("No product found in DB");
