@@ -126,7 +126,7 @@ const deleteProductEnclosure = () => {
   return (url: string) => {
     if (!url) {
       console.log("component-actions | deleteProduct | no url provided");
-      return null;
+      return false;
     }
 
     if (!productPromiseMap.has(url)) {
@@ -145,7 +145,7 @@ const deleteProductEnclosure = () => {
           .catch((error) => {
             productPromiseMap.delete(url);
             console.log("component-actions | deleteProduct | error", error);
-            return null;
+            return false;
           })
       );
     } else {

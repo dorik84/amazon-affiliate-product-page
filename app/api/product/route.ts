@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Product structure is not valid or URL is incorrect" }, { status: 400 });
     }
     const result = await updateProduct(product);
-    if (!result._id) {
+    console.log(result);
+    if (!result) {
       return NextResponse.json({ error: "Failed to save product data" }, { status: 500 });
     }
 

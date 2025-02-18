@@ -5,12 +5,14 @@ import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 
 interface AddProductFormProps {
   onAddProduct: (url: string) => void;
+  isLoading: boolean;
 }
 
-export function AddProductForm({ onAddProduct }: AddProductFormProps) {
+export function AddProductForm({ onAddProduct, isLoading }: AddProductFormProps) {
   const [url, setUrl] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,8 +30,18 @@ export function AddProductForm({ onAddProduct }: AddProductFormProps) {
         onChange={(e) => setUrl(e.target.value)}
         required
         className="flex-grow"
+        disabled={isLoading}
       />
-      <Button type="submit">Add Product</Button>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Adding...
+          </>
+        ) : (
+          "Add Product"
+        )}
+      </Button>
     </form>
   );
 }

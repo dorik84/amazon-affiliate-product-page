@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import AffiliateMessage from "@/components/AffiliateMessage";
 import ThemeToggle from "@/components/ThemeToggle";
 import SessionProvider from "@/components/SessionProvider";
+import { ToasterProvider } from "@/components/ui/ToasterProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,6 +32,8 @@ export default function RootLayout({ children, session }: { children: React.Reac
             {children}
           </SessionProvider>
         </ThemeProvider>
+        <ToasterProvider />
+        <Toaster />
       </body>
     </html>
   );

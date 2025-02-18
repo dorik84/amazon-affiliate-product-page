@@ -5,46 +5,93 @@ import { ProductList } from "@/components/ProductList";
 import { AddProductForm } from "@/components/AddProductForm";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ProductData } from "@/types/product";
+import type { ProductData } from "@/types/product";
 import { deleteProduct, getRelatedProducts, updateProduct } from "@/lib/component-actions";
+import { useToast } from "@/components/ui/use-toast";
 
 export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) {
+  console.log("AdminDashboard rerenders");
   const [products, setProducts] = useState<ProductData[]>(allProducts);
   const [sortBy, setSortBy] = useState<string>("name");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+  const { toast } = useToast();
 
   const handleAddProduct = async (url: string) => {
-    console.log("Adding product:", url);
-    url = encodeURIComponent(url);
-    const updatedroduct = await updateProduct(url);
-    console.log(updatedroduct);
-    // After adding, you should update the products state
-    if (updatedroduct) {
-      const products = await getRelatedProducts();
-      setProducts(products);
-    } else {
-      console.log("Failed to add product");
+    setLoading((prev) => ({ ...prev, add: true }));
+    try {
+      const encodedUrl = encodeURIComponent(url);
+      const updatedProduct = await updateProduct(encodedUrl);
+      if (updatedProduct) {
+        const products = await getRelatedProducts();
+        setProducts(products);
+        toast({
+          title: "Product added successfully",
+          description: `${updatedProduct.name} has been added to the list.`,
+        });
+      } else {
+        throw new Error("Failed to add product");
+      }
+    } catch (error) {
+      toast({
+        title: "Error adding product",
+        description: "There was a problem adding the product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, add: false }));
     }
   };
 
   const handleRefreshProduct = async (url: string) => {
-    // Implement the logic to refresh a product here
-    console.log("Refreshing product:", url);
-    const res = await updateProduct(url);
-    console.log(res);
-    // After refreshing, you should update the products state
-    const products = await getRelatedProducts();
-    setProducts(products);
+    setLoading((prev) => ({ ...prev, [url]: true }));
+    try {
+      const res = await updateProduct(url);
+      console.log("handleRefreshProduct | updateProduct | res", res);
+      if (res) {
+        // const products = await getRelatedProducts();
+        // setProducts(products);
+        toast({
+          title: "Product refreshed",
+          description: `${res.name} has been updated.`,
+        });
+      } else {
+        throw new Error("Failed to refresh product");
+      }
+    } catch (error) {
+      toast({
+        title: "Error refreshing product",
+        description: "There was a problem refreshing the product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, [url]: false }));
+    }
   };
 
   const handleDeleteProduct = async (url: string) => {
-    // Implement the logic to delete a product here
-    console.log("Deleting product:", url);
-    const res = await deleteProduct(url);
-    console.log(res);
-    // After deleting, you should update the products state
-    const products = await getRelatedProducts();
-    setProducts(products);
+    setLoading((prev) => ({ ...prev, [url]: true }));
+    try {
+      const res = await deleteProduct(url);
+      if (res) {
+        const products = await getRelatedProducts();
+        setProducts(products);
+        toast({
+          title: "Product deleted",
+          description: "The product has been removed from the list.",
+        });
+      } else {
+        throw new Error("Failed to delete product");
+      }
+    } catch (error) {
+      toast({
+        title: "Error deleting product",
+        description: "There was a problem deleting the product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, [url]: false }));
+    }
   };
 
   const sortedProducts = [...products].sort((a, b) => {
@@ -67,9 +114,9 @@ export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) 
   );
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-      <AddProductForm onAddProduct={handleAddProduct} />
+      <AddProductForm onAddProduct={handleAddProduct} isLoading={loading.add} />
       <div className="my-4 flex items-center space-x-4">
         <Input
           type="text"
@@ -93,6 +140,7 @@ export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) 
         products={filteredProducts}
         onRefreshProduct={handleRefreshProduct}
         onDeleteProduct={handleDeleteProduct}
+        loading={loading}
       />
     </div>
   );
