@@ -72,10 +72,14 @@ export default function ProfileDropdown() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
+              Log out
+            </DropdownMenuItem>
           </>
         ) : (
-          <DropdownMenuItem onClick={() => signIn()}>Log in</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" onClick={() => signIn()}>
+            Log in
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
