@@ -1,5 +1,6 @@
 import { ProductData } from "@/types/product";
 import { sanitizeProductData } from "./utils";
+import { DeleteProductResponseBody, UpdateProductResponseBody } from "@/types/responses";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -9,45 +10,59 @@ export async function fetcher(endpoint: string, options = {}) {
     ...options,
   });
   if (!response.ok) {
-    throw new Error("component-actions | fetcher | Network response was not ok");
+    console.log("component-actions | fetcher | Network response was not ok");
+    throw new Error((await response.json()).error);
   }
-  console.log("component-actions | fetcher | success");
+  console.log("component-actions | fetcher | end");
   return response.json();
 }
 
 const updateProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<ProductData> | null> = new Map();
+  let productPromiseMap: Map<String, Promise<UpdateProductResponseBody>> = new Map();
 
-  return (url: string) => {
+  return (url: string): Promise<UpdateProductResponseBody> => {
     if (!url) {
       console.log("component-actions | updateProduct | no url provided");
-      return null;
+      return Promise.reject({ message: "No url provided" });
     }
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | updateProduct | start");
-      productPromiseMap.set(
-        url,
-        fetcher(`/api/product?url=${url}`, {
-          method: "POST",
-          cache: "no-store",
-          // next: { revalidate: 60 },
+      const promise = fetch(`${baseUrl}/api/product?url=${url}`, {
+        method: "POST",
+        cache: "no-store",
+      })
+        .then(async (res) => {
+          console.log("component-actions | updateProduct | response received");
+          if (!res.ok) {
+            console.log("component-actions | updateProduct | Network response was not ok");
+            throw new Error((await res.json()).error);
+          }
+          return res.json();
         })
-          .then((product) => {
-            console.log("component-actions | updateProduct | product updated");
-            productPromiseMap.delete(url);
-            return product;
-          })
-          .catch((error) => {
-            productPromiseMap.delete(url);
-            throw new Error("component-actions | updateProduct | error", error);
-          })
-      );
-    } else {
-      console.log("component-actions | updateProduct | product data already updating");
+        .then((data) => {
+          console.log("component-actions | updateProduct | data retrieved");
+          productPromiseMap.delete(url);
+          return data;
+        })
+        .catch((error) => {
+          productPromiseMap.delete(url);
+          console.log("component-actions | updateProduct | error", error);
+          return Promise.reject(error);
+        });
+
+      productPromiseMap.set(url, promise);
+      return promise;
     }
 
-    return productPromiseMap.get(url);
+    const existingPromise = productPromiseMap.get(url);
+    if (!existingPromise) {
+      // This should never happen due to the check above, but TypeScript needs it
+      return Promise.reject(new Error("Promise unexpectedly missing"));
+    }
+
+    console.log("component-actions | updateProduct | product data already updating");
+    return existingPromise;
   };
 };
 
@@ -121,38 +136,50 @@ const getRelatedProductsEnclosure = () => {
 export const getRelatedProducts = getRelatedProductsEnclosure();
 
 const deleteProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<ProductData | null>> = new Map();
+  let productPromiseMap: Map<String, Promise<DeleteProductResponseBody>> = new Map();
 
-  return (url: string) => {
+  return (url: string): Promise<DeleteProductResponseBody> => {
     if (!url) {
       console.log("component-actions | deleteProduct | no url provided");
-      return false;
+      return Promise.reject({ message: "No url provided" });
     }
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | deleteProduct | start");
-      productPromiseMap.set(
-        url,
-        fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
-          method: "DELETE",
-          cache: "no-store",
+      const promise = fetch(`${baseUrl}/api/product?url=${encodeURIComponent(url)}`, {
+        method: "DELETE",
+        cache: "no-store",
+      })
+        .then(async (res) => {
+          console.log("component-actions | deleteProduct | response received");
+          if (!res.ok) {
+            console.log("component-actions | deleteProduct | Network response was not ok");
+            throw new Error((await res.json()).error);
+          }
+          return res.json();
         })
-          .then((resut) => {
-            productPromiseMap.delete(url);
-            console.log("component-actions | deleteProduct | product deleted");
-            return resut;
-          })
-          .catch((error) => {
-            productPromiseMap.delete(url);
-            console.log("component-actions | deleteProduct | error", error);
-            return false;
-          })
-      );
-    } else {
-      console.log("component-actions | deleteProduct | product deletiion already fetching");
+        .then((resut) => {
+          productPromiseMap.delete(url);
+          console.log("component-actions | deleteProduct | product deleted");
+          return resut;
+        })
+        .catch((error) => {
+          productPromiseMap.delete(url);
+          console.log("component-actions | deleteProduct | error", error);
+          return Promise.reject(error);
+        });
+      productPromiseMap.set(url, promise);
+      return promise;
     }
 
-    return productPromiseMap.get(url);
+    const existingPromise = productPromiseMap.get(url);
+    if (!existingPromise) {
+      // This should never happen due to the check above, but TypeScript needs it
+      return Promise.reject(new Error("Promise unexpectedly missing"));
+    }
+
+    console.log("component-actions | deleteProduct | product data already delleting");
+    return existingPromise;
   };
 };
 

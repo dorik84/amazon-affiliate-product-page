@@ -5,6 +5,7 @@ import { getRandomUserAgent } from "./utils";
 import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
 import { transformProduct } from "./productData-adapter";
+import { DeleteResult } from "mongoose";
 
 export async function getRelatedProducts() {
   try {
@@ -70,31 +71,48 @@ export async function getProduct(url: string) {
 
 export async function updateProduct(product: ProductData | undefined) {
   if (!product) {
-    console.log("server-actions | updateProduct | No product data provided");
-    return;
+    console.error("server-actions | updateProduct | No product data provided");
+    return null;
   }
+
   try {
-    const options = { new: true, upsert: true }; // Create if doesn't exist
-    const res = await Product.findOneAndUpdate({ url: product.url }, product, options);
-    console.log("server-actions | updateProduct | product updated in DB");
-    return res;
+    const query = { url: product.url };
+    const update = { $set: product };
+    const options = {
+      new: true,
+      upsert: true,
+      lean: true, // Returns a plain JavaScript object instead of a Mongoose document
+    };
+
+    const updatedProduct = await Product.findOneAndUpdate(query, update, options);
+    console.info("server-actions | updateProduct | product updated in DB");
+    return updatedProduct;
   } catch (err) {
-    console.log("server-actions | updateProduct | ", err);
+    console.error("server-actions | updateProduct | ", err);
+    throw err; // Propagate error to caller for proper error handling
   }
 }
 
-export async function deleteProduct(url: string) {
-  if (!url) {
-    console.log("server-actions | deleteProduct | No url provided");
-    return;
+export async function deleteProduct(url: string): Promise<DeleteResult | null> {
+  if (!url?.trim()) {
+    console.error("server-actions | deleteProduct | Invalid or empty URL provided");
+    return null;
   }
+
   try {
-    const res = await Product.deleteOne({ url });
-    console.log(res);
-    console.log("server-actions | deleteProduct | product deleted from DB");
-    return res;
-  } catch (err) {
-    console.log("server-actions | deleteProduct | ", err);
+    // Use lean() for better performance when we don't need a full Mongoose document
+    const result = await Product.deleteOne({ url }).lean();
+
+    if (result.deletedCount === 0) {
+      console.warn(`server-actions | deleteProduct | No product found with URL: ${url}`);
+      return null;
+    }
+
+    console.info("server-actions | deleteProduct | Product successfully deleted");
+    return result;
+  } catch (error) {
+    console.error("server-actions | deleteProduct | Error:", error instanceof Error ? error.message : "Unknown error");
+    throw error; // Re-throw to handle it in the calling function
   }
 }
 
@@ -128,7 +146,7 @@ export const fetchAndTransformAmazonProduct = (url: string) => {
     [`amazon-${url}`], // add the ID to the cache key
     {
       tags: ["amazon-url"],
-      revalidate: 60 * 60 * 24, // revalidate every 24 hours
+      revalidate: 60 * 60, // revalidate every 1 hours
     }
   );
   return getCachedAmazonProduct(url);

@@ -5,8 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import AffiliateMessage from "@/components/AffiliateMessage";
 import ThemeToggle from "@/components/ThemeToggle";
 import SessionProvider from "@/components/SessionProvider";
-import { ToasterProvider } from "@/components/ui/ToasterProvider";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,8 +31,23 @@ export default function RootLayout({ children, session }: { children: React.Reac
             {children}
           </SessionProvider>
         </ThemeProvider>
-        <ToasterProvider />
-        <Toaster />
+
+        <Toaster
+          richColors
+          closeButton
+          expand={true}
+          pauseWhenPageIsHidden={true}
+          className="toaster-container"
+          toastOptions={{
+            classNames: {
+              toast: "border rounded-lg shadow-lg",
+              title: "font-bold",
+              description: "text-sm",
+              actionButton: "bg-primary text-primary-foreground",
+              cancelButton: "bg-muted text-muted-foreground",
+            },
+          }}
+        />
       </body>
     </html>
   );
