@@ -19,17 +19,6 @@ export async function generateMetadata({ params }: { params: { encodedUrl: strin
   };
 }
 
-export default async function Layout({
-  product,
-  related,
-}: {
-  product: React.ReactElement;
-  related: React.ReactElement;
-}) {
-  return (
-    <>
-      {product}
-      {related}
-    </>
-  );
+export default async function Layout({ children }: { children: React.ReactElement }) {
+  return <>{children}</>;
 }
