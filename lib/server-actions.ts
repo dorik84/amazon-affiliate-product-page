@@ -4,26 +4,39 @@ import Product from "@/db/models";
 import { getRandomUserAgent } from "./utils";
 import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
-import { transformProduct } from "./productData-adapter";
+import { transformProduct } from "@/lib/productData-adapter";
 import { DeleteResult } from "mongoose";
+import { getProductsResponse } from "@/types/responses";
 
-export async function getRelatedProducts() {
+export async function getProducts(limit = 20, page = 1, category?: string): Promise<getProductsResponse> {
   try {
     await dbConnect();
-    const data = await Product.find({}).limit(10).lean();
+    const query = category ? { category } : {};
+    const data = await Product.find(query)
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
 
-    if (!data) {
-      console.log("server-actions | getRelatedProducts | No products found in DB");
-      return;
+    if (!data.length) {
+      console.log("server-actions | getProducts | No products found in DB for category:", category);
+      return {};
     }
+    const count = await Product.countDocuments(query);
 
-    console.log("server-actions | getRelatedProducts | products fetched from DB");
-    return data;
+    console.log("server-actions | getProducts | products fetched from DB for category:", category);
+    return {
+      data,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      limit,
+    };
   } catch (err) {
-    console.log(err);
-    return;
+    console.error("server-actions | getProducts | ", err);
+    return {};
   }
 }
+
+// ###########################################################################
 
 export async function getPopularProducts() {
   try {
@@ -41,6 +54,27 @@ export async function getPopularProducts() {
     return [];
   }
 }
+
+// ###########################################################################
+
+export async function getAllProducts() {
+  try {
+    await dbConnect();
+    const data = await Product.find({}).lean();
+
+    if (!data) {
+      console.log("server-actions | getPopularProducts | No products found in DB");
+      return [];
+    }
+    console.log("server-actions | getPopularProducts | products fetched from DB");
+    return data;
+  } catch (err) {
+    console.log("server-actions | getPopularProducts | ", err);
+    return [];
+  }
+}
+
+// ###########################################################################
 
 export async function getProduct(url: string) {
   const getCachedProduct = unstable_cache(
@@ -69,6 +103,34 @@ export async function getProduct(url: string) {
   return getCachedProduct(url);
 }
 
+// ###########################################################################
+
+export async function addProduct(product: ProductData | undefined) {
+  if (!product) {
+    console.error("server-actions | addProduct | No product data provided");
+    return null;
+  }
+
+  try {
+    const query = { url: product.url };
+    const update = { $set: product };
+    const options = {
+      new: true,
+      upsert: true,
+      lean: true, // Returns a plain JavaScript object instead of a Mongoose document
+    };
+
+    const updatedProduct = await Product.findOneAndUpdate(query, update, options);
+    console.info("server-actions | addProduct | product added in DB");
+    return updatedProduct;
+  } catch (err) {
+    console.error("server-actions | addProduct | ", err);
+    throw err; // Propagate error to caller for proper error handling
+  }
+}
+
+// ###########################################################################
+
 export async function updateProduct(product: ProductData | undefined) {
   if (!product) {
     console.error("server-actions | updateProduct | No product data provided");
@@ -93,6 +155,8 @@ export async function updateProduct(product: ProductData | undefined) {
   }
 }
 
+// ###########################################################################
+
 export async function deleteProduct(url: string): Promise<DeleteResult | null> {
   if (!url?.trim()) {
     console.error("server-actions | deleteProduct | Invalid or empty URL provided");
@@ -115,6 +179,8 @@ export async function deleteProduct(url: string): Promise<DeleteResult | null> {
     throw error; // Re-throw to handle it in the calling function
   }
 }
+
+// ###########################################################################
 
 // Cached function to fetch and strip data
 export const fetchAndTransformAmazonProduct = (url: string) => {
