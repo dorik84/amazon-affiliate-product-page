@@ -59,7 +59,9 @@ export async function transformProduct(response: any, url: string): Promise<Prod
       }
     }
     //Extract category from breadcrumbs
-    product.category = doc.querySelector("#nav-subnav")?.querySelector("span.nav-a-content")?.textContent?.trim() || "";
+    product.category =
+      doc.querySelector("#nav-subnav")?.querySelector("span.nav-a-content")?.textContent?.trim() ||
+      doc.querySelector("#desktop-breadcrumbs_feature_div")?.querySelector("a")?.textContent?.trim();
     console.log("product.category=", product.category);
     // Extract name from h1#title span
     const titleElement = doc.querySelector("#title span");
