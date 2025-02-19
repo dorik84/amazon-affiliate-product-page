@@ -13,7 +13,7 @@ interface AdminLinkProps {
 
 export function AdminLink({ href, children, className }: AdminLinkProps) {
   const isAdmin = useAdminRole();
-  console.log("isAdmin", isAdmin);
+
   if (!isAdmin) {
     return null;
   }

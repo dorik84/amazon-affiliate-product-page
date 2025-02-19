@@ -7,7 +7,7 @@ import { ProductData } from "@/types/product";
 
 import { DesktopPopularItems } from "@/components/DesktopPopularItems";
 
-export function PopularItems({ popularItems }: { popularItems: ProductData[] }) {
+export function PopularItems({ popularItems }: { popularItems: ProductData[] | undefined }) {
   if (!popularItems) return <div>Error fetching products</div>;
 
   const isDesktop = useMediaQuery("(min-width: 768px)");

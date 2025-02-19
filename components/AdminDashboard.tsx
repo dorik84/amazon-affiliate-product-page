@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ProductList } from "@/components/ProductList";
 import { AddProductForm } from "@/components/AddProductForm";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ProductData } from "@/types/product";
-import { deleteProduct, getRelatedProducts, updateProduct } from "@/lib/component-actions";
+import { deleteProduct, getRelatedProducts, updateProduct, addProduct } from "@/lib/component-actions";
 import { toast } from "sonner";
 import { CheckCircle2Icon, LoaderIcon, XCircleIcon } from "lucide-react";
+import { getProductsResponse } from "@/types/responses";
 
 const toastConfig = {
   loading: (
@@ -37,74 +38,113 @@ const toastConfig = {
   ),
 };
 
-export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) {
-  const [products, setProducts] = useState<ProductData[]>(allProducts);
+export function AdminDashboard({
+  allProducts: { data, totalPages, currentPage, limit },
+}: {
+  allProducts: getProductsResponse;
+}) {
+  const [products, setProducts] = useState<ProductData[]>(data || []);
   const [sortBy, setSortBy] = useState<string>("name");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
-  const updateProducts = (updatedProduct: ProductData) => {
+  const updateProductInList = useCallback((updatedProduct: ProductData) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) => (product.url === updatedProduct.url ? { ...product, ...updatedProduct } : product))
     );
-  };
+  }, []);
 
-  const deleteProducts = (encodedUrl: string) => {
+  const addProductInList = useCallback((newProduct: ProductData) => {
+    setProducts((prevProducts) => {
+      return [...prevProducts, newProduct];
+    });
+  }, []);
+
+  const deleteProductFromList = useCallback((encodedUrl: string) => {
     setProducts((prevProducts) => prevProducts.filter((product) => product.url !== encodedUrl));
-  };
+  }, []);
 
-  const handleAddUpdateProduct = async (url: string) => {
-    setLoading((prev) => ({ ...prev, add: true }));
-    try {
-      const encodedUrl = encodeURIComponent(url);
-      const productPromise = updateProduct(encodedUrl);
-
-      toast.promise(productPromise, toastConfig);
-
-      const updatedProduct = await productPromise;
-
-      updateProducts(updatedProduct.data as ProductData);
-    } catch (error) {
-      console.error("Error updating product:", error);
-    } finally {
-      setLoading((prev) => ({ ...prev, add: false }));
-    }
-  };
-
-  const handleDeleteProduct = async (url: string) => {
-    setLoading((prev) => ({ ...prev, [url]: true }));
-    try {
-      const deletePromise = deleteProduct(url);
-      console.log("deletePromise", deletePromise);
-
-      toast.promise(deletePromise, toastConfig);
-      await deletePromise;
-      deleteProducts(url);
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    } finally {
-      setLoading((prev) => ({ ...prev, [url]: false }));
-    }
-  };
-
-  const sortedProducts = [...products].sort((a, b) => {
-    switch (sortBy) {
-      case "name":
-        return a.name.localeCompare(b.name);
-      case "price":
-        return a.defaultPrice - b.defaultPrice;
-      case "category":
-        return (a.category || "").localeCompare(b.category || "");
-      default:
-        return 0;
-    }
-  });
-
-  const filteredProducts = sortedProducts.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleAddProduct = useCallback(
+    async (url: string) => {
+      setLoading((prev) => ({ ...prev, add: true }));
+      try {
+        const encodedUrl = encodeURIComponent(url);
+        const addPromise = addProduct(encodedUrl);
+        toast.promise(addPromise, toastConfig);
+        const newProduct = await addPromise;
+        addProductInList(newProduct.data as ProductData);
+      } catch (error) {
+        console.error("Error adding product:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, add: false }));
+      }
+    },
+    [addProductInList]
   );
+
+  const handleUpdateProduct = useCallback(
+    async (url: string) => {
+      setLoading((prev) => ({ ...prev, add: true }));
+      try {
+        const encodedUrl = encodeURIComponent(url);
+        const productPromise = updateProduct(encodedUrl);
+        toast.promise(productPromise, toastConfig);
+        const updatedProduct = await productPromise;
+        updateProductInList(updatedProduct.data as ProductData);
+      } catch (error) {
+        console.error("Error updating product:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, add: false }));
+      }
+    },
+    [updateProductInList]
+  );
+
+  const handleDeleteProduct = useCallback(
+    async (url: string) => {
+      setLoading((prev) => ({ ...prev, [url]: true }));
+      try {
+        const deletePromise = deleteProduct(url);
+        console.log("deletePromise", deletePromise);
+
+        toast.promise(deletePromise, toastConfig);
+        await deletePromise;
+        deleteProductFromList(url);
+      } catch (error) {
+        console.error("Error deleting product:", error);
+      } finally {
+        setLoading((prev) => ({ ...prev, [url]: false }));
+      }
+    },
+    [deleteProductFromList]
+  );
+
+  const sortedProducts = useMemo(() => {
+    return [...products].sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "price":
+          return a.defaultPrice - b.defaultPrice;
+        case "category":
+          return (a.category || "").localeCompare(b.category || "");
+        default:
+          return 0;
+      }
+    });
+  }, [products, sortBy]);
+
+  const filteredProducts = useMemo(
+    () =>
+      sortedProducts.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [sortedProducts, searchTerm]
+  );
+
+  const cachedLoading = useMemo(() => loading, [loading]);
 
   return (
     <div className="p-4">
@@ -129,9 +169,10 @@ export function AdminDashboard({ allProducts }: { allProducts: ProductData[] }) 
           </SelectContent>
         </Select>
       </div>
+
       <ProductList
         products={filteredProducts}
-        onRefreshProduct={handleRefreshProduct}
+        onRefreshProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
         loading={loading}
       />
