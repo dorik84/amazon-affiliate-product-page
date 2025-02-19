@@ -1,5 +1,6 @@
 import { authOptions } from "@/auth";
 import { deleteProduct, fetchAndTransformAmazonProduct, getProduct, updateProduct } from "@/lib/server-actions";
+import { isValidProduct } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -56,23 +57,32 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
-  }
-
-  const searchParams = request.nextUrl.searchParams;
-  const url = searchParams.get("url");
-
-  if (!url) {
-    return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
-  }
-
   try {
+    throw new Error("random"); // TEST
+    // 1. Authorization check
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
+    // 2. Input validation
+    const url = request.nextUrl.searchParams.get("url")?.trim();
+    if (!url) {
+      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
+    }
+
+    // 3. Delete operation
     const result = await deleteProduct(url);
-    return NextResponse.json(result);
+
+    // 4. Response handling
+    return NextResponse.json(
+      result ? { message: "Product deleted", deletedCount: result.deletedCount } : { error: "No product was found" },
+      { status: result ? 200 : 404 }
+    );
   } catch (error) {
-    console.log(error);
+    // 5. Error logging and handling
+    console.error("DELETE product error:", error instanceof Error ? error.message : "Unknown error");
+
     return NextResponse.json({ error: "Failed to delete product data" }, { status: 500 });
   }
 }

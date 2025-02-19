@@ -87,3 +87,16 @@ export function sanitizeProductData(obj: any): ProductData | null {
 
   return sanitized;
 }
+
+// Helper function to validate product structure
+export function isValidProduct(product: any): boolean {
+  return Boolean(
+    product &&
+      product.name &&
+      product.url &&
+      Array.isArray(product.images) &&
+      product.images.length > 0 &&
+      product.defaultPrice &&
+      product.category
+  );
+}
