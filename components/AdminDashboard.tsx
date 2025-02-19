@@ -6,7 +6,7 @@ import { AddProductForm } from "@/components/AddProductForm";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ProductData } from "@/types/product";
-import { deleteProduct, getRelatedProducts, updateProduct, addProduct } from "@/lib/component-actions";
+import { deleteProduct, updateProduct, addProduct } from "@/lib/component-actions";
 import { toast } from "sonner";
 import { CheckCircle2Icon, LoaderIcon, XCircleIcon } from "lucide-react";
 import { getProductsResponse } from "@/types/responses";

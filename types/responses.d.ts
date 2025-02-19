@@ -15,19 +15,25 @@ export type DeleteProductResponseBody = {
   error?: string;
 };
 
-export type getProductsResponse = {
+export type GetProductsResponse = {
   data?: ProductData[];
   totalPages?: number;
   currentPage?: number;
   limit?: number;
 };
+export type GetProductResponse = ProductData | null;
 
-// Define types for better type safety
 export type GetApiProductsResponse = {
   error?: string;
   data?: ProductData[];
   totalPages?: number;
   currentPage?: number;
   limit?: number;
+  status: number;
+};
+
+export type GetApiProductResponse = {
+  error?: string;
+  data?: ProductData;
   status: number;
 };

@@ -6,82 +6,54 @@ import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
 import { transformProduct } from "@/lib/productData-adapter";
 import { DeleteResult } from "mongoose";
-import { getProductsResponse } from "@/types/responses";
+import { GetProductResponse, GetProductsResponse } from "@/types/responses";
 
-export async function getProducts(limit = 20, page = 1, category?: string): Promise<getProductsResponse> {
-  try {
-    await dbConnect();
-    const query = category ? { category } : {};
-    const data = await Product.find(query)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .exec();
+export async function getProducts(limit = 20, page = 1, category?: string): Promise<GetProductsResponse> {
+  const getCachedProducts = unstable_cache(
+    async (limit, page, category) => {
+      try {
+        await dbConnect();
+        const query = category ? { category } : {};
+        const data = await Product.find(query)
+          .limit(limit * 1)
+          .skip((page - 1) * limit)
+          .exec();
 
-    if (!data.length) {
-      console.log("server-actions | getProducts | No products found in DB for category:", category);
-      return {};
+        if (!data.length) {
+          console.log("server-actions | getProducts | No products found in DB for category:", category);
+          return {};
+        }
+        const count = await Product.countDocuments(query);
+
+        console.log("server-actions | getProducts | products fetched from DB for category:", category);
+        return {
+          data,
+          totalPages: Math.ceil(count / limit),
+          currentPage: page,
+          limit,
+        };
+      } catch (err) {
+        console.error("server-actions | getProducts | ", err);
+        return {};
+      }
+    },
+    [`products-${limit}-${page}-${category}`], // More specific cache key
+    {
+      tags: ["products"],
+      revalidate: 3600,
     }
-    const count = await Product.countDocuments(query);
-
-    console.log("server-actions | getProducts | products fetched from DB for category:", category);
-    return {
-      data,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-      limit,
-    };
-  } catch (err) {
-    console.error("server-actions | getProducts | ", err);
-    return {};
-  }
+  );
+  return getCachedProducts(limit, page, category);
 }
 
 // ###########################################################################
 
-export async function getPopularProducts() {
-  try {
-    await dbConnect();
-    const data = await Product.find({}).limit(20).lean();
-
-    if (!data) {
-      console.log("server-actions | getPopularProducts | No products found in DB");
-      return [];
-    }
-    console.log("server-actions | getPopularProducts | products fetched from DB");
-    return data;
-  } catch (err) {
-    console.log("server-actions | getPopularProducts | ", err);
-    return [];
-  }
-}
-
-// ###########################################################################
-
-export async function getAllProducts() {
-  try {
-    await dbConnect();
-    const data = await Product.find({}).lean();
-
-    if (!data) {
-      console.log("server-actions | getPopularProducts | No products found in DB");
-      return [];
-    }
-    console.log("server-actions | getPopularProducts | products fetched from DB");
-    return data;
-  } catch (err) {
-    console.log("server-actions | getPopularProducts | ", err);
-    return [];
-  }
-}
-
-// ###########################################################################
-
-export async function getProduct(url: string) {
+export async function getProduct(url: string): GetProductResponse {
   const getCachedProduct = unstable_cache(
     async (url: string) => {
       try {
         await dbConnect();
-        const data = await Product.findOne({ url }).lean();
+        const data = (await Product.findOne({ url }).lean()) as ProductData | null;
 
         if (!data) {
           console.log("server-actions | getProduct | No products found in DB");
@@ -96,7 +68,7 @@ export async function getProduct(url: string) {
     },
     [`product-${url}`], // More specific cache key
     {
-      tags: ["products"],
+      tags: ["product"],
       revalidate: 3600,
     }
   );

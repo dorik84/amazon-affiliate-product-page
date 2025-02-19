@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { PopularItems } from "@/components/PopularItems";
 import { Footer } from "@/components/Footer";
 import { Suspense } from "react";
+// import { getProducts } from "@/lib/server-actions";
 import { getProducts } from "@/lib/component-actions";
 
 export default async function Home() {
