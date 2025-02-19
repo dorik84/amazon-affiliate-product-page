@@ -11,19 +11,28 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const url = searchParams.get("url");
-
-  if (!url) {
-    return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
-  }
-
   try {
+    const url = request.nextUrl.searchParams.get("url");
+
+    if (!url) {
+      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
+    }
+
     const data = await getProduct(url);
 
-    return NextResponse.json(data);
+    if (!data) {
+      const error = new Error("Failed to fetch product data");
+      console.error("[GET /api/product] | error ", error);
+      return NextResponse.json({ error: "Failed to fetch product data" }, { status: 404 });
+    }
+
+    return NextResponse.json(data, {
+      headers: {
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
+      },
+    });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json({ error: "Failed to fetch product data" }, { status: 500 });
   }
 }
@@ -46,6 +55,7 @@ export async function POST(request: NextRequest) {
     // Fetch and validate product data
     const product = await fetchAndTransformAmazonProduct(url);
     if (!isValidProduct(product)) {
+      console.log("POST /api/product] | product ", product);
       return NextResponse.json({ error: "Product structure is not valid or URL is incorrect" }, { status: 400 });
     }
 
