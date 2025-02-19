@@ -3,7 +3,9 @@ import { authOptions } from "@/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { AdminDashboard } from "@/components/AdminDashboard";
-import { getRelatedProducts } from "@/lib/component-actions";
+
+import { getProductsResponse } from "@/types/responses";
+import { getProducts } from "@/lib/component-actions";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -13,7 +15,7 @@ export default async function DashboardPage() {
   if (session.user.role !== "ADMIN") {
     redirect("/unauthorized");
   }
-  const products = await getRelatedProducts();
+  const response: getProductsResponse = await getProducts();
 
-  return <AdminDashboard allProducts={products} />;
+  return <AdminDashboard allProducts={response} />;
 }

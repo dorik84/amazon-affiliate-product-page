@@ -8,3 +8,10 @@ export type DeleteProductResponseBody = {
   message?: string;
   error?: string;
 };
+
+export type getProductsResponse = {
+  data?: ProductData[];
+  totalPages?: number;
+  currentPage?: number;
+  limit?: number;
+};
