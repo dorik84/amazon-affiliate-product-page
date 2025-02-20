@@ -65,10 +65,6 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsRe
       },
       {
         status: 200,
-        headers: {
-          "Cache-Control": "public, max-age=300", // 5 minutes cache
-          ETag: `"${Buffer.from(JSON.stringify({ category, limit, page })).toString("base64")}"`,
-        },
       }
     );
   } catch (error) {
@@ -91,9 +87,6 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsRe
       },
       {
         status: error instanceof Error && error.message === "Request timeout" ? 408 : 500,
-        headers: {
-          "Cache-Control": "no-store",
-        },
       }
     );
   }

@@ -32,14 +32,7 @@ export async function GET(
       return NextResponse.json({ error: "No product data found" }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { message: "Product fetched successfully", data },
-      {
-        headers: {
-          "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
-        },
-      }
-    );
+    return NextResponse.json({ message: "Product fetched successfully", data }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to fetch product data" }, { status: 500 });
