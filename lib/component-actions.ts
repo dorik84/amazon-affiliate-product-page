@@ -1,21 +1,7 @@
 import { DeleteProductResponse, GetProductsResponse } from "@/types/responses";
-import { cache } from "react";
 import { PostProductResponse, PutProductResponse, SuccessApiResponse } from "@/types/api";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-export async function fetcher(endpoint: string, options = {}) {
-  console.log("component-actions | fetcher | start");
-  const response = await fetch(`${baseUrl}${endpoint}`, {
-    ...options,
-  });
-  if (!response.ok) {
-    console.log("component-actions | fetcher | Network response was not ok");
-    throw new Error((await response.json()).error);
-  }
-  console.log("component-actions | fetcher | end");
-  return response.json();
-}
 
 // ###########################################################################
 
@@ -141,9 +127,9 @@ const getProductEnclosure = () => {
         cache: "no-store",
       })
         .then(async (res) => {
-          console.log("component-actions | updateProduct | response received");
+          console.log("component-actions | getProduct | response received");
           if (!res.ok) {
-            console.log("component-actions | updateProduct | Network response was not ok");
+            console.log("component-actions | getProduct | Network response was not ok");
             throw new Error((await res.json()).error);
           }
           return res.json();
@@ -200,7 +186,7 @@ const getProductsEnclosure = () => {
         })
         .then((result) => {
           productsPromiseMap.delete(queryKey);
-          console.log("component-actions | getProducts | products fetched");
+          console.log("component-actions | getProducts | complete");
           return result;
         })
         .catch((error) => {
@@ -224,32 +210,6 @@ const getProductsEnclosure = () => {
 };
 
 export const getProducts = getProductsEnclosure();
-// export const getProducts = cache((query?: string) => {
-//   const queryKey = query || "";
-
-//   console.log("component-actions | getProducts | start");
-//   const endpoint = query ? `/api/products?${query}` : "/api/products";
-//   console.log("component-actions | getProducts | endpoint", endpoint);
-//   return fetch(`${baseUrl}${endpoint}`, {
-//     cache: "no-store",
-//   })
-//     .then(async (res) => {
-//       console.log("component-actions | getProducts | response received");
-//       if (!res.ok) {
-//         console.log("component-actions | getProducts | Network response was not ok");
-//         throw new Error((await res.json()).error);
-//       }
-//       return res.json();
-//     })
-//     .then((result) => {
-//       console.log("component-actions | getProducts | products fetched");
-//       return result;
-//     })
-//     .catch((error) => {
-//       console.log("component-actions | getProducts | error", error);
-//       return Promise.reject(error);
-//     });
-// });
 
 // ###########################################################################
 

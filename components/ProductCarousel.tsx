@@ -59,7 +59,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
                   </div>
                 </DialogTrigger>
                 <DialogContent aria-describedby={undefined} className="max-w-[90vw] max-h-[90vh] p-0">
-                  <DialogTitle className="text-left pr-14">{product.name}</DialogTitle>
+                  <DialogTitle className="text-left pr-14 pl-10">{product.name}</DialogTitle>
                   <div className="relative w-full h-full min-h-[80vh]">
                     <ProductImage name={product.name} src={src} index={index} priority={index === 0} />
                   </div>

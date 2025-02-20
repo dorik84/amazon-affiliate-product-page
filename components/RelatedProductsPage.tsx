@@ -1,5 +1,5 @@
-import RelatedProducts from "@/components/RelatedProducts";
 import { getProducts } from "@/lib/component-actions";
+import RelatedProducts from "@/components/RelatedProducts";
 
 export const preloadRelatedProducts = (category: string | undefined) => {
   const query = `category=${encodeURIComponent(category || "")}`;

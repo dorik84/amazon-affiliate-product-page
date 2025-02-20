@@ -1,8 +1,6 @@
 import { getProducts } from "@/lib/server-actions";
 import { ProductsResponse } from "@/types/api";
-import { ProductData } from "@/types/product";
 import { GetProductsResponse } from "@/types/responses";
-
 import { NextRequest, NextResponse } from "next/server";
 import { cache } from "react";
 
@@ -10,6 +8,7 @@ import { cache } from "react";
 const CACHE_TTL = 1 * 60 * 1000; // 1 minutes in milliseconds
 const DEFAULT_LIMIT = 20;
 const DEFAULT_PAGE = 1;
+const MAX_LIMIT = 100;
 
 // Memoize parameter extraction for repeated requests
 const extractQueryParams = cache((request: NextRequest) => {
@@ -19,7 +18,7 @@ const extractQueryParams = cache((request: NextRequest) => {
     category: searchParams.get("category")?.trim(),
     limit: Math.min(
       parseInt(searchParams.get("limit")?.trim() || String(DEFAULT_LIMIT), 10),
-      100 // Max limit to prevent excessive data fetching
+      MAX_LIMIT // Max limit to prevent excessive data fetching
     ),
     page: parseInt(searchParams.get("page")?.trim() || String(DEFAULT_PAGE), 10),
   };
@@ -33,14 +32,14 @@ const getCachedProducts = cache(async (limit: number, page: number, category?: s
 // #######################################################################
 
 export async function GET(request: NextRequest): Promise<NextResponse<ProductsResponse>> {
-  // Removed generic type since NextResponse already includes the response type
+  console.log("[GET api/product]");
   // Use AbortController for request timeout
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
   try {
     const { category, limit, page } = extractQueryParams(request);
-    console.log("Extracted query parameters:", { category, limit, page });
+
     // Validate query parameters using bitwise operations for faster checks
     if ((limit | 0) < 1) {
       return NextResponse.json({ error: "Limit must be a positive number" }, { status: 400 });

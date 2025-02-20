@@ -75,7 +75,7 @@ export async function getProduct(url: string): Promise<ProductData | null> {
     [`product-${url}`], // More specific cache key
     {
       tags: ["product"],
-      revalidate: 3600,
+      revalidate: 60 * 60, // 1 hour
     }
   );
   return getCachedProduct(url);

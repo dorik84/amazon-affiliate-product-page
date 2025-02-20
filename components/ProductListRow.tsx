@@ -18,7 +18,6 @@ const ProductListRow = React.memo(
     onDeleteProduct: (url: string) => void;
     loading: { [key: string]: boolean };
   }) => {
-    console.log("ProductListRow rerenders", product.url);
     return (
       <TableRow key={product.url}>
         <TableCell>

@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import ProductCard from "./RelatedProductCard";
 import type { ProductData } from "@/types/product";
 
-export default function RelatedProductsWidget({ relatedProducts }: { relatedProducts: ProductData[] }) {
+export default function RelatedProducts({ relatedProducts }: { relatedProducts: ProductData[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollWidth, setScrollWidth] = useState(0);
 

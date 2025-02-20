@@ -7,7 +7,7 @@ import ProductImage from "@/components/ProductImage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const ProductCard = ({ product, className }: { product: ProductData; className?: string }) => {
+export const RelatedProductCard = ({ product, className }: { product: ProductData; className?: string }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
@@ -31,4 +31,4 @@ export const ProductCard = ({ product, className }: { product: ProductData; clas
   );
 };
 
-export default ProductCard;
+export default RelatedProductCard;
