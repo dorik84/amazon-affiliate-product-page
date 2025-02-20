@@ -1,138 +1,100 @@
-import { authOptions } from "@/auth";
-import {
-  deleteProduct,
-  fetchAndTransformAmazonProduct,
-  getProduct,
-  addProduct,
-  updateProduct,
-} from "@/lib/server-actions";
-import { isValidProduct } from "@/lib/utils";
-import { getServerSession } from "next-auth";
+import { getProducts } from "@/lib/server-actions";
+import { ProductsResponse } from "@/types/api";
+import { ProductData } from "@/types/product";
+import { GetProductsResponse } from "@/types/responses";
+
 import { NextRequest, NextResponse } from "next/server";
+import { cache } from "react";
 
-export async function GET(request: NextRequest) {
+// Cache constants
+const CACHE_TTL = 1 * 60 * 1000; // 1 minutes in milliseconds
+const DEFAULT_LIMIT = 20;
+const DEFAULT_PAGE = 1;
+
+// Memoize parameter extraction for repeated requests
+const extractQueryParams = cache((request: NextRequest) => {
+  const searchParams = request.nextUrl.searchParams;
+
+  return {
+    category: searchParams.get("category")?.trim(),
+    limit: Math.min(
+      parseInt(searchParams.get("limit")?.trim() || String(DEFAULT_LIMIT), 10),
+      100 // Max limit to prevent excessive data fetching
+    ),
+    page: parseInt(searchParams.get("page")?.trim() || String(DEFAULT_PAGE), 10),
+  };
+});
+
+// Memoize product fetching
+const getCachedProducts = cache(async (limit: number, page: number, category?: string) => {
+  return await getProducts(limit, page, category);
+});
+
+// #######################################################################
+
+export async function GET(request: NextRequest): Promise<NextResponse<ProductsResponse>> {
+  // Removed generic type since NextResponse already includes the response type
+  // Use AbortController for request timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
   try {
-    const url = request.nextUrl.searchParams.get("url");
-
-    if (!url) {
-      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
+    const { category, limit, page } = extractQueryParams(request);
+    console.log("Extracted query parameters:", { category, limit, page });
+    // Validate query parameters using bitwise operations for faster checks
+    if ((limit | 0) < 1) {
+      return NextResponse.json({ error: "Limit must be a positive number" }, { status: 400 });
     }
 
-    const data = await getProduct(url);
-
-    if (!data) {
-      const error = new Error("Failed to fetch product data");
-      console.error("[GET /api/product] | error ", error);
-      return NextResponse.json({ error: "Failed to fetch product data" }, { status: 404 });
+    if ((page | 0) < 1) {
+      return NextResponse.json({ error: "Page must be a positive number" }, { status: 400 });
     }
 
-    return NextResponse.json(data, {
-      headers: {
-        "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Failed to fetch product data" }, { status: 500 });
-  }
-}
+    // Fetch data with timeout
+    const data = (await Promise.race([
+      getCachedProducts(limit, page, category),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Request timeout")), 5000)),
+    ])) as GetProductsResponse;
 
-export async function POST(request: NextRequest) {
-  try {
-    // throw new Error("random"); // TEST
-    // Early authorization check
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
-    }
+    clearTimeout(timeoutId);
 
-    // Extract and validate URL parameter
-    const url = request.nextUrl.searchParams.get("url")?.trim();
-    if (!url) {
-      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
-    }
-
-    // Fetch and validate product data
-    const product = await fetchAndTransformAmazonProduct(url);
-    if (!isValidProduct(product)) {
-      console.log("POST /api/product] | product ", product);
-      return NextResponse.json({ error: "Product structure is not valid or URL is incorrect" }, { status: 400 });
-    }
-
-    // Update product in database
-    const result = await addProduct(product);
-    if (!result) {
-      throw new Error("Failed to save product data");
-    }
-
-    return NextResponse.json({ message: "Product added successfully", data: result }, { status: 201 });
-  } catch (error) {
-    console.error("[POST /api/product]", error instanceof Error ? error.message : "Unknown error");
-    return NextResponse.json({ error: "Failed to save product data" }, { status: 500 });
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    throw new Error("random"); // TEST
-    // Early authorization check
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
-    }
-
-    // Extract and validate URL parameter
-    const url = request.nextUrl.searchParams.get("url")?.trim();
-    if (!url) {
-      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
-    }
-
-    // Fetch and validate product data
-    const product = await fetchAndTransformAmazonProduct(url);
-    if (!isValidProduct(product)) {
-      return NextResponse.json({ error: "Product structure is not valid or URL is incorrect" }, { status: 400 });
-    }
-
-    // Update product in database
-    const result = await updateProduct(product);
-    if (!result) {
-      throw new Error("Failed to update product data");
-    }
-
-    return NextResponse.json({ message: "Product updated successfully", data: result }, { status: 201 });
-  } catch (error) {
-    console.error("[PUT /api/product]", error instanceof Error ? error.message : "Unknown error");
-    return NextResponse.json({ error: "Failed to update product data" }, { status: 500 });
-  }
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    throw new Error("random"); // TEST
-    // 1. Authorization check
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") {
-      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
-    }
-
-    // 2. Input validation
-    const url = request.nextUrl.searchParams.get("url")?.trim();
-    if (!url) {
-      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
-    }
-
-    // 3. Delete operation
-    const result = await deleteProduct(url);
-
-    // 4. Response handling
+    // Use structured clone for deep copying if needed
     return NextResponse.json(
-      result ? { message: "Product deleted", deletedCount: result.deletedCount } : { error: "No product was found" },
-      { status: result ? 200 : 404 }
+      {
+        ...data,
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, max-age=300", // 5 minutes cache
+          ETag: `"${Buffer.from(JSON.stringify({ category, limit, page })).toString("base64")}"`,
+        },
+      }
     );
   } catch (error) {
-    // 5. Error logging and handling
-    console.error("DELETE product error:", error instanceof Error ? error.message : "Unknown error");
+    clearTimeout(timeoutId);
 
-    return NextResponse.json({ error: "Failed to delete product data" }, { status: 500 });
+    if (error instanceof Error) {
+      console.error("Error fetching products:", {
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error && error.message === "Request timeout"
+            ? "Request timed out"
+            : "Failed to fetch product data",
+      },
+      {
+        status: error instanceof Error && error.message === "Request timeout" ? 408 : 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
   }
 }
