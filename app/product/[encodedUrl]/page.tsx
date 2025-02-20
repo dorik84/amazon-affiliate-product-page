@@ -5,25 +5,39 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getProduct } from "@/lib/component-actions";
 import { Suspense } from "react";
 
-export default async function Page({ params }: { params: { encodedUrl: string } }) {
-  const productPromise = getProduct(params.encodedUrl);
-  const product = await productPromise;
+interface PageProps {
+  params: {
+    encodedUrl: string;
+  };
+}
+export default async function ProductDetailPage({ params }: PageProps) {
+  const product = await getProduct(params.encodedUrl).catch((error) => {
+    console.error("[ProductDetailPage]:", error);
+    return null;
+  });
 
-  if (!product) {
+  if (!product?.data) {
     return <ProductNotFound />;
   }
 
-  // Start preloading related products as soon as we have the category
-  preloadRelatedProducts(product.category);
+  const { data } = product;
+
+  // Preload related products in parallel
+  preloadRelatedProducts(data.category);
 
   return (
-    <>
-      <Suspense fallback={<LoadingSpinner />}>
-        <ProductPage product={product} />
-      </Suspense>
-      <Suspense fallback={<LoadingSpinner />}>
-        <RelatedProductsPage category={product.category} />
-      </Suspense>
-    </>
+    <main>
+      <article>
+        <Suspense fallback={<LoadingSpinner aria-label="Loading product details" />}>
+          <ProductPage product={data} />
+        </Suspense>
+      </article>
+
+      <section>
+        <Suspense fallback={<LoadingSpinner aria-label="Loading related products" />}>
+          <RelatedProductsPage category={data.category} />
+        </Suspense>
+      </section>
+    </main>
   );
 }

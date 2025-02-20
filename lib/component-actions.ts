@@ -1,13 +1,6 @@
-import { ProductData } from "@/types/product";
-import { sanitizeProductData } from "./utils";
-import {
-  DeleteProductResponseBody,
-  UpdateProductResponseBody,
-  AddProductResponseBody,
-  GetProductsResponse,
-  GetProductResponse,
-} from "@/types/responses";
+import { DeleteProductResponse, GetProductsResponse } from "@/types/responses";
 import { cache } from "react";
+import { PostProductResponse, PutProductResponse, SuccessApiResponse } from "@/types/api";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -27,9 +20,9 @@ export async function fetcher(endpoint: string, options = {}) {
 // ###########################################################################
 
 const addProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<AddProductResponseBody>> = new Map();
+  let productPromiseMap: Map<String, Promise<PostProductResponse>> = new Map();
 
-  return (url: string): Promise<AddProductResponseBody> => {
+  return (url: string): Promise<PostProductResponse> => {
     if (!url) {
       console.log("component-actions | addProduct | no url provided");
       return Promise.reject({ message: "No url provided" });
@@ -37,7 +30,7 @@ const addProductEnclosure = () => {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | addProduct | start");
-      const promise = fetch(`${baseUrl}/api/product?url=${url}`, {
+      const promise: Promise<PostProductResponse> = fetch(`${baseUrl}/api/product/${url}`, {
         method: "POST",
         cache: "no-store",
       })
@@ -80,9 +73,9 @@ export const addProduct = addProductEnclosure();
 // ###########################################################################
 
 const updateProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<UpdateProductResponseBody>> = new Map();
+  let productPromiseMap: Map<String, Promise<PutProductResponse>> = new Map();
 
-  return (url: string): Promise<UpdateProductResponseBody> => {
+  return (url: string): Promise<PutProductResponse> => {
     if (!url) {
       console.log("component-actions | updateProduct | no url provided");
       return Promise.reject({ message: "No url provided" });
@@ -90,7 +83,7 @@ const updateProductEnclosure = () => {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | updateProduct | start");
-      const promise = fetch(`${baseUrl}/api/product?url=${url}`, {
+      const promise: Promise<PutProductResponse> = fetch(`${baseUrl}/api/product/${url}`, {
         method: "PUT",
         cache: "no-store",
       })
@@ -133,36 +126,50 @@ export const updateProduct = updateProductEnclosure();
 // ###########################################################################
 
 const getProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<GetProductResponse>> = new Map();
+  let productPromiseMap: Map<String, Promise<SuccessApiResponse>> = new Map();
 
   return (url: string) => {
     if (!url) {
       console.log("component-actions | getProduct | no url provided");
-      return null;
+      // Better to throw error and handle in component
+      return Promise.reject(new Error("No url provided"));
     }
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | getProduct | start");
-      productPromiseMap.set(
-        url,
-        fetcher(`/api/product?url=${encodeURIComponent(url)}`, {
-          cache: "no-store",
+      const promise: Promise<SuccessApiResponse> = fetch(`${baseUrl}/api/product/${encodeURIComponent(url)}`, {
+        cache: "no-store",
+      })
+        .then(async (res) => {
+          console.log("component-actions | updateProduct | response received");
+          if (!res.ok) {
+            console.log("component-actions | updateProduct | Network response was not ok");
+            throw new Error((await res.json()).error);
+          }
+          return res.json();
         })
-          .then((productDB) => {
-            productPromiseMap.delete(url);
-            return sanitizeProductData(productDB);
-          })
-          .catch((error) => {
-            productPromiseMap.delete(url);
-            console.log("component-actions | getProduct | error", error);
-            return null;
-          })
-      );
-    } else {
-      console.log("component-actions | getProduct | product data already fetching");
+        .then((productDB: SuccessApiResponse) => {
+          productPromiseMap.delete(url);
+          return productDB;
+        })
+        .catch((error) => {
+          productPromiseMap.delete(url);
+          console.log("component-actions | getProduct | error", error);
+          // Better to throw error and handle in component
+          throw error;
+        });
+
+      productPromiseMap.set(url, promise);
+      return promise;
+    }
+    const existingPromise = productPromiseMap.get(url);
+    if (!existingPromise) {
+      // This should never happen due to the check above, but TypeScript needs it
+      return Promise.reject(new Error("Promise unexpectedly missing"));
     }
 
-    return productPromiseMap.get(url);
+    console.log("component-actions | getProduct | product data already fetching");
+    return existingPromise;
   };
 };
 
@@ -170,47 +177,15 @@ export const getProduct = getProductEnclosure();
 
 // ###########################################################################
 
-// const getRelatedProductsEnclosure = () => {
-//   let productPromise: Promise<ProductData[]> | null = null;
-
-//   return () => {
-//     if (!productPromise) {
-//       console.log("component-actions | getRelatedProducts | start fetching");
-//       productPromise = fetcher("/api/products", {
-//         cache: "no-store",
-//         // next: { revalidate: 60 },
-//       })
-//         .then((productDB) => {
-//           productPromise = null; // Reset the promise after it resolves
-//           console.log("component-actions | getRelatedProducts | success");
-//           return productDB.map(sanitizeProductData).filter((p: ProductData | null) => p != null);
-//         })
-//         .catch((error) => {
-//           productPromise = null; // Reset the promise if there's an error
-//           console.log("component-actions | getRelatedProducts | error", error);
-//           return null;
-//         });
-//     } else {
-//       console.log("component-actions | getRelatedProducts | products data already fetching");
-//     }
-
-//     return productPromise;
-//   };
-// };
-
-// export const getRelatedProducts = getRelatedProductsEnclosure();
-
-// ###########################################################################
-
 const getProductsEnclosure = () => {
   let productsPromiseMap: Map<String, Promise<GetProductsResponse>> = new Map();
 
   return (query?: string): Promise<GetProductsResponse> => {
+    console.log("component-actions | getProducts | start");
     const queryKey = query || "";
 
     if (!productsPromiseMap.has(queryKey)) {
-      console.log("component-actions | getProducts | start");
-      const endpoint = query ? `/api/products?${query}` : "/api/products";
+      const endpoint = query ? `/api/product?${query}` : "/api/product";
       console.log("component-actions | getProducts | endpoint", endpoint);
       const promise = fetch(`${baseUrl}${endpoint}`, {
         cache: "no-store",
@@ -275,12 +250,13 @@ export const getProducts = getProductsEnclosure();
 //       return Promise.reject(error);
 //     });
 // });
+
 // ###########################################################################
 
 function deleteProductEnclosure() {
-  let productPromiseMap: Map<String, Promise<DeleteProductResponseBody>> = new Map();
+  let productPromiseMap: Map<String, Promise<DeleteProductResponse>> = new Map();
 
-  return (url: string): Promise<DeleteProductResponseBody> => {
+  return (url: string): Promise<DeleteProductResponse> => {
     if (!url) {
       console.log("component-actions | deleteProduct | no url provided");
       return Promise.reject({ message: "No url provided" });
@@ -288,7 +264,7 @@ function deleteProductEnclosure() {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | deleteProduct | start");
-      const promise = fetch(`${baseUrl}/api/product?url=${encodeURIComponent(url)}`, {
+      const promise = fetch(`${baseUrl}/api/product/${encodeURIComponent(url)}`, {
         method: "DELETE",
         cache: "no-store",
       })

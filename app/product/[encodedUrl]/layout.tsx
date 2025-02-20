@@ -2,20 +2,24 @@
 
 import React from "react";
 import type { Metadata } from "next";
-import { ProductData } from "@/types/product";
 import { getProduct } from "@/lib/component-actions";
 
 export async function generateMetadata({ params }: { params: { encodedUrl: string } }): Promise<Metadata> {
-  const product = await getProduct(params.encodedUrl);
+  const product = await getProduct(params.encodedUrl).catch((error) => {
+    console.error("[ProductLayout]:", error);
+    return null;
+  });
 
-  if (!product) {
+  if (!product?.data) {
     console.log("No product found in DB");
     return {};
   }
 
+  const { data } = product;
+
   return {
-    title: (product as ProductData).name,
-    description: (product as ProductData).description,
+    title: data.name,
+    description: data.description,
   };
 }
 
