@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import ProductCard from "./RelatedProductCard";
+import ProductCard from "@/components/RelatedProductCard";
 import type { ProductData } from "@/types/product";
 
 export default function RelatedProducts({ relatedProducts }: { relatedProducts: ProductData[] }) {
@@ -9,8 +9,8 @@ export default function RelatedProducts({ relatedProducts }: { relatedProducts: 
   const [scrollWidth, setScrollWidth] = useState(0);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      setScrollWidth(scrollRef.current.scrollWidth / 2);
+    if (scrollRef?.current) {
+      setScrollWidth(scrollRef?.current?.scrollWidth / 2);
     }
   }, [scrollRef]); //Fixed unnecessary dependency
 
