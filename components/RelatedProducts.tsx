@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import ProductCard from "@/components/RelatedProductCard";
+import ProductCard from "@/components/ProductCard";
 import type { ProductData } from "@/types/product";
 
 export default function RelatedProducts({ relatedProducts }: { relatedProducts: ProductData[] }) {

@@ -84,7 +84,7 @@ export default function CarouselThumbnails({ product, selectedIndex, onThumbClic
       <div className="absolute inset-0 bg-gradient-to-r from-background/10 to-background/5 backdrop-blur-sm rounded-lg" />
       <div
         ref={scrollContainerRef}
-        className="relative flex justify-center gap-4 p-4 overflow-x-auto max-h-[120px] rounded-lg scrollbar-thin no-scrollbar scrollbar-thumb-primary scrollbar-track-background/20"
+        className="relative flex justify-start gap-4 p-4 overflow-x-auto max-h-[120px] rounded-lg scrollbar-thin no-scrollbar scrollbar-thumb-primary scrollbar-track-background/20"
       >
         {product.images.map((src, index) => (
           <button
