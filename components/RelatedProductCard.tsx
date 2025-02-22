@@ -34,7 +34,21 @@ export const RelatedProductCard = ({ product, className }: { product: ProductDat
         <ProductImage name={product.name} src={product.images[0]} index={0} style={{ objectFit: "cover" }} />
       </div>
       <div className="p-4">
-        <h3 className="text-xs md:text-lg font-semibold mb-2 line-clamp-2">{product.name}</h3>
+        <TooltipProvider>
+          <Tooltip delayDuration={200}>
+            <TooltipTrigger asChild>
+              <h3 className="text-xs font-semibold mb-1 line-clamp-2 cursor-help">{product.name}</h3>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              sideOffset={5}
+              className="max-w-[180px] break-words text-center z-50"
+              align="center"
+            >
+              <p className="text-xs whitespace-normal">{product.name}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         {/* <p className="text-xs text-gray-600 mb-1">{item.category}</p> */}
         {/* <p className="font-bold mb-2">${item.defaultPrice.toFixed(2)}</p> */}
         <Link href={`/product/${product.url}`} onClick={handleClick} rel="noopener noreferrer">
