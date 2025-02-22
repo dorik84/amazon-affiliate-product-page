@@ -1,4 +1,4 @@
-import { ProductData, VariationData } from "@/types/productData";
+import { ProductData, VariationData } from "@/types/product";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -35,6 +35,7 @@ export const getInitialVariations = (productData: ProductData) => {
   return getInitialVariations;
 };
 
+// NOT USED
 export function deepEqual(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) {
     return true;
@@ -60,11 +61,18 @@ export function deepEqual(obj1: any, obj2: any): boolean {
   return true;
 }
 
-export function sanitizeProductData(obj: any): ProductData {
+export function sanitizeProductData(obj: any): ProductData | null {
+  if (obj === null || typeof obj !== "object") {
+    console.log("utils | sanitizeProductData | Input is not an object");
+    return null;
+  }
+
+  console.log("utils | sanitizeProductData | run");
+
   const sanitized: ProductData = {
-    title: obj.title,
+    name: obj.name,
     description: obj.description,
-    variations: obj.variations.map((variation: any) => ({
+    variations: obj.variations?.map((variation: any) => ({
       name: variation.name,
       price: variation.price,
       image: variation.image,
@@ -74,7 +82,21 @@ export function sanitizeProductData(obj: any): ProductData {
     images: obj.images,
     defaultPrice: obj.defaultPrice,
     url: obj.url,
+    category: obj.category,
   };
 
   return sanitized;
+}
+
+// Helper function to validate product structure
+export function isValidProduct(product: any): boolean {
+  return Boolean(
+    product &&
+      product.name &&
+      product.url &&
+      Array.isArray(product.images) &&
+      product.images.length > 0 &&
+      product.defaultPrice &&
+      product.category
+  );
 }

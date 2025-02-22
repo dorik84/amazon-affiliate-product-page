@@ -1,9 +1,10 @@
 "use client";
 
-import type { VariationData } from "@/types/productData";
+import type { VariationData } from "@/types/product";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CustomSelectItem } from "@/components/ui/custom-select-item";
 import Image from "next/image";
+import ProductImage from "./ProductImage";
 
 interface ProductVariationsProps {
   variations: VariationData[] | null | undefined;
@@ -45,12 +46,11 @@ export default function ProductVariations({
               <SelectValue>
                 {typeVariations[selectedVariations[type]]?.image && (
                   <div className="relative w-6 h-6 mr-2 inline-block align-middle">
-                    <Image
-                      src={typeVariations[selectedVariations[type]]?.image || "/placeholder.svg"}
-                      alt={typeVariations[selectedVariations[type]]?.name}
-                      layout="fill"
+                    <ProductImage
+                      name={typeVariations[selectedVariations[type]]?.name}
+                      src={typeVariations[selectedVariations[type]]?.image}
+                      index={0}
                       className="rounded-sm"
-                      style={{ objectFit: "cover" }}
                     />
                   </div>
                 )}

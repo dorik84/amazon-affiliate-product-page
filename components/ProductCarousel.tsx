@@ -2,21 +2,23 @@
 
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import type { ProductData } from "@/types/productData";
-import CarouselThumbnails from "./CarouselThumbnails";
+import type { ProductData } from "@/types/product";
+import CarouselThumbnails from "@/components/ProductCarouselThumbnails";
+import ProductImage from "@/components/ProductImage";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface ProductCarouselProps {
-  product: ProductData | null;
+  product: ProductData | undefined;
 }
 
 export default function ProductCarousel({ product }: ProductCarouselProps) {
-  if (!product?.images) return null;
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [emblaRef, emblaApi] = useEmblaCarousel();
+  const [emblaRef, emblaApi] = useEmblaCarousel({ align: "start" });
+
+  if (!product?.images) return null;
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
@@ -35,44 +37,30 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
-  // Add event listener for slide changes when emblaApi is available
   useEffect(() => {
-    if (emblaApi) {
-      emblaApi.on("select", onSelect);
-      return () => emblaApi.off("select", onSelect);
-    }
+    if (!emblaApi) return;
+    emblaApi.on("select", onSelect);
+    return () => emblaApi.off("select", onSelect);
   }, [emblaApi, onSelect]);
 
   return (
     <div className="flex flex-col-reverse items-center sm:items-start gap-4 mx-auto md:mx-0">
-      {/* Thumbnails */}
       <CarouselThumbnails product={product} selectedIndex={selectedIndex} onThumbClick={onThumbClick} />
 
-      {/* Main carousel */}
-      <div className="relative aspect-video w-full order-1 sm:order-2 sm:flex-grow">
-        <div className="overflow-hidden h-full" ref={emblaRef}>
-          <div className="flex h-full">
+      <div className="relative w-full order-1 sm:order-2 sm:flex-grow">
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex h-[400px]">
             {product?.images.map((src, index) => (
               <Dialog key={index}>
                 <DialogTrigger asChild>
                   <div className="flex-[0_0_100%] min-w-0 relative h-full cursor-pointer">
-                    <Image
-                      src={src || "/placeholder.svg"}
-                      alt={`${product.title} - Image ${index + 1}`}
-                      fill
-                      priority={index === 0}
-                      className="object-contain"
-                    />
+                    <ProductImage name={product.name} src={src} index={index} priority={index === 0} />
                   </div>
                 </DialogTrigger>
-                <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+                <DialogContent aria-describedby={undefined} className="max-w-[90vw] max-h-[90vh] p-4">
+                  <DialogTitle className="text-left pr-14 pl-10">{product.name}</DialogTitle>
                   <div className="relative w-full h-full min-h-[80vh]">
-                    <Image
-                      src={src || "/placeholder.svg"}
-                      alt={`${product.title} - Image ${index + 1}`}
-                      fill
-                      className="object-contain"
-                    />
+                    <ProductImage name={product.name} src={src} index={index} priority={index === 0} />
                   </div>
                 </DialogContent>
               </Dialog>
@@ -82,7 +70,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute top-1/2 left-4 transform -translate-y-1/2"
+          className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-primary/30 sm:bg-primary/10 md:bg-primary/30 rounded-full shadow-md"
           onClick={scrollPrev}
           aria-label="Previous image"
         >
@@ -91,7 +79,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
         <Button
           variant="outline"
           size="icon"
-          className="absolute top-1/2 right-4 transform -translate-y-1/2"
+          className={`absolute top-1/2 right-2 transform -translate-y-1/2 bg-primary/30 sm:bg-primary/10 md:bg-primary/30 rounded-full shadow-md`}
           onClick={scrollNext}
           aria-label="Next image"
         >

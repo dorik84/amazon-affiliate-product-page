@@ -1,7 +1,21 @@
-import type { ProductData, VariationData } from "@/types/productData";
+import type { ProductData, VariationData } from "@/types/product";
 import { JSDOM, VirtualConsole } from "jsdom";
 
+function sanitizeHTML(text: string): string {
+  return text.replace(/[&<>"']/g, (match) => {
+    const entities: { [key: string]: string } = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+    return entities[match];
+  });
+}
+
 export async function transformProduct(response: any, url: string): Promise<ProductData> {
+  console.log("productData-adapter | transformProduct | start");
   try {
     const html = await response.text();
     // Save HTML to file for debugging
@@ -23,16 +37,16 @@ export async function transformProduct(response: any, url: string): Promise<Prod
 
     // Transform HTML content into structured data
     const product: ProductData = {
-      title: "",
+      name: "",
       description: "",
       variations: [],
       images: [],
       defaultPrice: 0,
       url: "",
+      category: "",
     };
-
-    product.url = url;
-
+    product.url = encodeURIComponent(url);
+    console.log("productData-adapter | transformProduct | product.url", product.url);
     // Extract default price from the apex_desktop container
     const apexDesktop = doc.querySelector("#apex_desktop");
     if (apexDesktop) {
@@ -44,10 +58,14 @@ export async function transformProduct(response: any, url: string): Promise<Prod
         product.defaultPrice = whole + fraction / 100;
       }
     }
-
-    // Extract title from h1#title span
+    //Extract category from breadcrumbs
+    product.category =
+      doc.querySelector("#nav-subnav")?.querySelector("span.nav-a-content")?.textContent?.trim() ||
+      doc.querySelector("#desktop-breadcrumbs_feature_div")?.querySelector("a")?.textContent?.trim();
+    console.log("product.category=", product.category);
+    // Extract name from h1#title span
     const titleElement = doc.querySelector("#title span");
-    product.title = titleElement?.textContent?.trim() || "";
+    product.name = titleElement?.textContent?.trim() || "";
 
     // Extract description from product description and facts
     let description = "";
@@ -55,7 +73,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
     // Get information from feature bullets
     const featureBulletsDiv = doc.querySelector("#feature-bullets");
     if (featureBulletsDiv) {
-      const title = featureBulletsDiv.querySelector("h1")?.textContent?.trim();
+      const title = featureBulletsDiv.querySelector("h1")?.textContent?.trim() || "About product";
       const bulletItems = featureBulletsDiv.querySelectorAll("li span");
       if (bulletItems.length > 0) {
         description += `<h3 class="product-facts-title">${title}</h3>\n<ul>\n`;
@@ -91,6 +109,70 @@ export async function transformProduct(response: any, url: string): Promise<Prod
         });
         description += "</ul>\n\n";
       }
+    }
+
+    // Get the main product details container
+    const productDetailsDiv = doc.querySelector("#productDetails_feature_div");
+
+    if (productDetailsDiv) {
+      // Find all elements (h1 and tables) in order of appearance
+      const allElements = productDetailsDiv.querySelectorAll("h1, table");
+      let currentHeader = "";
+
+      // Iterate through elements in order
+      allElements.forEach((element) => {
+        if (element.tagName.toLowerCase() === "h1") {
+          // Store the header text for the next table
+          currentHeader = element.textContent?.trim() || "";
+        } else if (element.tagName.toLowerCase() === "table") {
+          const tableId = element.getAttribute("id") || "";
+
+          // Only process tables with productDetails_techSpec in their id
+          if (tableId.includes("productDetails_techSpec")) {
+            // Add the stored header
+            if (currentHeader) {
+              description += `<h3 class="product-facts-title">${currentHeader}</h3>`;
+            }
+
+            // Start new table
+            description +=
+              '<table class="w-full text-sm border-separate border-spacing-0 rounded-lg overflow-hidden"><tbody className="divide-y">';
+
+            // Process each row in the table
+            element.querySelectorAll("tr").forEach((row) => {
+              const th = row.querySelector("th")?.textContent?.trim();
+              const td = row.querySelector("td")?.textContent?.trim();
+
+              if (th && td) {
+                description += `
+              <tr class="hover:bg-muted/50 transition-colors">
+                <th class="
+                  px-4 py-1 
+                  text-left 
+                  font-medium 
+                  text-muted-foreground 
+                  text-xs sm:text-sm
+                  bg-muted/20 
+                  w-1/3
+                  border-r
+                  border-border/50
+                  ">${sanitizeHTML(th)}</th>
+                <td class="
+                  px-4 py-1 
+                  text-foreground 
+                  text-xs sm:text-sm
+                  w-2/3
+                    ">${sanitizeHTML(td)}</td>
+              </tr>`;
+              }
+            });
+
+            description += "</table>";
+          }
+          // Reset the header after processing a table (regardless of its type)
+          currentHeader = "";
+        }
+      });
     }
 
     // Get additional information from product facts

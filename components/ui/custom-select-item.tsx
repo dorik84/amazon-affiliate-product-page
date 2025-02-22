@@ -1,12 +1,12 @@
-import React from 'react'
-import { SelectItem } from "@/components/ui/select"
-import Image from 'next/image'
+import React from "react";
+import { SelectItem } from "@/components/ui/select";
+import Image from "next/image";
 
 interface CustomSelectItemProps {
-  value: string
-  disabled?: boolean
-  image?: string
-  children: React.ReactNode
+  value: string;
+  disabled?: boolean;
+  image?: string;
+  children: React.ReactNode;
 }
 
 export function CustomSelectItem({ value, disabled, image, children }: CustomSelectItemProps) {
@@ -18,8 +18,8 @@ export function CustomSelectItem({ value, disabled, image, children }: CustomSel
             <Image
               src={image || "/placeholder.svg"}
               alt={children?.toString() || ""}
-              layout="fill"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
               className="rounded-sm"
             />
           </div>
@@ -27,5 +27,5 @@ export function CustomSelectItem({ value, disabled, image, children }: CustomSel
         <span>{children}</span>
       </div>
     </SelectItem>
-  )
+  );
 }

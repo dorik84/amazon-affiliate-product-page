@@ -1,4 +1,4 @@
-import { ProductData, VariationData } from "@/types/productData";
+import { ProductData, VariationData } from "@/types/product";
 import { Schema, model, models, Document } from "mongoose";
 
 const variationSchema = new Schema<VariationData>({
@@ -11,12 +11,13 @@ const variationSchema = new Schema<VariationData>({
 
 const productSchema = new Schema<ProductData>(
   {
-    title: { type: String, required: true },
+    name: { type: String, required: true },
     description: { type: String, required: true },
     variations: { type: [variationSchema], required: true }, // Using the sub-schema for variations
     images: { type: [String], required: true }, // Array of strings for images
     defaultPrice: { type: Number, required: true },
     url: { type: String, required: true },
+    category: { type: String, required: false },
   },
   {
     timestamps: true,
