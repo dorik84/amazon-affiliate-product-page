@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, User } from "lucide-react";
+import { sendGAEvent } from "@/lib/analytics";
 
 export default function ProfileDropdown() {
   const { data: session, status } = useSession();
@@ -26,6 +27,15 @@ export default function ProfileDropdown() {
     setImageLoaded(true);
   };
 
+  function handleSignIn(): void {
+    sendGAEvent("login", "User Interaction", "Login", undefined);
+    signIn();
+  }
+
+  function handleSignOut(): void {
+    sendGAEvent("logout", "User Interaction", "Logout", undefined);
+    signOut();
+  }
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -72,12 +82,12 @@ export default function ProfileDropdown() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
+            <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
               Log out
             </DropdownMenuItem>
           </>
         ) : (
-          <DropdownMenuItem className="cursor-pointer" onClick={() => signIn()}>
+          <DropdownMenuItem className="cursor-pointer" onClick={handleSignIn}>
             Log in
           </DropdownMenuItem>
         )}

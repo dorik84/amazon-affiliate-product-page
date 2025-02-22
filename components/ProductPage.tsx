@@ -9,6 +9,7 @@ import { useState } from "react";
 import type { ProductData } from "@/types/product";
 import { getInitialVariations } from "@/lib/utils";
 import { RedirectIcon } from "@/components/RedirectIcon";
+import { sendGAEvent } from "@/lib/analytics";
 
 export default function ProductPage({ product }: { product: ProductData | undefined }) {
   if (!product) return null;
@@ -20,6 +21,12 @@ export default function ProductPage({ product }: { product: ProductData | undefi
       ...prev,
       [type]: index,
     }));
+    sendGAEvent("select_content", "Product Interaction", "Variation Change", `${type}:${index}`);
+  };
+
+  const onAmazonBtnClick = () => {
+    sendGAEvent("generate_lead", "Product Interaction", "Amazon Button Click", product.url);
+    window.open(decodeURIComponent(product?.url || ""), "_blank");
   };
 
   // Get the current selected variation's price
@@ -54,7 +61,7 @@ export default function ProductPage({ product }: { product: ProductData | undefi
                 See Price on Amazon
               </p>
 
-              <AnimatedButton size="lg" onClick={() => window.open(decodeURIComponent(product?.url || ""), "_blank")}>
+              <AnimatedButton size="lg" onClick={onAmazonBtnClick}>
                 {/* <Image src="/amazon-icon.svg" alt="Amazon" width={24} height={24} className="w-6" /> */}
                 View Product on Amazon
                 <RedirectIcon />
