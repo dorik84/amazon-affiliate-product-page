@@ -50,7 +50,6 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
       <div className="relative w-full order-1 sm:order-2 sm:flex-grow">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex h-[400px]">
-            {/* <div className="flex h-[400px] sm:h-[500px] md:h-[600px]"> */}
             {product?.images.map((src, index) => (
               <Dialog key={index}>
                 <DialogTrigger asChild>
@@ -58,7 +57,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
                     <ProductImage name={product.name} src={src} index={index} priority={index === 0} />
                   </div>
                 </DialogTrigger>
-                <DialogContent aria-describedby={undefined} className="max-w-[90vw] max-h-[90vh] p-0">
+                <DialogContent aria-describedby={undefined} className="max-w-[90vw] max-h-[90vh] p-4">
                   <DialogTitle className="text-left pr-14 pl-10">{product.name}</DialogTitle>
                   <div className="relative w-full h-full min-h-[80vh]">
                     <ProductImage name={product.name} src={src} index={index} priority={index === 0} />

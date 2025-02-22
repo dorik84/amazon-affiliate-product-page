@@ -27,7 +27,7 @@ export function PopularItems({ popularItems }: { popularItems: ProductData[] | u
   return (
     <section className="bg-background py-8">
       <div className="container mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-8">Popular Items</h2>
+        <h2 className="text-3xl font-bold text-center mb-8">Top Selections</h2>
         {/* Desktop version */}
         {isDesktop && <DesktopPopularItems key={key} items={popularItems} />}
         {/* Mobile version */}

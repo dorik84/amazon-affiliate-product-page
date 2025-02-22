@@ -56,11 +56,7 @@ export function MobilePopularItems({ items }: { items: ProductData[] }) {
 
   return (
     <div className="relative w-full overflow-hidden px-4" onTouchStart={handleTouchStart}>
-      <div
-        ref={slideRef}
-        className="flex transition-transform duration-300 ease-in-out pb-4"
-        style={{ width: `${totalSlides * 100}%` }}
-      >
+      <div ref={slideRef} className="flex transition-transform duration-300 ease-in-out pb-4">
         {Array.from({ length: totalSlides }).map((_, slideIndex) => (
           <div key={slideIndex} className="w-full flex-shrink-0">
             <div className="grid grid-cols-2 gap-4 p-2">

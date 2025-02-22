@@ -28,7 +28,7 @@ export const RelatedProductCard = ({ product, className }: { product: ProductDat
     <motion.div
       whileHover={{ scale: 1.05 }}
       transition={{ duration: 0.2 }}
-      className={cn("flex-shrink-0  rounded-lg overflow-hidden shadow-custom-shadow ", className)}
+      className={cn("flex-shrink-0  rounded-lg shadow-custom-shadow ", className)}
     >
       <div className="relative h-24 md:h-48">
         <ProductImage name={product.name} src={product.images[0]} index={0} style={{ objectFit: "cover" }} />
