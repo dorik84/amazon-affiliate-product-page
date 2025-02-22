@@ -10,9 +10,9 @@ interface PageProps {
     encodedUrl: string;
   };
 }
-export default async function ProductDetailPage({ params }: PageProps) {
+export default async function Page({ params }: PageProps) {
   const product = await getProduct(params.encodedUrl).catch((error) => {
-    console.error("[ProductDetailPage]:", error);
+    console.error("[Product / [encodedUrl]/ Page]:", error);
     return null;
   });
 
