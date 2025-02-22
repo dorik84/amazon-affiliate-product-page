@@ -9,8 +9,9 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { sendGAEvent } from "@/lib/analytics";
 
-export const RelatedProductCard = ({ product, className }: { product: ProductData; className?: string }) => {
+export const ProductCard = ({ product, className }: { product: ProductData; className?: string }) => {
   const [isClicked, setIsClicked] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export const RelatedProductCard = ({ product, className }: { product: ProductDat
 
   const handleClick = () => {
     setIsClicked(true);
+    sendGAEvent("product_view", "Product Interaction", "Product View Mobile or Related", product.url);
   };
 
   return (
@@ -72,4 +74,4 @@ export const RelatedProductCard = ({ product, className }: { product: ProductDat
   );
 };
 
-export default RelatedProductCard;
+export default ProductCard;
