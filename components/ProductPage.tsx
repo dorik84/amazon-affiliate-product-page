@@ -3,7 +3,6 @@
 import ProductCarousel from "@/components/ProductCarousel";
 import ProductDescription from "@/components/ProductDescription";
 import ProductVariations from "@/components/ProductVariations";
-import Image from "next/image";
 import { AnimatedButton } from "@/components/AnimatedButton";
 import { useState } from "react";
 import type { ProductData } from "@/types/product";
