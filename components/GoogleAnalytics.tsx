@@ -47,9 +47,14 @@ export function GoogleAnalytics({ gaId = GOOGLE_ANALYTICS_ID }: { gaId?: string 
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const url = pathname + searchParams.toString();
+    const url = pathname;
+    const params: { [key: string]: string } = {};
+    searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
     window.gtag?.("event", "page_view", {
       page_path: url,
+      page_query_params: params,
     });
   }, [pathname, searchParams]);
 

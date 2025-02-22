@@ -18,7 +18,3 @@ export const DesktopPopularItems = ({ items }: { items: ProductData[] }) => {
     </div>
   );
 };
-
-// 0,2 + 0,0
-//2,4 + 0,2
-//4,6 + 0,4
