@@ -7,17 +7,23 @@ import { unstable_cache } from "next/cache";
 import { transformProduct } from "@/lib/productData-adapter";
 import { DeleteResult } from "mongoose";
 import { GetProductsResponse } from "@/types/responses";
+import clientPromise from "@/db/mongodb";
+import { ReturnDocument } from "mongodb";
 
 export async function getProducts(limit = 20, page = 1, category?: string): Promise<GetProductsResponse> {
   const getCachedProducts = unstable_cache(
     async (limit, page, category) => {
       try {
-        await dbConnect();
+        const client = await clientPromise;
+        const db = client.db();
+        const collection = db.collection("products");
+
         const query = category ? { category } : {};
-        const data = (await Product.find(query)
-          .limit(limit * 1)
+        const data = await collection
+          .find(query)
+          .limit(limit)
           .skip((page - 1) * limit)
-          .lean()) as ProductData[] | [];
+          .toArray();
 
         if (!data.length) {
           console.log("server-actions | getProducts | No products found in DB for category:", category);
@@ -29,7 +35,7 @@ export async function getProducts(limit = 20, page = 1, category?: string): Prom
           };
         }
 
-        const count = await Product.countDocuments(query);
+        const count = await collection.countDocuments(query);
 
         console.log("server-actions | getProducts | products fetched from DB for category:", category);
         return {
@@ -53,13 +59,15 @@ export async function getProducts(limit = 20, page = 1, category?: string): Prom
 }
 
 // ###########################################################################
-
 export async function getProduct(url: string): Promise<ProductData | null> {
   const getCachedProduct = unstable_cache(
     async (url: string) => {
       try {
-        await dbConnect();
-        const data = (await Product.findOne({ url }).lean()) as ProductData | null;
+        const client = await clientPromise;
+        const db = client.db();
+        const collection = db.collection("products");
+
+        const data = (await collection.findOne({ url })) as ProductData | null;
 
         if (!data) {
           console.log("server-actions | getProduct | No products found in DB");
@@ -90,15 +98,20 @@ export async function addProduct(product: ProductData | undefined): Promise<Prod
   }
 
   try {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection("products");
+
     const query = { url: product.url };
     const update = { $set: product };
-    const options = {
-      new: true,
-      upsert: true,
-      lean: true, // Returns a plain JavaScript object instead of a Mongoose document
-    };
 
-    const newProduct = (await Product.findOneAndUpdate(query, update, options)) as ProductData | null;
+    const options = {
+      returnDocument: ReturnDocument.AFTER,
+      upsert: true,
+    };
+    const result = await collection.findOneAndUpdate(query, update, options);
+    const newProduct = result.value as ProductData | null;
+
     if (!newProduct) {
       console.log("server-actions | addProduct | No products added in DB");
       return null;
@@ -112,7 +125,6 @@ export async function addProduct(product: ProductData | undefined): Promise<Prod
 }
 
 // ###########################################################################
-
 export async function updateProduct(product: ProductData | undefined): Promise<ProductData | null> {
   if (!product) {
     console.error("server-actions | updateProduct | No product data provided");
@@ -120,15 +132,20 @@ export async function updateProduct(product: ProductData | undefined): Promise<P
   }
 
   try {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection("products");
+
     const query = { url: product.url };
     const update = { $set: product };
     const options = {
-      new: true,
+      returnDocument: ReturnDocument.AFTER,
       upsert: true,
-      lean: true, // Returns a plain JavaScript object instead of a Mongoose document
     };
 
-    const updatedProduct = (await Product.findOneAndUpdate(query, update, options)) as ProductData | null;
+    const result = await collection.findOneAndUpdate(query, update, options);
+    const updatedProduct = result.value as ProductData | null;
+
     if (!updatedProduct) {
       console.log("server-actions | updateProduct | No products updated in DB");
       return null;
@@ -150,8 +167,11 @@ export async function deleteProduct(url: string): Promise<DeleteResult | null> {
   }
 
   try {
-    // Use lean() for better performance when we don't need a full Mongoose document
-    const result = (await Product.deleteOne({ url }).lean()) as DeleteResult;
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection("products");
+
+    const result = await collection.deleteOne({ url });
 
     if (result.deletedCount === 0) {
       console.warn(`server-actions | deleteProduct | No product found with URL: ${url}`);
