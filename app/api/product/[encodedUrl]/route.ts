@@ -1,4 +1,3 @@
-import { authOptions } from "@/auth";
 import {
   deleteProduct,
   fetchAndTransformAmazonProduct,
@@ -7,7 +6,6 @@ import {
   updateProduct,
 } from "@/lib/server-actions";
 import { isValidProduct } from "@/lib/utils";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { GetProductResponse, PostProductResponse, PutProductResponse, DeleteProductResponse } from "@/types/api";
 import { verifyToken } from "@/lib/auth";

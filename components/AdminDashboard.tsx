@@ -9,7 +9,7 @@ import type { ProductData } from "@/types/product";
 import { deleteProduct, updateProduct, addProduct } from "@/lib/component-actions";
 import { toast } from "sonner";
 import { CheckCircle2Icon, LoaderIcon, XCircleIcon } from "lucide-react";
-import { GetProductsResponse } from "@/types/responses";
+import type { GetProductsResponse } from "@/types/responses";
 
 const toastConfig = {
   loading: (
@@ -84,17 +84,17 @@ export function AdminDashboard({
 
   const handleUpdateProduct = useCallback(
     async (url: string) => {
-      setLoading((prev) => ({ ...prev, add: true }));
+      setLoading((prev) => ({ ...prev, [url]: true }));
       try {
-        const encodedUrl = encodeURIComponent(url);
-        const productPromise = updateProduct(encodedUrl);
+        // const encodedUrl = encodeURIComponent(url);
+        const productPromise = updateProduct(url);
         toast.promise(productPromise, toastConfig);
         const updatedProduct = await productPromise;
         updateProductInList(updatedProduct.data as ProductData);
       } catch (error) {
         console.error("Error updating product:", error);
       } finally {
-        setLoading((prev) => ({ ...prev, add: false }));
+        setLoading((prev) => ({ ...prev, [url]: false }));
       }
     },
     [updateProductInList]
@@ -143,8 +143,6 @@ export function AdminDashboard({
       ),
     [sortedProducts, searchTerm]
   );
-
-  const cachedLoading = useMemo(() => loading, [loading]);
 
   return (
     <div className="p-4">
