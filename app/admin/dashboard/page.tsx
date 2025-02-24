@@ -12,7 +12,7 @@ export default async function DashboardPage() {
     redirect("/api/auth/signin?callbackUrl=%2Fadmin%2Fdashboard");
   }
   if (session.user.role !== "ADMIN") {
-    sendGAEvent("Unauthorized access", "unauthorized-access", "admin/dashboard", session.user.name);
+    sendGAEvent("Unauthorized access", "unauthorized-access", "admin/dashboard", session?.user?.name || "");
     redirect("/unauthorized");
   }
   const response = await getProducts();

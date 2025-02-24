@@ -1,3 +1,5 @@
+"use client";
+
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ProductData } from "@/types/product";
 
