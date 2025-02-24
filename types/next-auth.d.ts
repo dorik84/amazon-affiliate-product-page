@@ -22,10 +22,3 @@ declare module "next-auth/jwt" {
     role?: string;
   }
 }
-
-// interface Session {
-//   user: {
-//     id: string;
-//     role: 'ADMIN' | 'USER' | 'MANAGER';
-//   } & DefaultSession['user']
-// }
