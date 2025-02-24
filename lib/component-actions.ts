@@ -1,14 +1,14 @@
 import { DeleteProductResponse, GetProductsResponse } from "@/types/responses";
-import { PostProductResponse, PutProductResponse, SuccessApiResponse } from "@/types/api";
+import { ApiResponse, PostProductResponse, PutProductResponse, SuccessApiResponse } from "@/types/api";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // ###########################################################################
 
 const addProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<PostProductResponse>> = new Map();
+  let productPromiseMap: Map<String, Promise<ApiResponse>> = new Map();
 
-  return (url: string): Promise<PostProductResponse> => {
+  return (url: string): Promise<ApiResponse> => {
     if (!url) {
       console.log("component-actions | addProduct | no url provided");
       return Promise.reject({ message: "No url provided" });
@@ -16,7 +16,7 @@ const addProductEnclosure = () => {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | addProduct | start");
-      const promise: Promise<PostProductResponse> = fetch(`${baseUrl}/api/product/${url}`, {
+      const promise = fetch(`${baseUrl}/api/product/${url}`, {
         method: "POST",
         cache: "no-store",
       })
@@ -59,9 +59,9 @@ export const addProduct = addProductEnclosure();
 // ###########################################################################
 
 const updateProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<PutProductResponse>> = new Map();
+  let productPromiseMap: Map<String, Promise<ApiResponse>> = new Map();
 
-  return (url: string): Promise<PutProductResponse> => {
+  return (url: string): Promise<ApiResponse> => {
     if (!url) {
       console.log("component-actions | updateProduct | no url provided");
       return Promise.reject({ message: "No url provided" });
@@ -69,7 +69,7 @@ const updateProductEnclosure = () => {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | updateProduct | start");
-      const promise: Promise<PutProductResponse> = fetch(`${baseUrl}/api/product/${url}`, {
+      const promise: Promise<ApiResponse> = fetch(`${baseUrl}/api/product/${url}`, {
         method: "PUT",
         cache: "no-store",
       })
