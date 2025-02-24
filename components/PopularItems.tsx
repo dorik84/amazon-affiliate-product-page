@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MobilePopularItems } from "./MobilePopularItems";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { ProductData } from "@/types/product";
 import { DesktopPopularItems } from "@/components/DesktopPopularItems";
 import ProductNotFound from "@/components/ProductNotFound";
