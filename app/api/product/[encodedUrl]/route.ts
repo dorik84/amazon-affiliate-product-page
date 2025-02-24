@@ -10,6 +10,7 @@ import { isValidProduct } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { GetProductResponse, PostProductResponse, PutProductResponse, DeleteProductResponse } from "@/types/api";
+import { verifyToken } from "@/lib/auth";
 
 // #######################################################################
 
@@ -47,9 +48,14 @@ export async function POST(
 ): Promise<PostProductResponse> {
   try {
     // throw new Error("random"); // TEST
+
     // Early authorization check
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") {
+    const sessionToken = await verifyToken(request);
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    if (sessionToken?.user?.role !== "ADMIN") {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
@@ -88,8 +94,12 @@ export async function PUT(
   try {
     // throw new Error("random"); // TEST
     // Early authorization check
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") {
+    const sessionToken = await verifyToken(request);
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    if (sessionToken?.user?.role !== "ADMIN") {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
@@ -126,8 +136,12 @@ export async function DELETE(
   try {
     // throw new Error("random"); // TEST
     // 1. Authorization check
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") {
+    const sessionToken = await verifyToken(request);
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    if (sessionToken?.user?.role !== "ADMIN") {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
