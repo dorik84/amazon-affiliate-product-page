@@ -3,20 +3,22 @@ import ProductPage from "@/components/ProductPage";
 import RelatedProductsPage, { preloadRelatedProducts } from "@/components/RelatedProductsPage";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getProduct } from "@/lib/component-actions";
+import type { ApiResponse } from "@/types/api";
 import { Suspense } from "react";
 
 interface PageProps {
   params: {
-    encodedUrl: string;
+    id: string;
   };
 }
 export default async function Page({ params }: PageProps) {
-  const product = await getProduct(params.encodedUrl).catch((error) => {
+  const product: ApiResponse | null = await getProduct(params.id).catch((error) => {
     console.error("[Product / [encodedUrl]/ Page]:", error);
     return null;
   });
+  console.log("product/Page.tsx | product", product);
 
-  if (!product?.data) {
+  if (!product || !product.data) {
     return <ProductNotFound />;
   }
 
