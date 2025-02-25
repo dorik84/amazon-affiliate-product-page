@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    if (sessionToken?.user?.role !== "ADMIN") {
+    if (sessionToken.role !== "ADMIN") {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
@@ -87,7 +87,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    if (sessionToken?.user?.role !== "ADMIN") {
+    if (sessionToken.role !== "ADMIN") {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 

@@ -106,7 +106,7 @@ export async function POST(request: NextRequest): Promise<PostProductResponse> {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    if (sessionToken?.user?.role !== "ADMIN") {
+    if (sessionToken?.role !== "ADMIN") {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
