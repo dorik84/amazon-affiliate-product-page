@@ -14,7 +14,7 @@ function sanitizeHTML(text: string): string {
   });
 }
 
-export async function transformProduct(response: any, url: string): Promise<ProductData> {
+export async function transformProduct(response: any, url: string): Promise<Omit<ProductData, "id">> {
   console.log("productData-adapter | transformProduct | start");
   try {
     const html = await response.text();
@@ -61,8 +61,9 @@ export async function transformProduct(response: any, url: string): Promise<Prod
     //Extract category from breadcrumbs
     product.category =
       doc.querySelector("#nav-subnav")?.querySelector("span.nav-a-content")?.textContent?.trim() ||
-      doc.querySelector("#desktop-breadcrumbs_feature_div")?.querySelector("a")?.textContent?.trim();
-    console.log("product.category=", product.category);
+      doc.querySelector("#desktop-breadcrumbs_feature_div")?.querySelector("a")?.textContent?.trim() ||
+      "";
+
     // Extract name from h1#title span
     const titleElement = doc.querySelector("#title span");
     product.name = titleElement?.textContent?.trim() || "";
