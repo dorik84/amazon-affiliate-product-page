@@ -57,13 +57,13 @@ export const authOptions = {
   jwt: {
     // Use a custom encode/decode if needed
     async encode({ secret, token }) {
-      console.log("Encoding token:", token);
+      // console.log("Encoding token:", token);
       return jwt.sign(token, secret, {
         algorithm: "HS256",
       });
     },
     async decode({ secret, token }) {
-      console.log("Decoding token:", token);
+      // console.log("Decoding token:", token);
       return jwt.verify(token, secret);
     },
   },
