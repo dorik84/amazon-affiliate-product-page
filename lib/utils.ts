@@ -1,4 +1,4 @@
-import { ProductData, VariationData } from "@/types/product";
+import { ProductData } from "@/types/product";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -25,7 +25,7 @@ export function getRandomUserAgent() {
 export const getInitialVariations = (productData: ProductData) => {
   if (!productData) return {};
   const getInitialVariations: Record<string, number> = {};
-  productData.variations.forEach((variation: VariationData) => {
+  productData.variations.forEach((variation) => {
     const type = variation.type || "default";
     if (!getInitialVariations[type]) {
       getInitialVariations[type] = 0;
@@ -34,69 +34,3 @@ export const getInitialVariations = (productData: ProductData) => {
 
   return getInitialVariations;
 };
-
-// NOT USED
-export function deepEqual(obj1: any, obj2: any): boolean {
-  if (obj1 === obj2) {
-    return true;
-  }
-
-  if (obj1 == null || obj2 == null || typeof obj1 !== "object" || typeof obj2 !== "object") {
-    return false;
-  }
-
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (const key of keys1) {
-    if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-export function sanitizeProductData(obj: any): ProductData | null {
-  if (obj === null || typeof obj !== "object") {
-    console.log("utils | sanitizeProductData | Input is not an object");
-    return null;
-  }
-
-  console.log("utils | sanitizeProductData | run");
-
-  const sanitized: ProductData = {
-    name: obj.name,
-    description: obj.description,
-    variations: obj.variations?.map((variation: any) => ({
-      name: variation.name,
-      price: variation.price,
-      image: variation.image,
-      type: variation.type,
-      disabled: variation.disabled,
-    })),
-    images: obj.images,
-    defaultPrice: obj.defaultPrice,
-    url: obj.url,
-    category: obj.category,
-  };
-
-  return sanitized;
-}
-
-// Helper function to validate product structure
-export function isValidProduct(product: any): boolean {
-  return Boolean(
-    product &&
-      product.name &&
-      product.url &&
-      Array.isArray(product.images) &&
-      product.images.length > 0 &&
-      product.defaultPrice &&
-      product.category
-  );
-}
