@@ -1,5 +1,7 @@
-import { getProducts } from "@/lib/server-actions";
-import { ProductsResponse } from "@/types/api";
+import { verifyToken } from "@/lib/auth";
+import { addProduct, fetchAndTransformAmazonProduct, getProducts } from "@/lib/server-actions";
+
+import { PostProductResponse, ProductsResponse } from "@/types/api";
 import { GetProductsResponse } from "@/types/responses";
 import { NextRequest, NextResponse } from "next/server";
 import { cache } from "react";
@@ -88,5 +90,46 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsRe
         status: error instanceof Error && error.message === "Request timeout" ? 408 : 500,
       }
     );
+  }
+}
+
+// #######################################################################
+
+export async function POST(request: NextRequest): Promise<PostProductResponse> {
+  try {
+    console.log("[POST /api/product] | request ", request);
+    // throw new Error("random"); // TEST
+
+    // Early authorization check
+    const sessionToken = await verifyToken(request);
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    if (sessionToken?.user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
+    // Extract and validate URL parameter
+    const { searchParams } = new URL(request.url);
+    console.log("POST | searchParams", searchParams);
+    const url = searchParams.get("encodedUrl");
+    if (!url) {
+      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
+    }
+
+    // Fetch and validate product data
+    const product = await fetchAndTransformAmazonProduct(url);
+
+    // Update product in database
+    const result = await addProduct(product);
+    if (!result) {
+      throw new Error("Failed to save product data");
+    }
+
+    return NextResponse.json({ message: "Product added successfully", data: result }, { status: 201 });
+  } catch (error) {
+    console.error("[POST /api/product]", error instanceof Error ? error.message : "Unknown error");
+    return NextResponse.json({ error: "Failed to save product data" }, { status: 500 });
   }
 }
