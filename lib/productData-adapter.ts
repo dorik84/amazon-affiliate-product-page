@@ -1,4 +1,4 @@
-import type { ProductData, VariationData } from "@/types/product";
+import type { ProductData } from "@/types/product";
 import { JSDOM, VirtualConsole } from "jsdom";
 
 function sanitizeHTML(text: string): string {
@@ -36,7 +36,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
     const doc = dom.window.document;
 
     // Transform HTML content into structured data
-    const product: ProductData = {
+    const product: Omit<ProductData, "id"> = {
       name: "",
       description: "",
       variations: [],
@@ -503,7 +503,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
 
         // Create variation if we have a valid name
         if (name) {
-          const variation: VariationData = {
+          const variation = {
             name,
             price: parseFloat(priceText),
             image: imgUrl || "",

@@ -1,17 +1,24 @@
-export interface ProductData {
+export type ProductData = {
+  id: string;
   name: string;
   description: string;
-  variations: VariationData[];
+  variations: {
+    name: string;
+    price: number;
+    image: string;
+    type: string;
+    disabled?: boolean;
+  }[];
   images: string[];
   defaultPrice: number;
   url: string;
-  category?: string;
-}
+  category: string;
+};
 
-export interface VariationData {
-  name: string;
-  price: number;
-  image: string;
-  type: string;
-  disabled?: boolean;
-}
+// export type VariationData = {
+//   name: string;
+//   price: number;
+//   image: string;
+//   type: string;
+//   disabled?: boolean;
+// };
