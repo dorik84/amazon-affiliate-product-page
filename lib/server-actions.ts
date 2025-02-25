@@ -1,29 +1,26 @@
 "use server";
-import dbConnect from "@/db/db";
-import Product from "@/db/models";
+
 import { getRandomUserAgent } from "@/lib/utils";
 import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
 import { transformProduct } from "@/lib/productData-adapter";
-import { DeleteResult } from "mongoose";
+
 import { GetProductsResponse } from "@/types/responses";
 import clientPromise from "@/db/mongodb";
 import { ReturnDocument } from "mongodb";
+import {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct as updateProductDb,
+  deleteProduct as deleteProductDb,
+} from "@/db/products";
 
 export async function getProducts(limit = 20, page = 1, category?: string): Promise<GetProductsResponse> {
   const getCachedProducts = unstable_cache(
     async (limit, page, category) => {
       try {
-        const client = await clientPromise;
-        const db = client.db();
-        const collection = db.collection("products");
-
-        const query = category ? { category } : {};
-        const data = await collection
-          .find(query)
-          .limit(limit)
-          .skip((page - 1) * limit)
-          .toArray();
+        const { data, totalPages, currentPage } = await getAllProducts(limit, page, category);
 
         if (!data.length) {
           console.log("server-actions | getProducts | No products found in DB for category:", category);
@@ -35,13 +32,11 @@ export async function getProducts(limit = 20, page = 1, category?: string): Prom
           };
         }
 
-        const count = await collection.countDocuments(query);
-
         console.log("server-actions | getProducts | products fetched from DB for category:", category);
         return {
           data,
-          totalPages: Math.ceil(count / limit),
-          currentPage: page,
+          totalPages,
+          currentPage,
           limit,
         };
       } catch (err) {
@@ -63,11 +58,7 @@ export async function getProduct(id: string): Promise<ProductData | null> {
   const getCachedProduct = unstable_cache(
     async (id: string) => {
       try {
-        const client = await clientPromise;
-        const db = client.db();
-        const collection = db.collection("products");
-
-        const data = (await collection.findOne({ url })) as ProductData | null;
+        const data = getProductById(id);
 
         if (!data) {
           console.log("server-actions | getProduct | No products found in DB");
@@ -91,26 +82,14 @@ export async function getProduct(id: string): Promise<ProductData | null> {
 
 // ###########################################################################
 
-export async function addProduct(product: ProductData | undefined): Promise<ProductData | null> {
+export async function addProduct(product: Omit<ProductData, "id"> | undefined): Promise<ProductData | null> {
   if (!product) {
     console.error("server-actions | addProduct | No product data provided");
     return null;
   }
 
   try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection("products");
-
-    const query = { url: product.url };
-    const update = { $set: product };
-
-    const options = {
-      returnDocument: ReturnDocument.AFTER,
-      upsert: true,
-    };
-    const result = await collection.findOneAndUpdate(query, update, options);
-    const newProduct = result.value as ProductData | null;
+    const newProduct = createProduct(product);
 
     if (!newProduct) {
       console.log("server-actions | addProduct | No products added in DB");
@@ -125,26 +104,21 @@ export async function addProduct(product: ProductData | undefined): Promise<Prod
 }
 
 // ###########################################################################
-export async function updateProduct(product: ProductData | undefined): Promise<ProductData | null> {
+export async function updateProduct(
+  id: string,
+  product: Omit<ProductData, "id"> | undefined
+): Promise<ProductData | null> {
+  if (!id) {
+    console.error("server-actions | updateProduct | No id  provided");
+    return null;
+  }
   if (!product) {
     console.error("server-actions | updateProduct | No product data provided");
     return null;
   }
 
   try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection("products");
-
-    const query = { url: product.url };
-    const update = { $set: product };
-    const options = {
-      returnDocument: ReturnDocument.AFTER,
-      upsert: true,
-    };
-
-    const result = await collection.findOneAndUpdate(query, update, options);
-    const updatedProduct = result.value as ProductData | null;
+    const updatedProduct = updateProductDb(id, product);
 
     if (!updatedProduct) {
       console.log("server-actions | updateProduct | No products updated in DB");
@@ -167,19 +141,10 @@ export async function deleteProduct(id: string) {
   }
 
   try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection("products");
-
-    const result = await collection.deleteOne({ url });
-
-    if (result.deletedCount === 0) {
-      console.warn(`server-actions | deleteProduct | No product found with URL: ${url}`);
-      return result;
-    }
+    const result = await deleteProductDb(id);
 
     console.info("server-actions | deleteProduct | Product successfully deleted");
-    return result;
+    return null;
   } catch (error) {
     console.error("server-actions | deleteProduct | Error:", error instanceof Error ? error.message : "Unknown error");
     throw error; // Re-throw to handle it in the calling function
@@ -195,7 +160,7 @@ export const fetchAndTransformAmazonProduct = (url: string) => {
     async (url: string) => {
       try {
         // Simulate fetching large data from 3rd party API
-        const response = await fetch(`${decodeURIComponent(url)}`, {
+        const response = await fetch(`${url}`, {
           cache: "no-store",
           headers: {
             "User-Agent": getRandomUserAgent(),
