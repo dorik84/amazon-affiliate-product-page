@@ -53,7 +53,7 @@ export const ProductCard = ({ product, className }: { product: ProductData; clas
         </TooltipProvider>
         {/* <p className="text-xs text-gray-600 mb-1">{item.category}</p> */}
         {/* <p className="font-bold mb-2">${item.defaultPrice.toFixed(2)}</p> */}
-        <Link href={`/product/${product.url}`} onClick={handleClick} rel="noopener noreferrer">
+        <Link href={`/product/${product.id}`} onClick={handleClick} rel="noopener noreferrer">
           <Button
             className={cn("w-full text-xs py-1 transition-all duration-200", isClicked && "bg-primary/50 cursor-wait")}
             size="sm"

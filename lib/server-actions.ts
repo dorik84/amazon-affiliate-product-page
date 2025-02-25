@@ -59,9 +59,9 @@ export async function getProducts(limit = 20, page = 1, category?: string): Prom
 }
 
 // ###########################################################################
-export async function getProduct(url: string): Promise<ProductData | null> {
+export async function getProduct(id: string): Promise<ProductData | null> {
   const getCachedProduct = unstable_cache(
-    async (url: string) => {
+    async (id: string) => {
       try {
         const client = await clientPromise;
         const db = client.db();
@@ -80,13 +80,13 @@ export async function getProduct(url: string): Promise<ProductData | null> {
         throw err;
       }
     },
-    [`product-${url}`], // More specific cache key
+    [`product-${id}`], // More specific cache key
     {
       tags: ["product"],
       revalidate: 60 * 60, // 1 hour
     }
   );
-  return getCachedProduct(url);
+  return getCachedProduct(id);
 }
 
 // ###########################################################################
@@ -160,9 +160,9 @@ export async function updateProduct(product: ProductData | undefined): Promise<P
 
 // ###########################################################################
 
-export async function deleteProduct(url: string): Promise<DeleteResult | null> {
-  if (!url?.trim()) {
-    console.error("server-actions | deleteProduct | Invalid or empty URL provided");
+export async function deleteProduct(id: string) {
+  if (!id) {
+    console.error("server-actions | deleteProduct | Invalid or empty id provided");
     return null;
   }
 
