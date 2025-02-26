@@ -16,8 +16,9 @@ import {
   deleteProduct as deleteProductDb,
 } from "@/db/products";
 import logger from "@/lib/logger";
+import { ProductsResponse } from "@/types/api";
 
-export async function getProducts(limit = 20, page = 1, category?: string): Promise<GetProductsResponse> {
+export async function getProducts(limit = 20, page = 1, category?: string): Promise<ProductsResponse> {
   const getCachedProducts = unstable_cache(
     async (limit, page, category) => {
       try {

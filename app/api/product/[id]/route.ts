@@ -1,7 +1,7 @@
 import { deleteProduct, fetchAndTransformAmazonProduct, getProduct, updateProduct } from "@/lib/server-actions";
 import logger from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
-import { GetProductResponse, PutProductResponse, DeleteProductResponse } from "@/types/api";
+import { ApiResponse } from "@/types/api";
 
 import { getProductById } from "@/db/products";
 import { verifyToken } from "@/lib/auth";
@@ -9,7 +9,10 @@ import { isProductData } from "@/lib/utils";
 
 // #######################################################################
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }): Promise<GetProductResponse> {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse<ApiResponse>> {
   logger.debug("[GET /api/product[id]] | start ");
   try {
     if (!params.id) {
@@ -33,7 +36,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 // #######################################################################
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }): Promise<PutProductResponse> {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse<ApiResponse>> {
   logger.debug("[PUT /api/product[id]] | start");
   try {
     // throw new Error("random"); // TEST
@@ -90,7 +96,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
-): Promise<DeleteProductResponse> {
+): Promise<NextResponse<ApiResponse>> {
   logger.debug("[DELETE /api/product[id]] | start");
   try {
     // throw new Error("random"); // TEST

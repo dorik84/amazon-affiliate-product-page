@@ -9,7 +9,7 @@ import type { ProductData } from "@/types/product";
 import { deleteProduct, updateProduct, addProduct } from "@/lib/component-actions";
 import { toast } from "sonner";
 import { CheckCircle2Icon, LoaderIcon, XCircleIcon } from "lucide-react";
-import type { GetProductsResponse } from "@/types/responses";
+import { ProductsResponse } from "@/types/api";
 
 const toastConfig = {
   loading: (
@@ -41,7 +41,7 @@ const toastConfig = {
 export function AdminDashboard({
   allProducts: { data, totalPages, currentPage, limit },
 }: {
-  allProducts: GetProductsResponse;
+  allProducts: ProductsResponse;
 }) {
   const [products, setProducts] = useState<ProductData[]>(data || []);
   const [sortBy, setSortBy] = useState<string>("name");

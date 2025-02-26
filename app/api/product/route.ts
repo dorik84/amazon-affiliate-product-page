@@ -3,8 +3,7 @@ import logger from "@/lib/logger";
 import { addProduct, fetchAndTransformAmazonProduct, getProducts } from "@/lib/server-actions";
 import { isProductData } from "@/lib/utils";
 
-import { PostProductResponse, ProductsResponse } from "@/types/api";
-import { GetProductsResponse } from "@/types/responses";
+import { ApiResponse, ProductsResponse } from "@/types/api";
 import { NextRequest, NextResponse } from "next/server";
 import { cache } from "react";
 
@@ -60,7 +59,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsRe
     const data = (await Promise.race([
       getCachedProducts(limit, page, category),
       new Promise((_, reject) => setTimeout(() => reject(new Error("Request timeout")), 5000)),
-    ])) as GetProductsResponse;
+    ])) as ProductsResponse;
 
     clearTimeout(timeoutId);
 
@@ -101,7 +100,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsRe
 
 // #######################################################################
 
-export async function POST(request: NextRequest): Promise<PostProductResponse> {
+export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
     logger.debug("[POST /api/product] | start");
     // throw new Error("random"); // TEST
