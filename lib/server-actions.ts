@@ -5,9 +5,6 @@ import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
 import { transformProduct } from "@/utils/productData-adapter";
 
-import { GetProductsResponse } from "@/types/responses";
-import clientPromise from "@/db/mongodb";
-import { ReturnDocument } from "mongodb";
 import {
   createProduct,
   getAllProducts,
