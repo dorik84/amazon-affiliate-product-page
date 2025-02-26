@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
       role: session?.user?.role,
       name: session?.user?.name,
       picture: session?.user?.image,
+      sub: session?.user?.id,
     },
     secret,
     { expiresIn: "1h" } // Token expires in 1 hour

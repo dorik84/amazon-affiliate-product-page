@@ -34,3 +34,74 @@ export const getInitialVariations = (productData: ProductData) => {
 
   return getInitialVariations;
 };
+
+/**
+ * Validates if the provided object is a valid ProductData object
+ * @param obj - The object to validate
+ * @returns boolean - True if the object is a valid ProductData, false otherwise
+ */
+export function isProductData(obj: any): obj is ProductData {
+  // Check if obj is an object and not null
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
+    return false;
+  }
+
+  // Check required string properties
+  const requiredStringProps = ["name", "description", "url", "category"];
+  for (const prop of requiredStringProps) {
+    if (typeof obj[prop] !== "string" || obj[prop] === "") {
+      return false;
+    }
+  }
+
+  // Check defaultPrice
+  if (typeof obj.defaultPrice !== "number" || isNaN(obj.defaultPrice)) {
+    return false;
+  }
+
+  // Check images array
+  if (!Array.isArray(obj.images)) {
+    return false;
+  }
+
+  // Validate that all images are strings
+  if (!obj.images.every((img) => typeof img === "string")) {
+    return false;
+  }
+
+  // Check variations array
+  if (!Array.isArray(obj.variations)) {
+    return false;
+  }
+
+  // Validate each variation
+  for (const variation of obj.variations) {
+    if (typeof variation !== "object" || variation === null) {
+      return false;
+    }
+
+    // Check required variation properties
+    if (typeof variation.name !== "string" || variation.name === "") {
+      return false;
+    }
+
+    if (typeof variation.price !== "number" || isNaN(variation.price)) {
+      return false;
+    }
+
+    if (typeof variation.image !== "string" || variation.image === "") {
+      return false;
+    }
+
+    if (typeof variation.type !== "string" || variation.type === "") {
+      return false;
+    }
+
+    // Check optional disabled property if it exists
+    if ("disabled" in variation && typeof variation.disabled !== "boolean") {
+      return false;
+    }
+  }
+
+  return true;
+}

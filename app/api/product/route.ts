@@ -1,5 +1,6 @@
 import { verifyToken } from "@/lib/auth";
 import { addProduct, fetchAndTransformAmazonProduct, getProducts } from "@/lib/server-actions";
+import { isProductData } from "@/lib/utils";
 
 import { PostProductResponse, ProductsResponse } from "@/types/api";
 import { GetProductsResponse } from "@/types/responses";
@@ -120,6 +121,10 @@ export async function POST(request: NextRequest): Promise<PostProductResponse> {
 
     // Fetch and validate product data
     const product = await fetchAndTransformAmazonProduct(url);
+
+    if (!isProductData(product)) {
+      return NextResponse.json({ error: "Invalid product data" }, { status: 400 });
+    }
 
     // Update product in database
     const result = await addProduct(product);

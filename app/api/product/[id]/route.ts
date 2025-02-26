@@ -5,6 +5,7 @@ import { GetProductResponse, PutProductResponse, DeleteProductResponse } from "@
 
 import { getProductById } from "@/db/products";
 import { verifyToken } from "@/lib/auth";
+import { isProductData } from "@/lib/utils";
 
 // #######################################################################
 
@@ -60,6 +61,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const url = decodeURIComponent(product.url);
     // Fetch and validate product data
     const updatedProduct = await fetchAndTransformAmazonProduct(url);
+    if (!isProductData(updatedProduct)) {
+      return NextResponse.json({ error: "Invalid product data" }, { status: 400 });
+    }
 
     // Update product in database
     const result = await updateProduct(id, updatedProduct);
