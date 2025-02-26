@@ -63,16 +63,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ProductsRe
 
     clearTimeout(timeoutId);
 
-    // Use structured clone for deep copying if needed
-    return NextResponse.json(
-      {
-        ...data,
-      },
-      {
-        status: 200,
-      }
-    );
     logger.debug("[GET /api/product] | end");
+    return NextResponse.json({ ...data }, { status: 200 });
   } catch (error) {
     clearTimeout(timeoutId);
 
@@ -119,7 +111,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
     // Extract and validate URL parameter
     const { searchParams } = new URL(request.url);
-    const url = searchParams.get("encodedUrl");
+    const url = searchParams.get("url");
     logger.debug("[POST /api/product] | searchParams", searchParams);
 
     if (!url) {
