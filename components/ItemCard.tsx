@@ -7,7 +7,7 @@ import ProductImage from "@/components/ProductImage";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { sendGAEvent } from "@/lib/analytics";
 
 export function ItemCard({ product }: { product: ProductData }) {

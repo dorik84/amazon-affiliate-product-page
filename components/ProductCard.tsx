@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ProductData } from "@/types/product";
 import ProductImage from "@/components/ProductImage";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

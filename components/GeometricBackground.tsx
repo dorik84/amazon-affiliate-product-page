@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Pacifico } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 const pacifico = Pacifico({
   subsets: ["latin"],

@@ -1,7 +1,7 @@
 import { verifyToken } from "@/lib/auth";
 import logger from "@/lib/logger";
 import { addProduct, fetchAndTransformAmazonProduct, getProducts } from "@/lib/server-actions";
-import { isProductData } from "@/lib/utils";
+import { isProductData } from "@/utils/isProductData";
 
 import { ApiResponse, ProductsResponse } from "@/types/api";
 import { NextRequest, NextResponse } from "next/server";

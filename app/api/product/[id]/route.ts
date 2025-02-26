@@ -5,7 +5,7 @@ import { ApiResponse } from "@/types/api";
 
 import { getProductById } from "@/db/products";
 import { verifyToken } from "@/lib/auth";
-import { isProductData } from "@/lib/utils";
+import { isProductData } from "@/utils/isProductData";
 
 // #######################################################################
 

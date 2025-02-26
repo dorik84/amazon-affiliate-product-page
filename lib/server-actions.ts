@@ -1,9 +1,9 @@
 "use server";
 
-import { getRandomUserAgent } from "@/lib/utils";
+import { getRandomUserAgent } from "@/utils/getRandomUserAgent";
 import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
-import { transformProduct } from "@/lib/productData-adapter";
+import { transformProduct } from "@/utils/productData-adapter";
 
 import { GetProductsResponse } from "@/types/responses";
 import clientPromise from "@/db/mongodb";
