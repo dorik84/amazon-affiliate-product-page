@@ -27,6 +27,7 @@ export async function GET(
       return NextResponse.json({ error: "No product data found" }, { status: 404 });
     }
 
+    logger.debug("[GET /api/product[id]] | Product fetched successfully");
     return NextResponse.json({ message: "Product fetched successfully", data }, { status: 200 });
   } catch (error) {
     logger.error(error);
@@ -74,6 +75,7 @@ export async function PUT(
     // Fetch and validate product data
     const updatedProduct = await fetchAndTransformAmazonProduct(url);
     if (!isProductData(updatedProduct)) {
+      logger.error(`[PUT /api/product[id]] | updatedProduct is not valid Product`);
       return NextResponse.json({ error: "Invalid product data" }, { status: 400 });
     }
 
