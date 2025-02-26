@@ -15,10 +15,10 @@ export type ProductData = {
   category: string;
 };
 
-// export type VariationData = {
-//   name: string;
-//   price: number;
-//   image: string;
-//   type: string;
-//   disabled?: boolean;
-// };
+export type VariationData = {
+  name: string;
+  price: number;
+  image: string;
+  type: string;
+  disabled?: boolean;
+};

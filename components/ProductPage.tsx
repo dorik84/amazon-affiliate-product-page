@@ -6,9 +6,23 @@ import ProductVariations from "@/components/ProductVariations";
 import { AnimatedButton } from "@/components/AnimatedButton";
 import { useState } from "react";
 import type { ProductData } from "@/types/product";
-import { getInitialVariations } from "@/lib/utils";
+
 import { RedirectIcon } from "@/components/RedirectIcon";
 import { sendGAEvent } from "@/lib/analytics";
+
+const getInitialVariations = (productData: ProductData) => {
+  "use client";
+  if (!productData) return {};
+  const getInitialVariations: Record<string, number> = {};
+  productData.variations.forEach((variation) => {
+    const type = variation.type || "default";
+    if (!getInitialVariations[type]) {
+      getInitialVariations[type] = 0;
+    }
+  });
+
+  return getInitialVariations;
+};
 
 export default function ProductPage({ product }: { product: ProductData | undefined }) {
   if (!product) return null;

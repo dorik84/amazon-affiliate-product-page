@@ -66,7 +66,7 @@ export function isProductData(obj: any): obj is ProductData {
       return false;
     }
 
-    if ("image" in variation && (typeof variation.image !== "string" || variation.image === "")) {
+    if ("image" in variation && typeof variation.image !== "string") {
       logger.error("[lib/utils.ts] | isProductData() | variation.image is not string | variation", variation);
       return false;
     }
