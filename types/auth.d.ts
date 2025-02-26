@@ -19,6 +19,7 @@ declare module "next-auth" {
 // Extend the default JWT interface
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: string;
+    role: "ADMIN" | "USER";
+    id: string;
   }
 }

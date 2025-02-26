@@ -37,21 +37,24 @@ export async function verifyToken(req: NextRequest): Promise<TokenValidationResu
   try {
     // 1. Check for session token
     const sessionToken = await getToken({ req, secret });
+    console.debug("lib | auth.ts | verifyToken | Session token found:", sessionToken);
     if (sessionToken) return sessionToken;
 
     // 2. Check for Bearer token
     const authHeader = req.headers.get("authorization");
     const bearerToken = extractBearerToken(authHeader);
+    console.debug("lib | auth.ts | verifyToken | bearerToken found:", bearerToken);
     if (bearerToken) {
       const decodedToken = await validateBearerToken(bearerToken);
+      console.debug("lib | auth.ts | verifyToken | decodedToken:", decodedToken);
       if (decodedToken) return decodedToken;
     }
-
     // 3. Check for server session
     const session = await getServerSession(authOptions);
-    return session;
+    console.debug("lib | auth.ts | verifyToken | session found:", session);
+    return session?.user || null;
   } catch (error) {
-    console.error("Token verification failed:", error);
+    console.debug("lib | auth.ts | verifyToken | error:", error);
     return null;
   }
 }

@@ -1,4 +1,4 @@
-import { ProductData, VariationData } from "@/types/product";
+import { ProductData } from "@/types/product";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -25,7 +25,7 @@ export function getRandomUserAgent() {
 export const getInitialVariations = (productData: ProductData) => {
   if (!productData) return {};
   const getInitialVariations: Record<string, number> = {};
-  productData.variations.forEach((variation: VariationData) => {
+  productData.variations.forEach((variation) => {
     const type = variation.type || "default";
     if (!getInitialVariations[type]) {
       getInitialVariations[type] = 0;
@@ -35,68 +35,73 @@ export const getInitialVariations = (productData: ProductData) => {
   return getInitialVariations;
 };
 
-// NOT USED
-export function deepEqual(obj1: any, obj2: any): boolean {
-  if (obj1 === obj2) {
-    return true;
-  }
-
-  if (obj1 == null || obj2 == null || typeof obj1 !== "object" || typeof obj2 !== "object") {
+/**
+ * Validates if the provided object is a valid ProductData object
+ * @param obj - The object to validate
+ * @returns boolean - True if the object is a valid ProductData, false otherwise
+ */
+export function isProductData(obj: any): obj is ProductData {
+  // Check if obj is an object and not null
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
     return false;
   }
 
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
+  // Check required string properties
+  const requiredStringProps = ["name", "description", "url", "category"];
+  for (const prop of requiredStringProps) {
+    if (typeof obj[prop] !== "string" || obj[prop] === "") {
+      return false;
+    }
+  }
 
-  if (keys1.length !== keys2.length) {
+  // Check defaultPrice
+  if (typeof obj.defaultPrice !== "number" || isNaN(obj.defaultPrice)) {
     return false;
   }
 
-  for (const key of keys1) {
-    if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+  // Check images array
+  if (!Array.isArray(obj.images)) {
+    return false;
+  }
+
+  // Validate that all images are strings
+  if (!obj.images.every((img) => typeof img === "string")) {
+    return false;
+  }
+
+  // Check variations array
+  if (!Array.isArray(obj.variations)) {
+    return false;
+  }
+
+  // Validate each variation
+  for (const variation of obj.variations) {
+    if (typeof variation !== "object" || variation === null) {
+      return false;
+    }
+
+    // Check required variation properties
+    if (typeof variation.name !== "string" || variation.name === "") {
+      return false;
+    }
+
+    if (typeof variation.price !== "number" || isNaN(variation.price)) {
+      return false;
+    }
+
+    if (typeof variation.image !== "string" || variation.image === "") {
+      return false;
+    }
+
+    if (typeof variation.type !== "string" || variation.type === "") {
+      return false;
+    }
+
+    // Check optional disabled property if it exists
+    if ("disabled" in variation && typeof variation.disabled !== "boolean") {
       return false;
     }
   }
 
   return true;
-}
-
-export function sanitizeProductData(obj: any): ProductData | null {
-  if (obj === null || typeof obj !== "object") {
-    console.log("utils | sanitizeProductData | Input is not an object");
-    return null;
-  }
-
-  console.log("utils | sanitizeProductData | run");
-
-  const sanitized: ProductData = {
-    name: obj.name,
-    description: obj.description,
-    variations: obj.variations?.map((variation: any) => ({
-      name: variation.name,
-      price: variation.price,
-      image: variation.image,
-      type: variation.type,
-      disabled: variation.disabled,
-    })),
-    images: obj.images,
-    defaultPrice: obj.defaultPrice,
-    url: obj.url,
-    category: obj.category,
-  };
-
-  return sanitized;
-}
-
-// Helper function to validate product structure
-export function isValidProduct(product: any): boolean {
-  return Boolean(
-    product &&
-      product.name &&
-      product.url &&
-      Array.isArray(product.images) &&
-      product.images.length > 0 &&
-      product.defaultPrice &&
-      product.category
-  );
 }

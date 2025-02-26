@@ -17,8 +17,8 @@ export function ProductList({ products, onRefreshProduct, onDeleteProduct, loadi
   console.log("ProductList rerenders");
 
   const memoizedRefreshProduct = useCallback(
-    (url: string) => {
-      onRefreshProduct(url);
+    (id: string) => {
+      onRefreshProduct(id);
     },
     [onRefreshProduct]
   );

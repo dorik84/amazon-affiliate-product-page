@@ -1,4 +1,4 @@
-import type { ProductData, VariationData } from "@/types/product";
+import type { ProductData } from "@/types/product";
 import { JSDOM, VirtualConsole } from "jsdom";
 
 function sanitizeHTML(text: string): string {
@@ -14,7 +14,7 @@ function sanitizeHTML(text: string): string {
   });
 }
 
-export async function transformProduct(response: any, url: string): Promise<ProductData> {
+export async function transformProduct(response: any, url: string): Promise<Omit<ProductData, "id">> {
   console.log("productData-adapter | transformProduct | start");
   try {
     const html = await response.text();
@@ -36,7 +36,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
     const doc = dom.window.document;
 
     // Transform HTML content into structured data
-    const product: ProductData = {
+    const product: Omit<ProductData, "id"> = {
       name: "",
       description: "",
       variations: [],
@@ -61,8 +61,9 @@ export async function transformProduct(response: any, url: string): Promise<Prod
     //Extract category from breadcrumbs
     product.category =
       doc.querySelector("#nav-subnav")?.querySelector("span.nav-a-content")?.textContent?.trim() ||
-      doc.querySelector("#desktop-breadcrumbs_feature_div")?.querySelector("a")?.textContent?.trim();
-    console.log("product.category=", product.category);
+      doc.querySelector("#desktop-breadcrumbs_feature_div")?.querySelector("a")?.textContent?.trim() ||
+      "";
+
     // Extract name from h1#title span
     const titleElement = doc.querySelector("#title span");
     product.name = titleElement?.textContent?.trim() || "";
@@ -503,7 +504,7 @@ export async function transformProduct(response: any, url: string): Promise<Prod
 
         // Create variation if we have a valid name
         if (name) {
-          const variation: VariationData = {
+          const variation = {
             name,
             price: parseFloat(priceText),
             image: imgUrl || "",

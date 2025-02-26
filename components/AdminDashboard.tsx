@@ -50,7 +50,7 @@ export function AdminDashboard({
 
   const updateProductInList = useCallback((updatedProduct: ProductData) => {
     setProducts((prevProducts) =>
-      prevProducts.map((product) => (product.url === updatedProduct.url ? { ...product, ...updatedProduct } : product))
+      prevProducts.map((product) => (product.id === updatedProduct.id ? { ...product, ...updatedProduct } : product))
     );
   }, []);
 
@@ -60,8 +60,8 @@ export function AdminDashboard({
     });
   }, []);
 
-  const deleteProductFromList = useCallback((encodedUrl: string) => {
-    setProducts((prevProducts) => prevProducts.filter((product) => product.url !== encodedUrl));
+  const deleteProductFromList = useCallback((id: string) => {
+    setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
   }, []);
 
   const handleAddProduct = useCallback(
@@ -83,37 +83,36 @@ export function AdminDashboard({
   );
 
   const handleUpdateProduct = useCallback(
-    async (url: string) => {
-      setLoading((prev) => ({ ...prev, [url]: true }));
+    async (id: string) => {
+      setLoading((prev) => ({ ...prev, [id]: true }));
       try {
-        // const encodedUrl = encodeURIComponent(url);
-        const productPromise = updateProduct(url);
+        const productPromise = updateProduct(id);
         toast.promise(productPromise, toastConfig);
         const updatedProduct = await productPromise;
         updateProductInList(updatedProduct.data as ProductData);
       } catch (error) {
         console.error("Error updating product:", error);
       } finally {
-        setLoading((prev) => ({ ...prev, [url]: false }));
+        setLoading((prev) => ({ ...prev, [id]: false }));
       }
     },
     [updateProductInList]
   );
 
   const handleDeleteProduct = useCallback(
-    async (url: string) => {
-      setLoading((prev) => ({ ...prev, [url]: true }));
+    async (id: string) => {
+      setLoading((prev) => ({ ...prev, [id]: true }));
       try {
-        const deletePromise = deleteProduct(url);
+        const deletePromise = deleteProduct(id);
         console.log("deletePromise", deletePromise);
 
         toast.promise(deletePromise, toastConfig);
         await deletePromise;
-        deleteProductFromList(url);
+        deleteProductFromList(id);
       } catch (error) {
         console.error("Error deleting product:", error);
       } finally {
-        setLoading((prev) => ({ ...prev, [url]: false }));
+        setLoading((prev) => ({ ...prev, [id]: false }));
       }
     },
     [deleteProductFromList]

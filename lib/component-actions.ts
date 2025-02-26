@@ -1,5 +1,6 @@
 import { DeleteProductResponse, GetProductsResponse } from "@/types/responses";
 import { ApiResponse, PostProductResponse, PutProductResponse, SuccessApiResponse } from "@/types/api";
+import { ProductData } from "@/types/product";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -16,7 +17,7 @@ const addProductEnclosure = () => {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | addProduct | start");
-      const promise = fetch(`${baseUrl}/api/product/${url}`, {
+      const promise = fetch(`${baseUrl}/api/product?encodedUrl=${url}`, {
         method: "POST",
         cache: "no-store",
       })
@@ -61,15 +62,15 @@ export const addProduct = addProductEnclosure();
 const updateProductEnclosure = () => {
   let productPromiseMap: Map<String, Promise<ApiResponse>> = new Map();
 
-  return (url: string): Promise<ApiResponse> => {
-    if (!url) {
-      console.log("component-actions | updateProduct | no url provided");
-      return Promise.reject({ message: "No url provided" });
+  return (id: string): Promise<ApiResponse> => {
+    if (!id) {
+      console.log("component-actions | updateProduct | no id provided");
+      return Promise.reject({ message: "No id provided" });
     }
 
-    if (!productPromiseMap.has(url)) {
+    if (!productPromiseMap.has(id)) {
       console.log("component-actions | updateProduct | start");
-      const promise: Promise<ApiResponse> = fetch(`${baseUrl}/api/product/${url}`, {
+      const promise: Promise<ApiResponse> = fetch(`${baseUrl}/api/product/${id}`, {
         method: "PUT",
         cache: "no-store",
       })
@@ -83,20 +84,20 @@ const updateProductEnclosure = () => {
         })
         .then((data) => {
           console.log("component-actions | updateProduct | data retrieved");
-          productPromiseMap.delete(url);
+          productPromiseMap.delete(id);
           return data;
         })
         .catch((error) => {
-          productPromiseMap.delete(url);
+          productPromiseMap.delete(id);
           console.log("component-actions | updateProduct | error", error);
           return Promise.reject(error);
         });
 
-      productPromiseMap.set(url, promise);
+      productPromiseMap.set(id, promise);
       return promise;
     }
 
-    const existingPromise = productPromiseMap.get(url);
+    const existingPromise = productPromiseMap.get(id);
     if (!existingPromise) {
       // This should never happen due to the check above, but TypeScript needs it
       return Promise.reject(new Error("Promise unexpectedly missing"));
@@ -112,18 +113,18 @@ export const updateProduct = updateProductEnclosure();
 // ###########################################################################
 
 const getProductEnclosure = () => {
-  let productPromiseMap: Map<String, Promise<SuccessApiResponse>> = new Map();
+  let productPromiseMap: Map<String, Promise<ApiResponse>> = new Map();
 
-  return (url: string) => {
-    if (!url) {
-      console.log("component-actions | getProduct | no url provided");
+  return (id: string): Promise<ApiResponse> => {
+    if (!id) {
+      console.log("component-actions | getProduct | no id provided");
       // Better to throw error and handle in component
-      return Promise.reject(new Error("No url provided"));
+      return Promise.reject(new Error("No id provided"));
     }
 
-    if (!productPromiseMap.has(url)) {
+    if (!productPromiseMap.has(id)) {
       console.log("component-actions | getProduct | start");
-      const promise: Promise<SuccessApiResponse> = fetch(`${baseUrl}/api/product/${encodeURIComponent(url)}`, {
+      const promise = fetch(`${baseUrl}/api/product/${id}`, {
         cache: "no-store",
       })
         .then(async (res) => {
@@ -134,21 +135,21 @@ const getProductEnclosure = () => {
           }
           return res.json();
         })
-        .then((productDB: SuccessApiResponse) => {
-          productPromiseMap.delete(url);
+        .then((productDB) => {
+          productPromiseMap.delete(id);
           return productDB;
         })
         .catch((error) => {
-          productPromiseMap.delete(url);
+          productPromiseMap.delete(id);
           console.log("component-actions | getProduct | error", error);
           // Better to throw error and handle in component
           throw error;
         });
 
-      productPromiseMap.set(url, promise);
+      productPromiseMap.set(id, promise);
       return promise;
     }
-    const existingPromise = productPromiseMap.get(url);
+    const existingPromise = productPromiseMap.get(id);
     if (!existingPromise) {
       // This should never happen due to the check above, but TypeScript needs it
       return Promise.reject(new Error("Promise unexpectedly missing"));
@@ -216,15 +217,15 @@ export const getProducts = getProductsEnclosure();
 function deleteProductEnclosure() {
   let productPromiseMap: Map<String, Promise<DeleteProductResponse>> = new Map();
 
-  return (url: string): Promise<DeleteProductResponse> => {
-    if (!url) {
-      console.log("component-actions | deleteProduct | no url provided");
-      return Promise.reject({ message: "No url provided" });
+  return (id: string): Promise<DeleteProductResponse> => {
+    if (!id) {
+      console.log("component-actions | deleteProduct | no id provided");
+      return Promise.reject({ message: "No id provided" });
     }
 
-    if (!productPromiseMap.has(url)) {
+    if (!productPromiseMap.has(id)) {
       console.log("component-actions | deleteProduct | start");
-      const promise = fetch(`${baseUrl}/api/product/${encodeURIComponent(url)}`, {
+      const promise = fetch(`${baseUrl}/api/product/${id}`, {
         method: "DELETE",
         cache: "no-store",
       })
@@ -237,20 +238,20 @@ function deleteProductEnclosure() {
           return res.json();
         })
         .then((resut) => {
-          productPromiseMap.delete(url);
+          productPromiseMap.delete(id);
           console.log("component-actions | deleteProduct | product deleted");
           return resut;
         })
         .catch((error) => {
-          productPromiseMap.delete(url);
+          productPromiseMap.delete(id);
           console.log("component-actions | deleteProduct | error", error);
           return Promise.reject(error);
         });
-      productPromiseMap.set(url, promise);
+      productPromiseMap.set(id, promise);
       return promise;
     }
 
-    const existingPromise = productPromiseMap.get(url);
+    const existingPromise = productPromiseMap.get(id);
     if (!existingPromise) {
       // This should never happen due to the check above, but TypeScript needs it
       return Promise.reject(new Error("Promise unexpectedly missing"));

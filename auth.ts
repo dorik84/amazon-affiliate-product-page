@@ -5,8 +5,10 @@ import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import clientPromise from "./db/mongodb";
 
+import prisma from "@/db/prisma";
 const GITHUB_ID = process.env.GITHUB_ID;
 const GITHUB_SECRET = process.env.GITHUB_SECRET;
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
@@ -25,7 +27,8 @@ if (!NEXTAUTH_SECRET) {
 export const authOptions = {
   debug: !!process.env.AUTH_DEBUG,
   theme: { logo: "https://authjs.dev/img/logo-sm.png" },
-  adapter: MongoDBAdapter(clientPromise),
+  // adapter: MongoDBAdapter(clientPromise),
+  adapter: PrismaAdapter(prisma),
   providers: [
     GitHub({
       clientId: GITHUB_ID,
@@ -57,13 +60,13 @@ export const authOptions = {
   jwt: {
     // Use a custom encode/decode if needed
     async encode({ secret, token }) {
-      console.log("Encoding token:", token);
+      // console.log("Encoding token:", token);
       return jwt.sign(token, secret, {
         algorithm: "HS256",
       });
     },
     async decode({ secret, token }) {
-      console.log("Decoding token:", token);
+      // console.log("Decoding token:", token);
       return jwt.verify(token, secret);
     },
   },

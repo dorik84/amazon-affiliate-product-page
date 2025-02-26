@@ -14,14 +14,14 @@ const ProductListRow = React.memo(
     loading,
   }: {
     product: ProductData;
-    onRefreshProduct: (url: string) => void;
-    onDeleteProduct: (url: string) => void;
+    onRefreshProduct: (id: string) => void;
+    onDeleteProduct: (id: string) => void;
     loading: { [key: string]: boolean };
   }) => {
     return (
-      <TableRow key={product.url}>
+      <TableRow key={product.id}>
         <TableCell>
-          <Link href={`/product/${product.url}`} target="_blank">
+          <Link href={`/product/${product.id}`} target="_blank">
             <Image
               src={product.images[0] || "/placeholder.png"}
               alt={product.name}
@@ -39,21 +39,21 @@ const ProductListRow = React.memo(
           <div className="flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
             <Button
               className="w-full md:w-auto"
-              onClick={() => onRefreshProduct(product.url)}
+              onClick={() => onRefreshProduct(product.id)}
               variant="outline"
               size="sm"
-              disabled={loading[product.url]}
+              disabled={loading[product.id]}
             >
-              {loading[product.url] ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+              {loading[product.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
             </Button>
             <Button
               className="w-full md:w-auto"
-              onClick={() => onDeleteProduct(product.url)}
+              onClick={() => onDeleteProduct(product.id)}
               variant="destructive"
               size="sm"
-              disabled={loading[product.url]}
+              disabled={loading[product.id]}
             >
-              {loading[product.url] ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+              {loading[product.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
             </Button>
             <a
               className="w-full md:w-auto inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
