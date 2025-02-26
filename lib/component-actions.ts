@@ -17,7 +17,7 @@ const addProductEnclosure = () => {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | addProduct | start");
-      const promise = fetch(`${baseUrl}/api/product?encodedUrl=${url}`, {
+      const promise = fetch(`${baseUrl}/api/product?url=${url}`, {
         method: "POST",
         cache: "no-store",
       })

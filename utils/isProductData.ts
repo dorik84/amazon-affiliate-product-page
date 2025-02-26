@@ -1,0 +1,13 @@
+import logger from "@/lib/logger";
+    logger.error("[lib/utils.ts] | isProductData() | is not object");
+      logger.error("[lib/utils.ts] | isProductData() | does not have property", prop);
+    logger.error("[lib/utils.ts] | isProductData() | no defaultPrice or not a number");
+    logger.error("[lib/utils.ts] | isProductData() | images property is not array");
+    logger.error("[lib/utils.ts] | isProductData() | some of the images items is not a string");
+    logger.error("[lib/utils.ts] | isProductData() | variations prop is not a array");
+      logger.error("[lib/utils.ts] | isProductData() | variation is not obj | variation", variation);
+      logger.error("[lib/utils.ts] | isProductData() | variation.name is not string | variation", variation);
+      logger.error("[lib/utils.ts] | isProductData() | variation.price is not number | variation", variation);
+      logger.error("[lib/utils.ts] | isProductData() | variation.image is not string | variation", variation);
+      logger.error("[lib/utils.ts] | isProductData() | variation.type is not string | variation", variation);
+      logger.error("[lib/utils.ts] | isProductData() | variation.disabled is not boolean | variation", variation);

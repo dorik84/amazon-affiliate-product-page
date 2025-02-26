@@ -13,10 +13,9 @@ interface PageProps {
 }
 export default async function Page({ params }: PageProps) {
   const product: ApiResponse | null = await getProduct(params.id).catch((error) => {
-    console.error("[Product / [encodedUrl]/ Page]:", error);
+    console.error("[roduct/[id]/Page.tsx]:", error);
     return null;
   });
-  console.log("product/Page.tsx | product", product);
 
   if (!product || !product.data) {
     return <ProductNotFound />;

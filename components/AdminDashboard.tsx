@@ -104,7 +104,6 @@ export function AdminDashboard({
       setLoading((prev) => ({ ...prev, [id]: true }));
       try {
         const deletePromise = deleteProduct(id);
-        console.log("deletePromise", deletePromise);
 
         toast.promise(deletePromise, toastConfig);
         await deletePromise;
