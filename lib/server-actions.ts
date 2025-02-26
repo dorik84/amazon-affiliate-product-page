@@ -156,6 +156,7 @@ export async function deleteProduct(id: string) {
 // Cached function to fetch and strip data
 export const fetchAndTransformAmazonProduct = (url: string) => {
   console.log("server-actions | fetchAndTransformAmazonProduct | start");
+  console.log("server-actions | fetchAndTransformAmazonProduct | url", url);
   const getCachedAmazonProduct = unstable_cache(
     async (url: string) => {
       try {
