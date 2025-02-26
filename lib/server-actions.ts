@@ -1,13 +1,10 @@
 "use server";
 
-import { getRandomUserAgent } from "@/lib/utils";
+import { getRandomUserAgent } from "@/utils/getRandomUserAgent";
 import { ProductData } from "@/types/product";
 import { unstable_cache } from "next/cache";
-import { transformProduct } from "@/lib/productData-adapter";
+import { transformProduct } from "@/utils/productData-adapter";
 
-import { GetProductsResponse } from "@/types/responses";
-import clientPromise from "@/db/mongodb";
-import { ReturnDocument } from "mongodb";
 import {
   createProduct,
   getAllProducts,
@@ -15,15 +12,17 @@ import {
   updateProduct as updateProductDb,
   deleteProduct as deleteProductDb,
 } from "@/db/products";
+import logger from "@/lib/logger";
+import { ProductsResponse } from "@/types/api";
 
-export async function getProducts(limit = 20, page = 1, category?: string): Promise<GetProductsResponse> {
+export async function getProducts(limit = 20, page = 1, category?: string): Promise<ProductsResponse> {
   const getCachedProducts = unstable_cache(
     async (limit, page, category) => {
       try {
         const { data, totalPages, currentPage } = await getAllProducts(limit, page, category);
 
         if (!data.length) {
-          console.log("server-actions | getProducts | No products found in DB for category:", category);
+          logger.debug("[lib/server-actions.ts] | getProducts | No products found in DB for category:", category);
           return {
             data: [],
             totalPages: 0,
@@ -32,7 +31,7 @@ export async function getProducts(limit = 20, page = 1, category?: string): Prom
           };
         }
 
-        console.log("server-actions | getProducts | products fetched from DB for category:", category);
+        logger.info("[lib/server-actions.ts] | getProducts | products fetched from DB for category:", category);
         return {
           data,
           totalPages,
@@ -40,7 +39,7 @@ export async function getProducts(limit = 20, page = 1, category?: string): Prom
           limit,
         };
       } catch (err) {
-        console.error("server-actions | getProducts | ", err);
+        logger.error("[lib/server-actions.ts] | getProducts | error", err);
         throw err;
       }
     },
@@ -61,13 +60,13 @@ export async function getProduct(id: string): Promise<ProductData | null> {
         const data = getProductById(id);
 
         if (!data) {
-          console.log("server-actions | getProduct | No products found in DB");
+          logger.debug("[lib/server-actions.ts] | getProduct | No products found in DB");
           return null;
         }
-        console.log("server-actions | getProduct | product fetched from DB");
+        logger.info("[lib/server-actions.ts] | getProduct | product fetched from DB");
         return data;
       } catch (err) {
-        console.log("server-actions | getProduct | ", err);
+        logger.error("[lib/server-actions.ts] | getProduct | ", err);
         throw err;
       }
     },
@@ -84,7 +83,7 @@ export async function getProduct(id: string): Promise<ProductData | null> {
 
 export async function addProduct(product: Omit<ProductData, "id"> | undefined): Promise<ProductData | null> {
   if (!product) {
-    console.error("server-actions | addProduct | No product data provided");
+    logger.error("[lib/server-actions.ts] | addProduct | No product data provided");
     return null;
   }
 
@@ -92,13 +91,13 @@ export async function addProduct(product: Omit<ProductData, "id"> | undefined): 
     const newProduct = createProduct(product);
 
     if (!newProduct) {
-      console.log("server-actions | addProduct | No products added in DB");
+      logger.error("[lib/server-actions.ts] | addProduct | No products added in DB");
       return null;
     }
-    console.info("server-actions | addProduct | product added in DB");
+    logger.info("[lib/server-actions.ts] | addProduct | product added in DB");
     return newProduct;
   } catch (err) {
-    console.error("server-actions | addProduct | ", err);
+    logger.error("[lib/server-actions.ts] | addProduct | ", err);
     throw err; // Propagate error to caller for proper error handling
   }
 }
@@ -109,11 +108,11 @@ export async function updateProduct(
   product: Omit<ProductData, "id"> | undefined
 ): Promise<ProductData | null> {
   if (!id) {
-    console.error("server-actions | updateProduct | No id  provided");
+    logger.error("[lib/server-actions.ts] | updateProduct | No id  provided");
     return null;
   }
   if (!product) {
-    console.error("server-actions | updateProduct | No product data provided");
+    logger.error("[lib/server-actions.ts] | updateProduct | No product data provided");
     return null;
   }
 
@@ -121,13 +120,13 @@ export async function updateProduct(
     const updatedProduct = updateProductDb(id, product);
 
     if (!updatedProduct) {
-      console.log("server-actions | updateProduct | No products updated in DB");
+      logger.error("[lib/server-actions.ts] | updateProduct | No products updated in DB");
       return null;
     }
-    console.info("server-actions | updateProduct | product updated in DB");
+    logger.info("[lib/server-actions.ts] | updateProduct | product updated in DB");
     return updatedProduct;
   } catch (err) {
-    console.error("server-actions | updateProduct | ", err);
+    logger.error("[lib/server-actions.ts] | updateProduct | ", err);
     throw err; // Propagate error to caller for proper error handling
   }
 }
@@ -136,17 +135,20 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string) {
   if (!id) {
-    console.error("server-actions | deleteProduct | Invalid or empty id provided");
+    logger.error("[lib/server-actions.ts] | deleteProduct | Invalid or empty id provided");
     return null;
   }
 
   try {
     const result = await deleteProductDb(id);
 
-    console.info("server-actions | deleteProduct | Product successfully deleted");
+    logger.info("[lib/server-actions.ts] | deleteProduct | Product successfully deleted");
     return null;
   } catch (error) {
-    console.error("server-actions | deleteProduct | Error:", error instanceof Error ? error.message : "Unknown error");
+    logger.error(
+      "[lib/server-actions.ts] | deleteProduct | Error:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
     throw error; // Re-throw to handle it in the calling function
   }
 }
@@ -155,8 +157,8 @@ export async function deleteProduct(id: string) {
 
 // Cached function to fetch and strip data
 export const fetchAndTransformAmazonProduct = (url: string) => {
-  console.log("server-actions | fetchAndTransformAmazonProduct | start");
-  console.log("server-actions | fetchAndTransformAmazonProduct | url", url);
+  logger.debug("[lib/server-actions.ts] | fetchAndTransformAmazonProduct | start");
+  logger.debug("[lib/server-actions.ts] | fetchAndTransformAmazonProduct | url", url);
   const getCachedAmazonProduct = unstable_cache(
     async (url: string) => {
       try {
@@ -175,10 +177,13 @@ export const fetchAndTransformAmazonProduct = (url: string) => {
         // Parse the large response
         // Strip down the data to essential information
         const strippedData = transformProduct(response, url);
-        console.log("server-actions | fetchAndTransformAmazonProduct | data fetched and stripped");
+        logger.debug("[lib/server-actions.ts] | fetchAndTransformAmazonProduct | data fetched and stripped");
         return strippedData;
       } catch (error) {
-        console.error("server-actions | fetchAndTransformAmazonProduct | Error fetching or stripping data:", error);
+        logger.error(
+          "[lib/server-actions.ts] | fetchAndTransformAmazonProduct | Error fetching or stripping data:",
+          error
+        );
       }
     },
     [`amazon-${url}`], // add the ID to the cache key

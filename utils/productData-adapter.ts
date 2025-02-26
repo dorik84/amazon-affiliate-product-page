@@ -1,5 +1,7 @@
+"use server";
 import type { ProductData } from "@/types/product";
 import { JSDOM, VirtualConsole } from "jsdom";
+import logger from "@/lib/logger";
 
 function sanitizeHTML(text: string): string {
   return text.replace(/[&<>"']/g, (match) => {
@@ -15,12 +17,15 @@ function sanitizeHTML(text: string): string {
 }
 
 export async function transformProduct(response: any, url: string): Promise<Omit<ProductData, "id">> {
-  console.log("productData-adapter | transformProduct | start");
+  logger.debug("[lib/productData-adapter.ts] | transformProduct | start");
   try {
     const html = await response.text();
     // Save HTML to file for debugging
-    const fs = require("fs");
-    fs.writeFileSync("product-page.txt", html);
+
+    if (process.env.NODE_ENV === "development") {
+      const fs = require("fs");
+      fs.writeFileSync("product-page.txt", html);
+    }
 
     // Create virtual console to suppress CSS errors
     const virtualConsole = new VirtualConsole();
@@ -46,7 +51,6 @@ export async function transformProduct(response: any, url: string): Promise<Omit
       category: "",
     };
     product.url = encodeURIComponent(url);
-    console.log("productData-adapter | transformProduct | product.url", product.url);
     // Extract default price from the apex_desktop container
     const apexDesktop = doc.querySelector("#apex_desktop");
     if (apexDesktop) {
@@ -326,7 +330,7 @@ export async function transformProduct(response: any, url: string): Promise<Omit
             tempDiv.innerHTML = dataAHtmlContent;
             dataContentElements = Array.from(tempDiv.querySelectorAll(".swatch-title-text-display"));
           } catch (err) {
-            console.error("Error parsing data-a-html-content:", err);
+            logger.error("[lib/productData-adapter.ts] | transfromProduct | Error parsing data-a-html-content:", err);
           }
         }
 
@@ -424,7 +428,7 @@ export async function transformProduct(response: any, url: string): Promise<Omit
               tempDiv.textContent?.trim()?.replace(/Select\s*/g, "") ||
               "";
           } catch (err) {
-            console.error("Error parsing data-a-html-content:", err);
+            logger.error("[lib/productData-adapter.ts] | transfromProduct | Error parsing data-a-html-content:", err);
           }
         }
 
@@ -443,7 +447,7 @@ export async function transformProduct(response: any, url: string): Promise<Omit
             });
             buttonContent = buttonContent.replace(/Select\s*/g, "").trim();
           } catch (err) {
-            console.error("Error extracting button content:", err);
+            logger.error("[lib/productData-adapter.ts] | transfromProduct | Error extracting button content:", err);
           }
         }
 
@@ -514,10 +518,10 @@ export async function transformProduct(response: any, url: string): Promise<Omit
         }
       });
     });
-
+    logger.debug("[lib/productData-adapter.ts] | transfromProduct | end");
     return product;
   } catch (error) {
-    console.error("Error fetching and transforming product:", error);
+    logger.debug("[lib/productData-adapter.ts] | transfromProduct | Error fetching and transforming product:", error);
     throw error;
   }
 }

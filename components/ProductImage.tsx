@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 export default function ProductImage({
   name,

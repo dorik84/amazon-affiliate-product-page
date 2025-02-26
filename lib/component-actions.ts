@@ -1,6 +1,4 @@
-import { DeleteProductResponse, GetProductsResponse } from "@/types/responses";
-import { ApiResponse, PostProductResponse, PutProductResponse, SuccessApiResponse } from "@/types/api";
-import { ProductData } from "@/types/product";
+import { ApiResponse, ProductsResponse } from "@/types/api";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -17,7 +15,7 @@ const addProductEnclosure = () => {
 
     if (!productPromiseMap.has(url)) {
       console.log("component-actions | addProduct | start");
-      const promise = fetch(`${baseUrl}/api/product?encodedUrl=${url}`, {
+      const promise = fetch(`${baseUrl}/api/product?url=${url}`, {
         method: "POST",
         cache: "no-store",
       })
@@ -165,9 +163,9 @@ export const getProduct = getProductEnclosure();
 // ###########################################################################
 
 const getProductsEnclosure = () => {
-  let productsPromiseMap: Map<String, Promise<GetProductsResponse>> = new Map();
+  let productsPromiseMap: Map<String, Promise<ProductsResponse>> = new Map();
 
-  return (query?: string): Promise<GetProductsResponse> => {
+  return (query?: string): Promise<ProductsResponse> => {
     console.log("component-actions | getProducts | start");
     const queryKey = query || "";
 
@@ -215,9 +213,9 @@ export const getProducts = getProductsEnclosure();
 // ###########################################################################
 
 function deleteProductEnclosure() {
-  let productPromiseMap: Map<String, Promise<DeleteProductResponse>> = new Map();
+  let productPromiseMap: Map<String, Promise<ApiResponse>> = new Map();
 
-  return (id: string): Promise<DeleteProductResponse> => {
+  return (id: string): Promise<ApiResponse> => {
     if (!id) {
       console.log("component-actions | deleteProduct | no id provided");
       return Promise.reject({ message: "No id provided" });
