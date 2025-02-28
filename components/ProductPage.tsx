@@ -6,9 +6,8 @@ import ProductVariations from "@/components/ProductVariations";
 import { AnimatedButton } from "@/components/AnimatedButton";
 import { useState } from "react";
 import type { ProductData } from "@/types/product";
-
+import { sendGTMEvent } from "@next/third-parties/google";
 import { RedirectIcon } from "@/components/RedirectIcon";
-import { sendGAEvent } from "@/lib/analytics";
 
 const getInitialVariations = (productData: ProductData) => {
   "use client";
@@ -34,11 +33,12 @@ export default function ProductPage({ product }: { product: ProductData | undefi
       ...prev,
       [type]: index,
     }));
-    sendGAEvent("select_content", "Product Interaction", "Variation Change", `${type}:${index}`);
+    // sendGAEvent("select_content", "Product Interaction", "Variation Change", `${type}:${index}`);
   };
 
   const onAmazonBtnClick = () => {
-    sendGAEvent("generate_lead", "Product Interaction", "Amazon Button Click", product.url);
+    // sendGAEvent("generate_lead", "Product Interaction", "Amazon Button Click", product.url);
+    sendGTMEvent({ event: "amazon_lead", value: product.url });
     window.open(decodeURIComponent(product?.url || ""), "_blank");
   };
 

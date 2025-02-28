@@ -6,7 +6,7 @@ import AffiliateMessage from "@/components/AffiliateMessage";
 import ThemeToggle from "@/components/ThemeToggle";
 import SessionProvider from "@/components/SessionProvider";
 import { Toaster } from "sonner";
-import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,11 +19,17 @@ export const metadata: Metadata = {
   description: "The best choice goods for you",
 };
 
+const GOOGLE_TAG_MANAGER_ID = process.env.GOOGLE_TAG_MANAGER_ID || "";
+
+if (!GOOGLE_TAG_MANAGER_ID) {
+  throw new Error("Please define the GOOGLE_TAG_MANAGER_ID environment variable inside .env.local");
+}
+
 export default function RootLayout({ children, session }: { children: React.ReactNode; session: any }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <GoogleTagManager gtmId={GOOGLE_TAG_MANAGER_ID} />
       <body className={`${inter.className} bg-custom-radial bg-custom-size bg-fixed`}>
-        <GoogleAnalytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SessionProvider session={session}>
             <div className="flex justify-between items-center mb-4 px-4 gap-4 sm:mb-6">

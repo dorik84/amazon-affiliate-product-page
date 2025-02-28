@@ -9,7 +9,6 @@ import { cn } from "@/utils/cn";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { sendGAEvent } from "@/lib/analytics";
 
 export const ProductCard = ({ product, className }: { product: ProductData; className?: string }) => {
   const [isClicked, setIsClicked] = useState(false);
@@ -23,7 +22,7 @@ export const ProductCard = ({ product, className }: { product: ProductData; clas
 
   const handleClick = () => {
     setIsClicked(true);
-    sendGAEvent("product_view", "Product Interaction", "Product View Mobile or Related", product.url);
+    // sendGAEvent("product_view", "Product Interaction", "Product View Mobile or Related", product.url);
   };
 
   return (

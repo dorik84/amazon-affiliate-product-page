@@ -9,7 +9,6 @@ import type { ProductData } from "@/types/product";
 import CarouselThumbnails from "@/components/ProductCarouselThumbnails";
 import ProductImage from "@/components/ProductImage";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { sendGAEvent } from "@/lib/analytics";
 
 interface ProductCarouselProps {
   product: ProductData | undefined;
@@ -49,7 +48,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
       if (!emblaApi) return;
       const newIndex = emblaApi.selectedScrollSnap();
       setSelectedIndex(newIndex);
-      sendGAEvent("carousel_image_view", "Product Interaction", "Image View", newIndex);
+      // sendGAEvent("carousel_image_view", "Product Interaction", "Image View", newIndex);
     };
   }, [emblaApi, selectedIndex]);
 
@@ -76,7 +75,7 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
   }, [emblaApi, onSelect]);
 
   const handleDialogOpen = (index: number) => {
-    sendGAEvent("product_image_zoom", "Product Interaction", "Image Zoom", index);
+    // sendGAEvent("product_image_zoom", "Product Interaction", "Image Zoom", index);
   };
 
   if (!product?.images) return null;

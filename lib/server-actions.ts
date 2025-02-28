@@ -156,7 +156,7 @@ export async function deleteProduct(id: string) {
 // ###########################################################################
 
 // Cached function to fetch and strip data
-export const fetchAndTransformAmazonProduct = (url: string) => {
+export const fetchAndTransformAmazonProduct = async (url: string) => {
   logger.debug("[lib/server-actions.ts] | fetchAndTransformAmazonProduct | start");
   logger.debug("[lib/server-actions.ts] | fetchAndTransformAmazonProduct | url", url);
   const getCachedAmazonProduct = unstable_cache(

@@ -19,8 +19,8 @@ export async function GET(
       logger.error("[GET /api/product[id]] | error | id parameter is missing");
       return NextResponse.json({ error: "id parameter is required" }, { status: 400 });
     }
-
-    const data = await getProduct(params.id);
+    const { id } = await params;
+    const data = await getProduct(id);
 
     if (!data) {
       logger.error("[GET /api/product[id]] | error | no product found in db");

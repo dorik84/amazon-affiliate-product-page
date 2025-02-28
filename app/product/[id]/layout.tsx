@@ -5,7 +5,8 @@ import type { Metadata } from "next";
 import { getProduct } from "@/lib/component-actions";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const product = await getProduct(params.id).catch((error) => {
+  const { id } = await params;
+  const product = await getProduct(id).catch((error) => {
     console.error("[ProductLayout]:", error);
     return null;
   });
