@@ -17,7 +17,7 @@ export default function RelatedProducts({ relatedProducts }: { relatedProducts: 
   const duplicatedProducts = [...relatedProducts, ...relatedProducts];
 
   return (
-    <div className="w-full overflow-hidden pb-4">
+    <div id="related-products" className="w-full overflow-hidden pb-4">
       <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 px-4">Recommended Picks</h2>
       <div
         ref={scrollRef}

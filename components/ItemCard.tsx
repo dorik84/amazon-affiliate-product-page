@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/utils/cn";
-import { sendGAEvent } from "@/lib/analytics";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 export function ItemCard({ product }: { product: ProductData }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -23,7 +23,19 @@ export function ItemCard({ product }: { product: ProductData }) {
 
   const handleClick = () => {
     setIsClicked(true);
-    sendGAEvent("product_view", "Product Interaction", "Product View Desktop", product.url);
+
+    sendGTMEvent({
+      event: "product_card_click",
+      productId: product.id,
+      productUrl: product.url,
+      AdCreativeId: "creativeId",
+      adId: "adId",
+      pixel: "pixelId",
+      adAudience: "targetAudienceId",
+      adTtitle: "titleId",
+      adDescription: "description",
+      aDUserLocation: "locationId",
+    });
   };
 
   return (
