@@ -33,12 +33,27 @@ export default function ProductPage({ product }: { product: ProductData | undefi
       ...prev,
       [type]: index,
     }));
-    // sendGAEvent("select_content", "Product Interaction", "Variation Change", `${type}:${index}`);
+
+    sendGTMEvent({
+      event: "product_variation_change",
+      variationType: type,
+      variationName: product?.variations?.[index]?.name,
+      variationImage: product?.variations?.[index]?.image,
+    });
   };
 
   const onAmazonBtnClick = () => {
-    // sendGAEvent("generate_lead", "Product Interaction", "Amazon Button Click", product.url);
-    sendGTMEvent({ event: "amazon_lead", value: product.url });
+    sendGTMEvent({
+      event: "amazon_lead",
+      productUrl: product.url,
+      creative: "creativeId",
+      ad: "adId",
+      pixel: "pixelId",
+      audience: "targetAudienceId",
+      title: "titleId",
+      description: "description",
+      location: "locationId",
+    });
     window.open(decodeURIComponent(product?.url || ""), "_blank");
   };
 

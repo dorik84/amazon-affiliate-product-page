@@ -9,6 +9,7 @@ import type { ProductData } from "@/types/product";
 import CarouselThumbnails from "@/components/ProductCarouselThumbnails";
 import ProductImage from "@/components/ProductImage";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 interface ProductCarouselProps {
   product: ProductData | undefined;
@@ -26,14 +27,12 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
     scrollPrevRef.current = () => {
       if (emblaApi) {
         emblaApi.scrollPrev();
-        // sendGAEvent("carousel_scroll", "Product Interaction", "Scroll Previous", selectedIndex);
       }
     };
 
     scrollNextRef.current = () => {
       if (emblaApi) {
         emblaApi.scrollNext();
-        // sendGAEvent("carousel_scroll", "Product Interaction", "Scroll Next", selectedIndex);
       }
     };
 
@@ -41,14 +40,16 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
       if (!emblaApi) return;
       emblaApi.scrollTo(index);
       setSelectedIndex(index);
-      // sendGAEvent("carousel_thumbnail_click", "Product Interaction", "Thumbnail Click", index);
     };
 
     onSelectRef.current = () => {
       if (!emblaApi) return;
       const newIndex = emblaApi.selectedScrollSnap();
       setSelectedIndex(newIndex);
-      // sendGAEvent("carousel_image_view", "Product Interaction", "Image View", newIndex);
+      sendGTMEvent({
+        event: "carousel_view_image",
+        imageUrl: product?.images[newIndex],
+      });
     };
   }, [emblaApi, selectedIndex]);
 
@@ -75,7 +76,10 @@ export default function ProductCarousel({ product }: ProductCarouselProps) {
   }, [emblaApi, onSelect]);
 
   const handleDialogOpen = (index: number) => {
-    // sendGAEvent("product_image_zoom", "Product Interaction", "Image Zoom", index);
+    sendGTMEvent({
+      event: "carousel_zoom_image",
+      imageUrl: product?.images[index],
+    });
   };
 
   if (!product?.images) return null;

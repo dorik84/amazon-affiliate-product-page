@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, User } from "lucide-react";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 export default function ProfileDropdown() {
   const { data: session, status } = useSession();
@@ -27,12 +28,13 @@ export default function ProfileDropdown() {
   };
 
   function handleSignIn(): void {
-    // sendGAEvent("login", "User Interaction", "Login", undefined);
+    sendGTMEvent({
+      event: "login_click",
+    });
     signIn();
   }
 
   function handleSignOut(): void {
-    // sendGAEvent("logout", "User Interaction", "Logout", undefined);
     signOut();
   }
   return (

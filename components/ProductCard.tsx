@@ -9,6 +9,7 @@ import { cn } from "@/utils/cn";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 export const ProductCard = ({ product, className }: { product: ProductData; className?: string }) => {
   const [isClicked, setIsClicked] = useState(false);
@@ -22,7 +23,18 @@ export const ProductCard = ({ product, className }: { product: ProductData; clas
 
   const handleClick = () => {
     setIsClicked(true);
-    // sendGAEvent("product_view", "Product Interaction", "Product View Mobile or Related", product.url);
+    sendGTMEvent({
+      event: "product_card_click",
+      productId: product.id,
+      productUrl: product.url,
+      AdCreativeId: "creativeId",
+      adId: "adId",
+      pixel: "pixelId",
+      adAudience: "targetAudienceId",
+      adTtitle: "titleId",
+      adDescription: "description",
+      aDUserLocation: "locationId",
+    });
   };
 
   return (
