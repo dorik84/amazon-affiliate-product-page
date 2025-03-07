@@ -15,11 +15,12 @@ export async function GET(
 ): Promise<NextResponse<ApiResponse>> {
   logger.debug("[GET /api/product[id]] | start ");
   try {
-    if (!params.id) {
+    const { id } = await params;
+    if (!id) {
       logger.error("[GET /api/product[id]] | error | id parameter is missing");
       return NextResponse.json({ error: "id parameter is required" }, { status: 400 });
     }
-    const { id } = await params;
+
     const data = await getProduct(id);
 
     if (!data) {
