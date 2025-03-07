@@ -9,7 +9,7 @@ import type { ProductData } from "@/types/product";
 import { deleteProduct, updateProduct, addProduct } from "@/lib/component-actions";
 import { toast } from "sonner";
 import { CheckCircle2Icon, LoaderIcon, XCircleIcon } from "lucide-react";
-import { ProductsResponse } from "@/types/api";
+import type { ProductsResponse } from "@/types/api";
 
 const toastConfig = {
   loading: (
@@ -38,13 +38,17 @@ const toastConfig = {
   ),
 };
 
+export type SortColumn = "name" | "price" | "category" | "updatedAt";
+export type SortDirection = "asc" | "desc";
+
 export function AdminDashboard({
   allProducts: { data, totalPages, currentPage, limit },
 }: {
   allProducts: ProductsResponse;
 }) {
   const [products, setProducts] = useState<ProductData[]>(data || []);
-  const [sortBy, setSortBy] = useState<string>("name");
+  const [sortBy, setSortBy] = useState<SortColumn>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
 
@@ -117,20 +121,44 @@ export function AdminDashboard({
     [deleteProductFromList]
   );
 
+  const handleSortChange = useCallback(
+    (column: SortColumn) => {
+      if (sortBy === column) {
+        // Toggle direction if clicking the same column
+        setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+      } else {
+        // Set new column and default to ascending
+        setSortBy(column);
+        setSortDirection("asc");
+      }
+    },
+    [sortBy]
+  );
+
   const sortedProducts = useMemo(() => {
     return [...products].sort((a, b) => {
+      let comparison = 0;
+
       switch (sortBy) {
         case "name":
-          return a.name.localeCompare(b.name);
+          comparison = a.name.localeCompare(b.name);
+          break;
         case "price":
-          return a.defaultPrice - b.defaultPrice;
+          comparison = a.defaultPrice - b.defaultPrice;
+          break;
         case "category":
-          return (a.category || "").localeCompare(b.category || "");
+          comparison = (a.category || "").localeCompare(b.category || "");
+          break;
+        case "updatedAt":
+          comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+          break;
         default:
-          return 0;
+          comparison = 0;
       }
+
+      return sortDirection === "asc" ? comparison : -comparison;
     });
-  }, [products, sortBy]);
+  }, [products, sortBy, sortDirection]);
 
   const filteredProducts = useMemo(
     () =>
@@ -154,16 +182,6 @@ export function AdminDashboard({
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="price">Price</SelectItem>
-            <SelectItem value="category">Category</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <ProductList
@@ -171,6 +189,9 @@ export function AdminDashboard({
         onRefreshProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
         loading={loading}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        onSortChange={handleSortChange}
       />
     </div>
   );

@@ -13,6 +13,7 @@ export type ProductData = {
   defaultPrice: number;
   url: string;
   category: string;
+  updatedAt: string;
 };
 
 export type VariationData = {

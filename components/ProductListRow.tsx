@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { ProductData } from "@/types/product";
@@ -18,6 +20,16 @@ const ProductListRow = React.memo(
     onDeleteProduct: (id: string) => void;
     loading: { [key: string]: boolean };
   }) => {
+
+    // Format the date
+    const formattedDate = new Date(product.updatedAt).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
     return (
       <TableRow key={product.id}>
         <TableCell>
@@ -35,10 +47,11 @@ const ProductListRow = React.memo(
         <TableCell>{product.description.substring(0, 100)}...</TableCell>
         <TableCell>${product.defaultPrice.toFixed(2)}</TableCell>
         <TableCell>{product.category || "N/A"}</TableCell>
+        <TableCell>{formattedDate}</TableCell>
         <TableCell>
           <div className="flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
             <Button
-              className="w-full md:w-auto"
+              className="w-full md:w-auto min-w-[80px]"
               onClick={() => onRefreshProduct(product.id)}
               variant="outline"
               size="sm"
@@ -47,7 +60,7 @@ const ProductListRow = React.memo(
               {loading[product.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
             </Button>
             <Button
-              className="w-full md:w-auto"
+              className="w-full md:w-auto min-w-[80px]"
               onClick={() => onDeleteProduct(product.id)}
               variant="destructive"
               size="sm"
@@ -72,7 +85,7 @@ const ProductListRow = React.memo(
   (prevProps, nextProps) => {
     return (
       prevProps.product === nextProps.product &&
-      prevProps.loading[prevProps.product.url] === nextProps.loading[nextProps.product.url]
+      prevProps.loading[prevProps.product.id] === nextProps.loading[nextProps.product.id]
     );
   }
 );
