@@ -1,7 +1,5 @@
 "use server";
-
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+import "@/lib/envConfig";
 
 import mongoose from "mongoose";
 

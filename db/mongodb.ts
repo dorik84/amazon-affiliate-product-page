@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import "@/lib/envConfig";
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');

@@ -1,4 +1,5 @@
 import { createLogger, format, transports } from "winston";
+import "@/lib/envConfig";
 
 const logLevel = process.env.NEXT_PUBLIC_LOG_LEVEL || "info";
 
