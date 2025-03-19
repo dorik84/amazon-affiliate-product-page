@@ -3,7 +3,7 @@ name: Build and Deploy to Lightsail
 on:
   push:
     branches:
-      - main
+      - fixing-pipeline
   pull_request:
     branches:
       - main
@@ -27,6 +27,7 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:prod
+
   deploy-infra:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -45,10 +46,17 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform apply -auto-approve
         working-directory: infrastructure
-      - name: Output IP
-        id: terraform
-        run: echo "instance_ip=$(terraform output -raw instance_ip)" >> $GITHUB_OUTPUT
-        working-directory: infrastructure
+      - name: Capture Terraform Outputs
+        id: tf-outputs
+        run: |
+          echo "instance_ip=$(terraform output -raw instance_ip)" >> $GITHUB_OUTPUT
+          echo "instance_private_key<> $GITHUB_OUTPUT
+          terraform output -raw instance_private_key >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+    outputs:
+      instance_ip: ${{ steps.tf-outputs.outputs.instance_ip }}
+      instance_private_key: ${{ steps.tf-outputs.outputs.instance_private_key }}
+
   deploy-app:
     needs: deploy-infra
     runs-on: ubuntu-latest
@@ -56,11 +64,11 @@ jobs:
       - name: Deploy to Lightsail
         env:
           LIGHTSAIL_HOST: ${{ needs.deploy-infra.outputs.instance_ip }}
-          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          LIGHTSAIL_SSH_KEY: ${{ needs.deploy-infra.outputs.instance_private_key }}
         run: |
           echo "$LIGHTSAIL_SSH_KEY" > key.pem
           chmod 600 key.pem
-          ssh -i key.pem ubuntu@$LIGHTSAIL_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$LIGHTSAIL_HOST << 'EOF'
             cd /opt/next-app
             docker-compose pull
             docker-compose up -d

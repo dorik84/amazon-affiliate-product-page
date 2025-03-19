@@ -124,3 +124,8 @@ resource "aws_cloudwatch_metric_alarm" "health_check" {
 output "instance_ip" {
   value = aws_lightsail_instance.next_app.public_ip_address
 }
+
+output "instance_private_key" {
+  value     = aws_lightsail_instance.next_app.key_pair.private_key
+  sensitive = true # Mark as sensitive to avoid logging in plain text
+}
