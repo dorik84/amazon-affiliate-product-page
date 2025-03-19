@@ -1,7 +1,7 @@
 # Build stage
 FROM node:20-alpine AS builder
 WORKDIR /app
-ENV NODE_ENV=production # Set NODE_ENV to production during build
+ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm install
 COPY . . 
