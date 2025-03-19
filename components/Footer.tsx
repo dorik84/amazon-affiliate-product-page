@@ -1,5 +1,3 @@
-import "@/lib/envConfig";
-
 export function Footer() {
   return (
     <footer className="bg-background ">
@@ -8,7 +6,8 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">About Us</h3>
             <p className="text-gray-400">
-              {process.env.STORE_NAME} is your one-stop shop for all your needs, from electronics to fashion and beyond.
+              {process.env.NEXT_PUBLIC_STORE_NAME} is your one-stop shop for all your needs, from electronics to fashion
+              and beyond.
             </p>
           </div>
           {/* <div>
@@ -78,7 +77,7 @@ export function Footer() {
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} {process.env.STORE_NAME}. All rights reserved.
+            &copy; {new Date().getFullYear()} {process.env.NEXT_PUBLIC_STORE_NAME}. All rights reserved.
           </p>
         </div>
       </div>
