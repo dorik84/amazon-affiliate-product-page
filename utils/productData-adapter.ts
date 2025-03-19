@@ -22,10 +22,10 @@ export async function transformProduct(response: any, url: string): Promise<Omit
     const html = await response.text();
     // Save HTML to file for debugging
 
-    if (process.env.NODE_ENV === "development") {
-      const fs = require("fs");
-      fs.writeFileSync("product-page.txt", html);
-    }
+    // if (process.env.NODE_ENV === "development") {
+    //   const fs = require("fs");
+    //   fs.writeFileSync("product-page.txt", html);
+    // }
 
     // Create virtual console to suppress CSS errors
     const virtualConsole = new VirtualConsole();
