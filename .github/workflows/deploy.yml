@@ -39,9 +39,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:prod
           file: Dockerfile # Ensure this points to your Dockerfile if not in root
-          build-args: | # Optional: Pass specific build-time args if needed
-            GOOGLE_TAG_MANAGER_ID=${{ secrets.GOOGLE_TAG_MANAGER_ID }}
-          env: # Pass environment variables to the build
+            build-args: |
+              GOOGLE_TAG_MANAGER_ID=${{ secrets.GOOGLE_TAG_MANAGER_ID }}
+          env:
             GOOGLE_TAG_MANAGER_ID: ${{ secrets.GOOGLE_TAG_MANAGER_ID }}
 
   deploy-infra:
