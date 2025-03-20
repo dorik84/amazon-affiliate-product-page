@@ -7,6 +7,9 @@ RUN npm install
 COPY . . 
 COPY ./prisma ./prisma  
 RUN npx prisma generate  
+# Pass build-time environment variables
+ARG GOOGLE_TAG_MANAGER_ID
+ENV GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID
 RUN npm run build
 
 # Run stage
