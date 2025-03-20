@@ -1,3 +1,4 @@
+// keep it in case i need to use it in the future
 import { MongoClient } from "mongodb";
 import "@/lib/envConfig";
 

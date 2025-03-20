@@ -12,6 +12,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
+      - name: Create .env file
+        run: echo "${{ secrets.ENV_FILE }}" > .env
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -27,6 +29,8 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:prod
+          build-args: |
+            --env-file .env
 
   deploy-infra:
     needs: build-and-push
