@@ -1,18 +1,18 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-# Accept build-time argument
-ARG GOOGLE_TAG_MANAGER_ID
-ENV GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID
-
 WORKDIR /app
-ENV NODE_ENV=production
 
+# Copy the .env.local file into the build context
+COPY .env.local ./
+
+# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
 COPY . . 
 COPY ./prisma ./prisma  
 RUN npx prisma generate  
+# Build the Next.js app (Next.js will automatically load .env.local)
 RUN npm run build
 
 # Run stage
