@@ -15,10 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env.local file
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env.local
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -32,8 +28,25 @@ jobs:
       - name: Build and push Docker image
         env:
           REGISTRY: ghcr.io/${{ github.repository }}
+          GIT_HUB_ID: ${{ secrets.GIT_HUB_ID }}
+          GIT_HUB_SECRET: ${{ secrets.GIT_HUB_SECRET }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXT_PUBLIC_LOG_LEVEL: ${{ vars.NEXT_PUBLIC_LOG_LEVEL }}
+          NEXT_PUBLIC_STORE_NAME: ${{ vars.NEXT_PUBLIC_STORE_NAME }}
+          GOOGLE_TAG_MANAGER_ID: ${{ secrets.GOOGLE_TAG_MANAGER_ID }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
         run: |
-          docker build -t $REGISTRY:prod .
+          docker build \
+            --build-arg GIT_HUB_ID=$GIT_HUB_ID \
+            --build-arg GIT_HUB_SECRET=$GIT_HUB_SECRET \
+            --build-arg NEXTAUTH_SECRET=$NEXTAUTH_SECRET \
+            --build-arg NEXTAUTH_URL=$NEXTAUTH_URL \
+            --build-arg NEXT_PUBLIC_LOG_LEVEL=$NEXT_PUBLIC_LOG_LEVEL \
+            --build-arg GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID \
+            --build-arg DATABASE_URL=$DATABASE_URL \
+            -t $REGISTRY:prod .
           docker push $REGISTRY:prod
 
   deploy-infra:
@@ -52,6 +65,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         run: terraform apply -auto-approve
         working-directory: infrastructure
       - name: Capture Terraform Outputs

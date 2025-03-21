@@ -5,8 +5,8 @@ import GitHub from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/db/prisma";
 
-const GITHUB_ID = process.env.GITHUB_ID;
-const GITHUB_SECRET = process.env.GITHUB_SECRET;
+const GITHUB_ID = process.env.GIT_HUB_ID;
+const GITHUB_SECRET = process.env.GIT_HUB_SECRET;
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
 
 if (!GITHUB_ID) {

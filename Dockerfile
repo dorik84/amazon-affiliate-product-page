@@ -3,8 +3,25 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy the .env.local file into the build context
-COPY .env.local ./
+# Accept build arguments
+ARG GIT_HUB_ID
+ARG GIT_HUB_SECRET
+ARG NEXTAUTH_SECRET
+ARG NEXTAUTH_URL
+ARG NEXT_PUBLIC_LOG_LEVEL
+ARG GOOGLE_TAG_MANAGER_ID
+ARG DATABASE_URL
+
+
+# Set environment variables
+ENV GIT_HUB_ID=$GIT_HUB_ID
+ENV GIT_HUB_SECRET=$GIT_HUB_SECRET
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ENV NEXT_PUBLIC_LOG_LEVEL=$NEXT_PUBLIC_LOG_LEVEL
+ENV GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID
+ENV DATABASE_URL=$DATABASE_URL
+
 
 # Copy package files and install dependencies
 COPY package*.json ./
@@ -12,7 +29,7 @@ RUN npm install
 COPY . . 
 COPY ./prisma ./prisma  
 RUN npx prisma generate  
-# Build the Next.js app (Next.js will automatically load .env.local)
+# Build the Next.js app
 RUN npm run build
 
 # Run stage
