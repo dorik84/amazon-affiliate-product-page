@@ -44,6 +44,7 @@ jobs:
             --build-arg NEXTAUTH_SECRET=$NEXTAUTH_SECRET \
             --build-arg NEXTAUTH_URL=$NEXTAUTH_URL \
             --build-arg NEXT_PUBLIC_LOG_LEVEL=$NEXT_PUBLIC_LOG_LEVEL \
+            --build-arg NEXT_PUBLIC_STORE_NAME=$NEXT_PUBLIC_STORE_NAME \
             --build-arg GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID \
             --build-arg DATABASE_URL=$DATABASE_URL \
             -t $REGISTRY:prod .
