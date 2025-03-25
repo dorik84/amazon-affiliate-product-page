@@ -118,7 +118,7 @@ resource "aws_cloudwatch_metric_alarm" "health_check" {
   threshold           = "1"
   alarm_description   = "Triggers when health check fails"
   alarm_actions       = [aws_sns_topic.health_alarm.arn]
-  treat_missing_data  = "breach" # Assume failure if no data
+  treat_missing_data  = "breaching" 
 }
 
 output "instance_ip" {
