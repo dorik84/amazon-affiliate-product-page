@@ -61,6 +61,7 @@ jobs:
   deploy-infra:
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
       - name: Set up Terraform
@@ -69,6 +70,24 @@ jobs:
           terraform_version: "1.5.0"
       - name: Terraform Init
         run: terraform init
+        working-directory: infrastructure
+
+      - name: Debug AWS Credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+        run: |
+          echo "AWS_ACCESS_KEY_ID is set to: $AWS_ACCESS_KEY_ID"  # Will mask the value if present
+          echo "AWS_SECRET_ACCESS_KEY is set to: $AWS_SECRET_ACCESS_KEY"  # Will mask the value if present
+          echo "AWS_DEFAULT_REGION is: $AWS_DEFAULT_REGION"
+
+      - name: Terraform Apply
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+        run: terraform apply -auto-approve
         working-directory: infrastructure
       - name: Terraform Apply
         env:
@@ -89,6 +108,7 @@ jobs:
   deploy-app:
     needs: deploy-infra
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Deploy to Lightsail
         env:
