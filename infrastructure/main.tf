@@ -17,7 +17,7 @@ resource "aws_lightsail_instance" "next_app" {
   availability_zone = "us-east-1a"
   blueprint_id      = "ubuntu_20_04"
   bundle_id         = "nano_2_0"
-  key_pair_name     = "LightsailDefaultKey-us-east-1"  # Use the default key pair in us-east-1
+  key_pair_name     = "NextAppKey"  # Custom key pair created in Lightsail
   user_data         = <<-EOF
     #!/bin/bash
     apt-get update
@@ -69,11 +69,11 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
 # Lambda Function to Reboot Lightsail
 resource "aws_lambda_function" "reboot_instance" {
-  filename      = "lambda.zip"
-  function_name = "reboot_lightsail_instance"
-  role          = aws_iam_role.lambda_role.arn
-  handler       = "index.handler"
-  runtime       = "nodejs20.x"
+  filename         = "lambda.zip"
+  function_name    = "reboot_lightsail_instance"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
   source_code_hash = filebase64sha256("lambda.zip")
 }
 
@@ -118,14 +118,9 @@ resource "aws_cloudwatch_metric_alarm" "health_check" {
   threshold           = "1"
   alarm_description   = "Triggers when health check fails"
   alarm_actions       = [aws_sns_topic.health_alarm.arn]
-  treat_missing_data  = "breaching" 
+  treat_missing_data  = "breaching"
 }
 
 output "instance_ip" {
   value = aws_lightsail_instance.next_app.public_ip_address
 }
-
-# output "instance_private_key" {
-#   value     = aws_lightsail_instance.next_app.key_pair.private_key
-#   sensitive = true # Mark as sensitive to avoid logging in plain text
-# }
