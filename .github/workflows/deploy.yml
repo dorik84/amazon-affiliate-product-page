@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:
+  packages: write # Ensure package write access
+  contents: read # Required for checkout
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -28,7 +32,7 @@ jobs:
 
       - name: Build and push Docker image
         env:
-          REGISTRY: ghcr.io/${{ github.repository }}
+          REGISTRY: ghcr.io/${{ github.repository }} # Use dynamic repository name
           GIT_HUB_ID: ${{ secrets.GIT_HUB_ID }}
           GIT_HUB_SECRET: ${{ secrets.GIT_HUB_SECRET }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -40,6 +44,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
         run: |
+          echo "Pushing to: $REGISTRY:prod"  # Debug the target
           docker build \
             --build-arg GIT_HUB_ID=$GIT_HUB_ID \
             --build-arg GIT_HUB_SECRET=$GIT_HUB_SECRET \
