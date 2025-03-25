@@ -32,7 +32,8 @@ jobs:
           GIT_HUB_ID: ${{ secrets.GIT_HUB_ID }}
           GIT_HUB_SECRET: ${{ secrets.GIT_HUB_SECRET }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
           NEXT_PUBLIC_LOG_LEVEL: ${{ vars.NEXT_PUBLIC_LOG_LEVEL }}
           NEXT_PUBLIC_STORE_NAME: ${{ vars.NEXT_PUBLIC_STORE_NAME }}
           GOOGLE_TAG_MANAGER_ID: ${{ secrets.GOOGLE_TAG_MANAGER_ID }}
@@ -44,6 +45,7 @@ jobs:
             --build-arg GIT_HUB_SECRET=$GIT_HUB_SECRET \
             --build-arg NEXTAUTH_SECRET=$NEXTAUTH_SECRET \
             --build-arg NEXTAUTH_URL=$NEXTAUTH_URL \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL \
             --build-arg NEXT_PUBLIC_LOG_LEVEL=$NEXT_PUBLIC_LOG_LEVEL \
             --build-arg NEXT_PUBLIC_STORE_NAME=$NEXT_PUBLIC_STORE_NAME \
             --build-arg GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID \
