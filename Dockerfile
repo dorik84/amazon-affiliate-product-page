@@ -34,6 +34,9 @@ COPY ./prisma ./prisma
 # Generate Prisma client
 RUN npx prisma generate  
 
+# Log the value of GOOGLE_TAG_MANAGER_ID before building
+RUN echo "GOOGLE_TAG_MANAGER_ID is: $GOOGLE_TAG_MANAGER_ID"
+
 # Build the Next.js app
 RUN npm run build
 
