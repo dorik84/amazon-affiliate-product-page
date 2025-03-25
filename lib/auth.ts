@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import "@/lib/envConfig";
 
 // Custom type for token validation result
 type TokenValidationResult = jwt.JwtPayload | null;

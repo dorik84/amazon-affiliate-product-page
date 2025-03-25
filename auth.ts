@@ -1,5 +1,5 @@
 import "next-auth/jwt";
-import "@/lib/envConfig";
+
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";

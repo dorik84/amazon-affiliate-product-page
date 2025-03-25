@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import "@/lib/envConfig";
+
 import jwt from "jsonwebtoken";
 import type { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
