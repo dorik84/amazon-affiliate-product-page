@@ -93,7 +93,7 @@ jobs:
       - name: Deploy to Lightsail
         env:
           LIGHTSAIL_HOST: ${{ needs.deploy-infra.outputs.instance_ip }}
-          LIGHTSAIL_SSH_KEY: ${{ needs.deploy-infra.outputs.instance_private_key }}
+          LIGHTSAIL_SSH_KEY: ${{ secrets.NEXT_APP_PRIVATE_KEY }} # Add this secret in GitHub
         run: |
           echo "$LIGHTSAIL_SSH_KEY" > key.pem
           chmod 600 key.pem

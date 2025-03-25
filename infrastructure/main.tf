@@ -16,9 +16,9 @@ resource "aws_lightsail_instance" "next_app" {
   name              = "next-app-instance"
   availability_zone = "us-east-1a"
   blueprint_id      = "ubuntu_20_04"
-  bundle_id         = "nano_2_0" # $3.50/month
-
-  user_data = <<-EOF
+  bundle_id         = "nano_2_0"
+  key_pair_name     = "LightsailDefaultKey-us-east-1"  # Use the default key pair in us-east-1
+  user_data         = <<-EOF
     #!/bin/bash
     apt-get update
     apt-get install -y docker.io docker-compose awscli
@@ -125,7 +125,7 @@ output "instance_ip" {
   value = aws_lightsail_instance.next_app.public_ip_address
 }
 
-output "instance_private_key" {
-  value     = aws_lightsail_instance.next_app.key_pair.private_key
-  sensitive = true # Mark as sensitive to avoid logging in plain text
-}
+# output "instance_private_key" {
+#   value     = aws_lightsail_instance.next_app.key_pair.private_key
+#   sensitive = true # Mark as sensitive to avoid logging in plain text
+# }
