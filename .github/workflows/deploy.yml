@@ -69,7 +69,7 @@ jobs:
         with:
           terraform_version: "1.5.0"
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -backend-config="bucket=amazon-associates-terraform-state-bucket" -backend-config="key=lightsail/terraform.tfstate" -backend-config="region=us-east-1"
         working-directory: infrastructure
 
       - name: Debug AWS Credentials

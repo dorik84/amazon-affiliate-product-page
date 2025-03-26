@@ -5,6 +5,11 @@ terraform {
       version = "~> 5.0"  # Use a recent version
     }
   }
+  backend "s3" {
+    bucket = "amazon-associates-terraform-state-bucket"  # Create this bucket in AWS
+    key    = "lightsail/terraform.tfstate"
+    region = "us-east-1"
+  }
 }
 provider "aws" {
   # No need to specify access_key, secret_key, or region here
