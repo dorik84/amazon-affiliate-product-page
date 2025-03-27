@@ -12,7 +12,6 @@ terraform {
   }
 }
 provider "aws" {
-  # No need to specify access_key, secret_key here
   # Terraform will use AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
   region = "us-east-2"
 }
