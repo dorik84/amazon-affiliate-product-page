@@ -69,25 +69,11 @@ jobs:
         with:
           terraform_version: "1.5.0"
       - name: Terraform Init
-        run: terraform init -backend-config="bucket=amazon-associates-terraform-state-bucket" -backend-config="key=lightsail/terraform.tfstate" -backend-config="region=us-east-1"
-        working-directory: infrastructure
-
-      - name: Debug AWS Credentials
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-        run: |
-          echo "AWS_ACCESS_KEY_ID is set to: $AWS_ACCESS_KEY_ID"  # Will mask the value if present
-          echo "AWS_SECRET_ACCESS_KEY is set to: $AWS_SECRET_ACCESS_KEY"  # Will mask the value if present
-          echo "AWS_DEFAULT_REGION is: $AWS_DEFAULT_REGION"
-
-      - name: Terraform Apply
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-        run: terraform apply -auto-approve
+        run: terraform init -backend-config="bucket=amazon-associates-terraform-state-bucket" -backend-config="key=lightsail/terraform.tfstate" -backend-config="region=us-east-2"
         working-directory: infrastructure
       - name: Terraform Apply
         env:
@@ -100,10 +86,9 @@ jobs:
         id: tf-outputs
         run: |
           echo "instance_ip=$(terraform output -raw instance_ip)" >> $GITHUB_OUTPUT
-          echo "instance_private_key=$(terraform output -raw instance_private_key)" >> $GITHUB_OUTPUT
+        working-directory: infrastructure
     outputs:
       instance_ip: ${{ steps.tf-outputs.outputs.instance_ip }}
-      instance_private_key: ${{ steps.tf-outputs.outputs.instance_private_key }}
 
   deploy-app:
     needs: deploy-infra

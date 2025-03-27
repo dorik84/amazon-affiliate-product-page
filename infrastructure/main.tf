@@ -8,18 +8,19 @@ terraform {
   backend "s3" {
     bucket = "amazon-associates-terraform-state-bucket"  # Create this bucket in AWS
     key    = "lightsail/terraform.tfstate"
-    region = "us-east-1"
+    region = "us-east-2"
   }
 }
 provider "aws" {
-  # No need to specify access_key, secret_key, or region here
-  # Terraform will use AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_DEFAULT_REGION
+  # No need to specify access_key, secret_key here
+  # Terraform will use AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+  region = "us-east-2"
 }
 
 # Lightsail Instance
 resource "aws_lightsail_instance" "next_app" {
   name              = "next-app-instance"
-  availability_zone = "us-east-1a"
+  availability_zone = "us-east-2a"
   blueprint_id      = "ubuntu_20_04"
   bundle_id         = "nano_2_0"
   key_pair_name     = "NextAppKey"  # Custom key pair created in Lightsail
@@ -33,7 +34,7 @@ resource "aws_lightsail_instance" "next_app" {
     cd /opt/next-app
     echo '${file("docker-compose.yml")}' > docker-compose.yml
     # Install AWS CLI and push health check metric
-    echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-1' > /etc/cron.d/health-check
+    echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check
     docker-compose up -d
   EOF
 }
