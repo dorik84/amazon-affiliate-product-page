@@ -146,6 +146,7 @@ resource "aws_cloudwatch_metric_alarm" "health_check" {
   treat_missing_data  = "breaching"
 }
 
+
 output "instance_ip" {
   value = aws_lightsail_instance.next_app.public_ip_address
 }
