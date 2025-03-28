@@ -9,8 +9,8 @@ on:
       - main
 
 permissions:
-  packages: write # Ensure package write access
-  contents: read # Required for checkout
+  packages: write
+  contents: read
 
 jobs:
   build-and-push:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Build and push Docker image
         env:
-          REGISTRY: ghcr.io/${{ github.repository }} # Use dynamic repository name
+          REGISTRY: ghcr.io/${{ github.repository }}
           GIT_HUB_ID: ${{ secrets.GIT_HUB_ID }}
           GIT_HUB_SECRET: ${{ secrets.GIT_HUB_SECRET }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -42,9 +42,8 @@ jobs:
           NEXT_PUBLIC_STORE_NAME: ${{ vars.NEXT_PUBLIC_STORE_NAME }}
           GOOGLE_TAG_MANAGER_ID: ${{ secrets.GOOGLE_TAG_MANAGER_ID }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
         run: |
-          echo "Pushing to: $REGISTRY:prod"  # Debug the target
+          echo "Pushing to: $REGISTRY:${{ github.sha }}"
           docker build \
             --build-arg GIT_HUB_ID=$GIT_HUB_ID \
             --build-arg GIT_HUB_SECRET=$GIT_HUB_SECRET \
@@ -55,8 +54,15 @@ jobs:
             --build-arg NEXT_PUBLIC_STORE_NAME=$NEXT_PUBLIC_STORE_NAME \
             --build-arg GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID \
             --build-arg DATABASE_URL=$DATABASE_URL \
-            -t $REGISTRY:prod .
-          docker push $REGISTRY:prod
+            -t $REGISTRY:${{ github.sha }} .
+          docker push $REGISTRY:${{ github.sha }}
+
+      - name: Output Image Tag
+        id: image
+        run: echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      image_tag: ${{ steps.image.outputs.image_tag }}
 
   deploy-infra:
     needs: build-and-push
@@ -73,14 +79,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-        run: terraform init -backend-config="bucket=amazon-associates-terraform-state-bucket" -backend-config="key=lightsail/terraform.tfstate" -backend-config="region=us-east-2"
+        run: terraform init
         working-directory: infrastructure
       - name: Terraform Apply
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var "image_tag=${{ needs.build-and-push.outputs.image_tag }}"
         working-directory: infrastructure
       - name: Capture Terraform Outputs
         id: tf-outputs
@@ -102,12 +108,14 @@ jobs:
       - name: Deploy to Lightsail
         env:
           LIGHTSAIL_HOST: ${{ needs.deploy-infra.outputs.instance_ip }}
-          LIGHTSAIL_SSH_KEY: ${{ secrets.NEXT_APP_PRIVATE_KEY }} # Add this secret in GitHub
+          LIGHTSAIL_SSH_KEY: ${{ secrets.NEXT_APP_PRIVATE_KEY }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
           echo "$LIGHTSAIL_SSH_KEY" > key.pem
           chmod 600 key.pem
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$LIGHTSAIL_HOST << 'EOF'
             cd /opt/next-app
+            sed -i "s|ghcr.io/dorik84/amazon-affiliate-product-page:.*|ghcr.io/dorik84/amazon-affiliate-product-page:$IMAGE_TAG|" docker-compose.yml
             docker-compose pull
             docker-compose up -d
           EOF

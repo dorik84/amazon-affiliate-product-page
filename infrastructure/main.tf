@@ -17,25 +17,44 @@ provider "aws" {
   region = "us-east-2"
 }
 
+# Variable for dynamic image tag
+variable "image_tag" {
+  description = "Docker image tag from pipeline"
+  default     = "prod"  # Fallback for local runs
+}
+
 # Lightsail Instance
 resource "aws_lightsail_instance" "next_app" {
   name              = "next-app-instance"
   availability_zone = "us-east-2a"
   blueprint_id      = "ubuntu_20_04"
   bundle_id         = "nano_2_0"
-  key_pair_name     = "NextAppKey"  # Custom key pair created in Lightsail
+  key_pair_name     = "NextAppKey"
   user_data         = <<-EOF
     #!/bin/bash
-    apt-get update
-    apt-get install -y docker.io docker-compose awscli
-    systemctl enable docker
-    systemctl start docker
-    mkdir -p /opt/next-app
-    cd /opt/next-app
-    echo '${file("docker-compose.yml")}' > docker-compose.yml
-    # Install AWS CLI and push health check metric
-    echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check
-    docker-compose up -d
+    set -x
+    apt-get update 2>&1 | tee -a /var/log/user-data.log
+    apt-get install -y docker.io awscli 2>&1 | tee -a /var/log/user-data.log
+    systemctl enable docker 2>&1 | tee -a /var/log/user-data.log
+    systemctl start docker 2>&1 | tee -a /var/log/user-data.log
+    curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
+    chmod +x /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
+    ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
+    mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
+    cd /opt/next-app 2>&1 | tee -a /var/log/user-data.log
+    cat << 'INNER_EOF' > docker-compose.yml
+    version: "3.8"
+    services:
+      app:
+        image: ghcr.io/dorik84/amazon-affiliate-product-page:${var.image_tag}
+        ports:
+          - "3000:3000"
+        environment:
+          - NODE_ENV=production
+        restart: unless-stopped
+    INNER_EOF
+    echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
+    docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
 }
 
