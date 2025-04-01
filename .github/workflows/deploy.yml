@@ -104,6 +104,7 @@ jobs:
     needs: deploy-infra
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - name: Deploy to Lightsail
         env:
