@@ -23,7 +23,6 @@ variable "image_tag" {
   default     = "prod"  # Fallback for local runs
 }
 
-# Lightsail Instance
 resource "aws_lightsail_instance" "next_app" {
   name              = "next-app-instance"
   availability_zone = "us-east-2a"
@@ -41,8 +40,9 @@ resource "aws_lightsail_instance" "next_app" {
     chmod +x /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
-    cd /opt/next-app 2>&1 | tee -a /var/log/user-data.log
-    cat << 'INNER_EOF' > docker-compose.yml
+    cd /opt/next-app || { echo "Failed to cd into /opt/next-app" >> /var/log/user-data.log; exit 1; }
+    echo "Writing docker-compose.yml..." >> /var/log/user-data.log
+    cat << 'INNER_EOF' > /opt/next-app/docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     version: "3.8"
     services:
       app:
@@ -53,6 +53,7 @@ resource "aws_lightsail_instance" "next_app" {
           - NODE_ENV=production
         restart: unless-stopped
     INNER_EOF
+    ls -la /opt/next-app >> /var/log/user-data.log
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
     docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
