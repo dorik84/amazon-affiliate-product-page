@@ -115,8 +115,8 @@ jobs:
           echo "$LIGHTSAIL_SSH_KEY" > key.pem
           chmod 600 key.pem
           echo "Connecting to: $LIGHTSAIL_HOST"
-          echo "Waiting 120 seconds for user_data to complete..."
-          sleep 120  # Give user_data time to complete
+          echo "Waiting 180 seconds for user_data to complete..."
+          sleep 180  # Give user_data time to complete
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$LIGHTSAIL_HOST << 'EOF'
             pwd
             ls -la /opt
