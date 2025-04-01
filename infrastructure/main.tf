@@ -39,10 +39,12 @@ resource "aws_lightsail_instance" "next_app" {
     curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     chmod +x /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
+    usermod -aG docker ubuntu 2>&1 | tee -a /var/log/user-data.log  # Add ubuntu to docker group
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
+    chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log  # Set ownership
     cd /opt/next-app || { echo "Failed to cd into /opt/next-app" >> /var/log/user-data.log; exit 1; }
     echo "Writing docker-compose.yml..." >> /var/log/user-data.log
-    cat << 'INNER_EOF' > /opt/next-app/docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
+    cat << 'INNER_EOF' > docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     version: "3.8"
     services:
       app:
@@ -53,9 +55,10 @@ resource "aws_lightsail_instance" "next_app" {
           - NODE_ENV=production
         restart: unless-stopped
     INNER_EOF
+    chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log  # Ensure ubuntu owns the file
     ls -la /opt/next-app >> /var/log/user-data.log
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
+    sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
 }
 
