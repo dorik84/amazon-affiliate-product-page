@@ -86,7 +86,18 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-        run: terraform apply -auto-approve -var "image_tag=${{ needs.build-and-push.outputs.image_tag }}"
+        run: |
+          terraform apply -auto-approve \
+            -var "image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
+            -var "google_tag_manager_id=${{ secrets.GOOGLE_TAG_MANAGER_ID }}" \
+            -var "git_hub_id=${{ secrets.GIT_HUB_ID }}" \
+            -var "git_hub_secret=${{ secrets.GIT_HUB_SECRET }}" \
+            -var "nextauth_secret=${{ secrets.NEXTAUTH_SECRET }}" \
+            -var "nextauth_url=${{ vars.NEXTAUTH_URL }}" \
+            -var "next_public_api_base_url=${{ vars.NEXT_PUBLIC_API_BASE_URL }}" \
+            -var "next_public_log_level=${{ vars.NEXT_PUBLIC_LOG_LEVEL }}" \
+            -var "next_public_store_name=${{ vars.NEXT_PUBLIC_STORE_NAME }}" \
+            -var "database_url=${{ secrets.DATABASE_URL }}"
         working-directory: infrastructure
       - name: Capture Terraform Outputs
         id: tf-outputs

@@ -23,7 +23,65 @@ variable "image_tag" {
   default     = "prod"  # Fallback for local runs
 }
 
+# Add variables for all env vars
+variable "google_tag_manager_id" {
+  description = "Google Tag Manager ID"
+  type        = string
+  default     = ""  # Default for local runs, overridden in pipeline
+}
+
+variable "git_hub_id" {
+  description = "GitHub ID"
+  type        = string
+  default     = ""
+}
+
+variable "git_hub_secret" {
+  description = "GitHub Secret"
+  type        = string
+  default     = ""
+}
+
+variable "nextauth_secret" {
+  description = "NextAuth Secret"
+  type        = string
+  default     = ""
+}
+
+variable "nextauth_url" {
+  description = "NextAuth URL"
+  type        = string
+  default     = ""
+}
+
+variable "next_public_api_base_url" {
+  description = "Next Public API Base URL"
+  type        = string
+  default     = ""
+}
+
+variable "next_public_log_level" {
+  description = "Next Public Log Level"
+  type        = string
+  default     = ""
+}
+
+variable "next_public_store_name" {
+  description = "Next Public Store Name"
+  type        = string
+  default     = ""
+}
+
+variable "database_url" {
+  description = "Database URL"
+  type        = string
+  default     = ""
+}
+
 resource "aws_lightsail_instance" "next_app" {
+  tags = {
+    Name = "next-app-instance"
+  }
   name              = "next-app-instance"
   availability_zone = "us-east-2a"
   blueprint_id      = "ubuntu_20_04"
@@ -50,7 +108,7 @@ resource "aws_lightsail_instance" "next_app" {
       app:
         image: ghcr.io/dorik84/amazon-affiliate-product-page:${var.image_tag}
         ports:
-          - "3000:3000"
+          - "3000:80"
         environment:
           - NODE_ENV=production
         restart: unless-stopped
@@ -60,6 +118,25 @@ resource "aws_lightsail_instance" "next_app" {
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
+}
+
+resource "aws_lightsail_instance_public_ports" "next_app_ports" {
+  instance_name = aws_lightsail_instance.next_app.name
+  port_info {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+  }
+  port_info {
+    from_port   = 22  # Keep SSH open
+    to_port     = 22
+    protocol    = "tcp"
+  }
+  port_info {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+  }
 }
 
 # IAM Role for Lambda
