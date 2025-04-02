@@ -122,8 +122,11 @@ jobs:
             ls -la /opt
             docker-compose --version || echo "docker-compose not found in PATH"
             cd /opt/next-app || echo "Failed to cd into /opt/next-app"
+            echo "Before sed:"
             cat docker-compose.yml || echo "docker-compose.yml not found"
             sed -i "s|ghcr.io/dorik84/amazon-affiliate-product-page:.*|ghcr.io/dorik84/amazon-affiliate-product-page:$IMAGE_TAG|" docker-compose.yml
+            echo "After sed:"
+            cat docker-compose.yml || echo "docker-compose.yml not found after sed"
             docker-compose pull
             docker-compose up -d
           EOF
