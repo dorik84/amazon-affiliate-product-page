@@ -101,22 +101,22 @@ jobs:
       instance_ip: ${{ steps.tf-outputs.outputs.instance_ip }}
 
   deploy-app:
-    needs: deploy-infra
+    needs: [build-and-push, deploy-infra] # Add build-and-push dependency
     runs-on: ubuntu-latest
     environment: production
-
     steps:
       - name: Deploy to Lightsail
         env:
           LIGHTSAIL_HOST: ${{ needs.deploy-infra.outputs.instance_ip }}
           LIGHTSAIL_SSH_KEY: ${{ secrets.NEXT_APP_PRIVATE_KEY }}
-          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }} # Direct from build-and-push
         run: |
           echo "$LIGHTSAIL_SSH_KEY" > key.pem
           chmod 600 key.pem
           echo "Connecting to: $LIGHTSAIL_HOST"
+          echo "IMAGE_TAG is: '$IMAGE_TAG'"  # Debug
           echo "Waiting 180 seconds for user_data to complete..."
-          sleep 180  # Give user_data time to complete
+          sleep 180
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$LIGHTSAIL_HOST << 'EOF'
             pwd
             ls -la /opt
