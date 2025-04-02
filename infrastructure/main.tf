@@ -108,7 +108,7 @@ resource "aws_lightsail_instance" "next_app" {
       app:
         image: ghcr.io/dorik84/amazon-affiliate-product-page:${var.image_tag}
         ports:
-          - "3000:80"
+          - "80:3000"
         environment:
           - NODE_ENV=production
         restart: unless-stopped
