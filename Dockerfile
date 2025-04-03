@@ -8,6 +8,7 @@ ARG GIT_HUB_ID
 ARG GIT_HUB_SECRET
 ARG NEXTAUTH_SECRET
 ARG NEXTAUTH_URL
+ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_LOG_LEVEL
 ARG NEXT_PUBLIC_STORE_NAME
 ARG GOOGLE_TAG_MANAGER_ID
@@ -55,6 +56,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma  
 COPY --from=builder /app/lib ./lib     
+COPY --from=builder /app/.env.local ./.env.local  
 
 # Install production dependencies
 RUN npm install --omit=dev
