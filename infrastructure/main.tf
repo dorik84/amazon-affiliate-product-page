@@ -84,7 +84,7 @@ resource "aws_lightsail_instance" "next_app" {
   }
   name              = "next-app-instance"
   availability_zone = "us-east-2a"
-  blueprint_id      = "ubuntu_20_04"
+  blueprint_id      = "ubuntu_24_04"
   bundle_id         = "nano_2_0"
   key_pair_name     = "NextAppKey"
   user_data         = <<-EOF
@@ -210,6 +210,22 @@ resource "aws_lambda_permission" "sns_invoke" {
   function_name = aws_lambda_function.reboot_instance.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = aws_sns_topic.health_alarm.arn
+}
+
+resource "aws_cloudwatch_metric_alarm" "memory_high" {
+  alarm_name          = "next-app-memory-high"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/Lightsail"
+  period              = "300"  # 5 minutes
+  statistic           = "Average"
+  threshold           = "80"   # 80% memory usage
+  alarm_description   = "Triggers when memory exceeds 80%"
+  alarm_actions       = [aws_sns_topic.health_alarm.arn]
+  dimensions = {
+    InstanceName = aws_lightsail_instance.next_app.name
+  }
 }
 
 # CloudWatch Metric Alarm
