@@ -84,7 +84,7 @@ resource "aws_lightsail_instance" "next_app" {
   }
   name              = "next-app-instance"
   availability_zone = "us-east-2a"
-  blueprint_id      = "ubuntu_24_04"
+  blueprint_id      = "ubuntu_22_04"
   bundle_id         = "nano_2_0"
   key_pair_name     = "NextAppKey"
   user_data         = <<-EOF
