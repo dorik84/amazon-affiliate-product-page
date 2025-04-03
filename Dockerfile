@@ -30,6 +30,17 @@ RUN npm install
 
 # Copy app code and build
 COPY . .
+
+# Create .env.local
+RUN echo "GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID" > .env.local && \
+    echo "GIT_HUB_ID=$GIT_HUB_ID" >> .env.local && \
+    echo "GIT_HUB_SECRET=$GIT_HUB_SECRET" >> .env.local && \
+    echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.local && \
+    echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.local && \
+    echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL" >> .env.local && \
+    echo "NEXT_PUBLIC_LOG_LEVEL=$NEXT_PUBLIC_LOG_LEVEL" >> .env.local && \
+    echo "NEXT_PUBLIC_STORE_NAME=$NEXT_PUBLIC_STORE_NAME" >> .env.local && \
+    echo "DATABASE_URL=$DATABASE_URL" >> .env.local
 COPY ./prisma ./prisma  
 RUN npx prisma generate && npm run build
 
