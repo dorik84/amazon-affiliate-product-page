@@ -97,7 +97,8 @@ jobs:
             -var "next_public_api_base_url=${{ vars.NEXT_PUBLIC_API_BASE_URL }}" \
             -var "next_public_log_level=${{ vars.NEXT_PUBLIC_LOG_LEVEL }}" \
             -var "next_public_store_name=${{ vars.NEXT_PUBLIC_STORE_NAME }}" \
-            -var "database_url=${{ secrets.DATABASE_URL }}"
+            -var "database_url=${{ secrets.DATABASE_URL }}" \
+            -var "lets_encrypt_email=${{ secrets.LETS_ENCRYPT_EMAIL }}"
         working-directory: infrastructure
       - name: Capture Terraform Outputs
         id: tf-outputs

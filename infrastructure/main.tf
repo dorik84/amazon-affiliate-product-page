@@ -23,7 +23,12 @@ variable "image_tag" {
   default     = "prod"  # Fallback for local runs
 }
 
-# Add variables for all env vars
+variable "lets_encrypt_email" {
+  description = "Email address for Let's Encrypt certificate notifications"
+  type        = string
+  default     = "default@example.com"  # Fallback for local testing
+}
+
 variable "google_tag_manager_id" {
   description = "Google Tag Manager ID"
   type        = string
@@ -91,15 +96,39 @@ resource "aws_lightsail_instance" "next_app" {
     #!/bin/bash
     set -x
     apt-get update 2>&1 | tee -a /var/log/user-data.log
-    apt-get install -y docker.io awscli 2>&1 | tee -a /var/log/user-data.log
+    apt-get install -y docker.io awscli nginx certbot python3-certbot-nginx 2>&1 | tee -a /var/log/user-data.log
     systemctl enable docker 2>&1 | tee -a /var/log/user-data.log
     systemctl start docker 2>&1 | tee -a /var/log/user-data.log
+    systemctl enable nginx 2>&1 | tee -a /var/log/user-data.log
+    systemctl start nginx 2>&1 | tee -a /var/log/user-data.log
     curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     chmod +x /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
-    usermod -aG docker ubuntu 2>&1 | tee -a /var/log/user-data.log  # Add ubuntu to docker group
+    usermod -aG docker ubuntu 2>&1 | tee -a /var/log/user-data.log
+
+    # Configure Nginx
+    cat << 'NGINX_EOF' > /etc/nginx/sites-available/best-choice.click 2>&1 | tee -a /var/log/user-data.log
+    server {
+        listen 80;
+        server_name best-choice.click;
+
+        location / {
+            proxy_pass http://localhost:3000;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+        }
+    }
+    NGINX_EOF
+    ln -sf /etc/nginx/sites-available/best-choice.click /etc/nginx/sites-enabled/ 2>&1 | tee -a /var/log/user-data.log
+    systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
+
+    # Obtain Let's Encrypt certificate with email from variable
+    certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/user-data.log
+
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
-    chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log  # Set ownership
+    chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     cd /opt/next-app || { echo "Failed to cd into /opt/next-app" >> /var/log/user-data.log; exit 1; }
     echo "Writing docker-compose.yml..." >> /var/log/user-data.log
     cat << 'INNER_EOF' > docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
@@ -108,16 +137,17 @@ resource "aws_lightsail_instance" "next_app" {
       app:
         image: ghcr.io/dorik84/amazon-affiliate-product-page:${var.image_tag}
         ports:
-          - "80:3000"
+          - "3000:3000"
         environment:
           - NODE_ENV=production
           - GIT_HUB_ID=${var.git_hub_id}
           - GIT_HUB_SECRET=${var.git_hub_secret}
           - NEXTAUTH_SECRET=${var.nextauth_secret}
           - NEXTAUTH_URL=${var.nextauth_url}
+          - NEXT_PUBLIC_API_BASE_URL=${var.next_public_api_base_url}
         restart: unless-stopped
     INNER_EOF
-    chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log  # Ensure ubuntu owns the file
+    chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     ls -la /opt/next-app >> /var/log/user-data.log
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
