@@ -289,3 +289,52 @@ resource "aws_route53_record" "best_choice_click_a" {
   ttl     = 300  # 5 minutes
   records = [aws_lightsail_instance.next_app.public_ip_address]
 }
+
+# Add this near your existing IAM resources
+resource "aws_iam_user_policy" "amazon_associate_policy" {
+  name   = "AmazonAssociatePipelinePolicy"
+  user   = "amazon_associate_account"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lightsail:*",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:lightsail:us-east-2:027569700913:*",
+          "arn:aws:s3:::amazon-associates-terraform-state-bucket/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:GetHostedZone",
+          "route53:ChangeResourceRecordSets",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets"
+        ]
+        Resource = "arn:aws:route53:::hostedzone/Z07095402QPZ2E2HYCD5J"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction",
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = "sns:Publish"
+        Resource = "arn:aws:sns:us-east-2:027569700913:next-app-health-alarm"
+      }
+    ]
+  })
+}
