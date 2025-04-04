@@ -281,3 +281,11 @@ resource "aws_cloudwatch_metric_alarm" "health_check" {
 output "instance_ip" {
   value = aws_lightsail_instance.next_app.public_ip_address
 }
+
+resource "aws_route53_record" "best_choice_click_a" {
+  zone_id = "Z07095402QPZ2E2HYCD5J"  # Replace with your Hosted Zone ID
+  name    = var.next_public_api_base_url
+  type    = "A"
+  ttl     = 300  # 5 minutes
+  records = [aws_lightsail_instance.next_app.public_ip_address]
+}
