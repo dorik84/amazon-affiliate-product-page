@@ -21,7 +21,7 @@ if (!NEXTAUTH_SECRET) {
 }
 
 export const authOptions = {
-  debug: !!process.env.AUTH_DEBUG,
+  debug: true,
   theme: { logo: "https://authjs.dev/img/logo-sm.png" },
 
   adapter: PrismaAdapter(prisma),

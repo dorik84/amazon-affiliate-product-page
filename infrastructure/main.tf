@@ -111,6 +111,10 @@ resource "aws_lightsail_instance" "next_app" {
           - "80:3000"
         environment:
           - NODE_ENV=production
+          - GIT_HUB_ID=${var.git_hub_id}
+          - GIT_HUB_SECRET=${var.git_hub_secret}
+          - NEXTAUTH_SECRET=${var.nextauth_secret}
+          - NEXTAUTH_URL=${var.nextauth_url}
         restart: unless-stopped
     INNER_EOF
     chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log  # Ensure ubuntu owns the file
