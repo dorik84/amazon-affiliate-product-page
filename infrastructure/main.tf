@@ -321,7 +321,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_high" {
     InstanceName = aws_lightsail_instance.next_app.name
   }
 }
-
+#1
 resource "aws_cloudwatch_metric_alarm" "health_check" {
   alarm_name          = "next-app-health-failure"
   comparison_operator = "LessThanThreshold"
