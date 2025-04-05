@@ -281,7 +281,8 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
         Action = [
           "cloudwatch:DescribeAlarms",
           "cloudwatch:PutMetricAlarm",
-          "cloudwatch:DeleteAlarms"
+          "cloudwatch:DeleteAlarms",
+          "cloudwatch:ListTagsForResource"
         ]
         Resource = "arn:aws:cloudwatch:us-east-2:027569700913:*"
       }
