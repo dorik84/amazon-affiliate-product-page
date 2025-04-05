@@ -2,91 +2,36 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"  # Use a recent version
+      version = "~> 5.0"
     }
   }
   backend "s3" {
-    bucket = "amazon-associates-terraform-state-bucket"  # Create this bucket in AWS
+    bucket = "amazon-associates-terraform-state-bucket"
     key    = "lightsail/terraform.tfstate"
     region = "us-east-2"
   }
 }
+
 provider "aws" {
-  
-  # Terraform will use AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
   region = "us-east-2"
 }
 
-# Variable for dynamic image tag
-variable "image_tag" {
-  description = "Docker image tag from pipeline"
-  default     = "prod"  # Fallback for local runs
-}
+# Variables (unchanged)
+variable "image_tag" { description = "Docker image tag from pipeline"; default = "prod" }
+variable "google_tag_manager_id" { description = "Google Tag Manager ID"; type = string; default = "" }
+variable "git_hub_id" { description = "GitHub ID"; type = string; default = "" }
+variable "git_hub_secret" { description = "GitHub Secret"; type = string; default = "" }
+variable "nextauth_secret" { description = "NextAuth Secret"; type = string; default = "" }
+variable "nextauth_url" { description = "NextAuth URL"; type = string; default = "" }
+variable "next_public_api_base_url" { description = "Next Public API Base URL"; type = string; default = "" }
+variable "next_public_log_level" { description = "Next Public Log Level"; type = string; default = "" }
+variable "next_public_store_name" { description = "Next Public Store Name"; type = string; default = "" }
+variable "database_url" { description = "Database URL"; type = string; default = "" }
+variable "lets_encrypt_email" { description = "Email address for Let's Encrypt certificate notifications"; type = string; default = "default@example.com" }
 
-variable "lets_encrypt_email" {
-  description = "Email address for Let's Encrypt certificate notifications"
-  type        = string
-  default     = "default@example.com"  # Fallback for local testing
-}
-
-variable "google_tag_manager_id" {
-  description = "Google Tag Manager ID"
-  type        = string
-  default     = ""  # Default for local runs, overridden in pipeline
-}
-
-variable "git_hub_id" {
-  description = "GitHub ID"
-  type        = string
-  default     = ""
-}
-
-variable "git_hub_secret" {
-  description = "GitHub Secret"
-  type        = string
-  default     = ""
-}
-
-variable "nextauth_secret" {
-  description = "NextAuth Secret"
-  type        = string
-  default     = ""
-}
-
-variable "nextauth_url" {
-  description = "NextAuth URL"
-  type        = string
-  default     = ""
-}
-
-variable "next_public_api_base_url" {
-  description = "Next Public API Base URL"
-  type        = string
-  default     = ""
-}
-
-variable "next_public_log_level" {
-  description = "Next Public Log Level"
-  type        = string
-  default     = ""
-}
-
-variable "next_public_store_name" {
-  description = "Next Public Store Name"
-  type        = string
-  default     = ""
-}
-
-variable "database_url" {
-  description = "Database URL"
-  type        = string
-  default     = ""
-}
-
+# Lightsail Instance (unchanged)
 resource "aws_lightsail_instance" "next_app" {
-  tags = {
-    Name = "next-app-instance"
-  }
+  tags = { Name = "next-app-instance" }
   name              = "next-app-instance"
   availability_zone = "us-east-2a"
   blueprint_id      = "ubuntu_22_04"
@@ -105,13 +50,10 @@ resource "aws_lightsail_instance" "next_app" {
     chmod +x /usr/local/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 2>&1 | tee -a /var/log/user-data.log
     usermod -aG docker ubuntu 2>&1 | tee -a /var/log/user-data.log
-
-    # Configure Nginx
     cat << 'NGINX_EOF' > /etc/nginx/sites-available/best-choice.click 2>&1 | tee -a /var/log/user-data.log
     server {
         listen 80;
         server_name best-choice.click;
-
         location / {
             proxy_pass http://localhost:3000;
             proxy_set_header Host \$host;
@@ -123,10 +65,7 @@ resource "aws_lightsail_instance" "next_app" {
     NGINX_EOF
     ln -sf /etc/nginx/sites-available/best-choice.click /etc/nginx/sites-enabled/ 2>&1 | tee -a /var/log/user-data.log
     systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
-
-    # Obtain Let's Encrypt certificate with email from variable
     certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/user-data.log
-
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     cd /opt/next-app || { echo "Failed to cd into /opt/next-app" >> /var/log/user-data.log; exit 1; }
@@ -162,15 +101,23 @@ resource "aws_lightsail_instance_public_ports" "next_app_ports" {
     protocol    = "tcp"
   }
   port_info {
-    from_port   = 22  # Keep SSH open
-    to_port     = 22
-    protocol    = "tcp"
-  }
-  port_info {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
   }
+  port_info {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+  }
+}
+
+resource "aws_route53_record" "best_choice_click_a" {
+  zone_id = "Z07095402QPZ2E2HYCD5J"
+  name    = "best-choice.click"
+  type    = "A"
+  ttl     = 300
+  records = [aws_lightsail_instance.next_app.public_ip_address]
 }
 
 # IAM Role for Lambda
@@ -181,9 +128,7 @@ resource "aws_iam_role" "lambda_role" {
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
+      Principal = { Service = "lambda.amazonaws.com" }
     }]
   })
 }
@@ -207,15 +152,6 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
-# Lambda Function to Reboot Lightsail
-resource "aws_lambda_function" "reboot_instance" {
-  filename         = "lambda.zip"
-  function_name    = "reboot_lightsail_instance"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "index.handler"
-  runtime          = "nodejs20.x"
-  source_code_hash = filebase64sha256("lambda.zip")
-}
 
 # Lambda Function Code (create this file locally as index.js, then zip it)
 # index.js:
@@ -226,70 +162,7 @@ resource "aws_lambda_function" "reboot_instance" {
 #   return { status: 'Instance rebooted' };
 # }
 # Then: zip lambda.zip index.js
-
-# SNS Topic for CloudWatch Alarm to Trigger Lambda
-resource "aws_sns_topic" "health_alarm" {
-  name = "next-app-health-alarm"
-}
-
-resource "aws_sns_topic_subscription" "lambda_subscription" {
-  topic_arn = aws_sns_topic.health_alarm.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.reboot_instance.arn
-}
-
-resource "aws_lambda_permission" "sns_invoke" {
-  statement_id  = "AllowExecutionFromSNS"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.reboot_instance.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.health_alarm.arn
-}
-
-resource "aws_cloudwatch_metric_alarm" "memory_high" {
-  alarm_name          = "next-app-memory-high"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "MemoryUtilization"
-  namespace           = "AWS/Lightsail"
-  period              = "300"  # 5 minutes
-  statistic           = "Average"
-  threshold           = "80"   # 80% memory usage
-  alarm_description   = "Triggers when memory exceeds 80%"
-  alarm_actions       = [aws_sns_topic.health_alarm.arn]
-  dimensions = {
-    InstanceName = aws_lightsail_instance.next_app.name
-  }
-}
-
-# CloudWatch Metric Alarm
-resource "aws_cloudwatch_metric_alarm" "health_check" {
-  alarm_name          = "next-app-health-failure"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "HealthStatus"
-  namespace           = "NextApp"
-  period              = "60" # 1 minute
-  statistic           = "Average"
-  threshold           = "1"
-  alarm_description   = "Triggers when health check fails"
-  alarm_actions       = [aws_sns_topic.health_alarm.arn]
-  treat_missing_data  = "breaching"
-}
-
-
-output "instance_ip" {
-  value = aws_lightsail_instance.next_app.public_ip_address
-}
-
-resource "aws_route53_record" "best_choice_click_a" {
-  zone_id = "Z07095402QPZ2E2HYCD5J"  # Replace with your Hosted Zone ID
-  name    = var.next_public_api_base_url
-  type    = "A"
-  ttl     = 300  # 5 minutes
-  records = [aws_lightsail_instance.next_app.public_ip_address]
-}
-
+# IAM Policy for amazon_associate_account
 resource "aws_iam_user_policy" "amazon_associate_policy" {
   name   = "AmazonAssociatePipelinePolicy"
   user   = "amazon_associate_account"
@@ -299,18 +172,20 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       {
         Effect = "Allow"
         Action = [
-          "lightsail:*"
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
         ]
-        Resource = "*"
+        Resource = [
+          "arn:aws:s3:::amazon-associates-terraform-state-bucket",
+          "arn:aws:s3:::amazon-associates-terraform-state-bucket/*"
+        ]
       },
       {
         Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
-        Resource = "arn:aws:s3:::amazon-associates-terraform-state-bucket/*"
+        Action = "lightsail:*"
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -335,23 +210,16 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
           "iam:DeleteRolePolicy",
           "iam:PassRole"
         ]
-        Resource = [
-          "arn:aws:iam::027569700913:role/lambda-lightsail-role",
-          "arn:aws:iam::027569700913:role/*"  // Broader scope for flexibility
-        ]
+        Resource = "arn:aws:iam::027569700913:role/*"
       },
       {
         Effect = "Allow"
-        Action = [
-          "sns:*"
-        ]
+        Action = "sns:*"
         Resource = "arn:aws:sns:us-east-2:027569700913:*"
       },
       {
         Effect = "Allow"
-        Action = [
-          "lambda:*"
-        ]
+        Action = "lambda:*"
         Resource = "arn:aws:lambda:us-east-2:027569700913:function:*"
       },
       {
@@ -365,4 +233,66 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       }
     ]
   })
+}
+
+# SNS Topic and other resources (unchanged)
+resource "aws_sns_topic" "health_alarm" {
+  name = "next-app-health-alarm"
+}
+
+resource "aws_lambda_function" "reboot_instance" {
+  filename         = "lambda.zip"
+  function_name    = "reboot_lightsail_instance"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  source_code_hash = filebase64sha256("lambda.zip")
+}
+
+resource "aws_sns_topic_subscription" "lambda_subscription" {
+  topic_arn = aws_sns_topic.health_alarm.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.reboot_instance.arn
+}
+
+resource "aws_lambda_permission" "sns_invoke" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.reboot_instance.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.health_alarm.arn
+}
+
+resource "aws_cloudwatch_metric_alarm" "memory_high" {
+  alarm_name          = "next-app-memory-high"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/Lightsail"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = "80"
+  alarm_description   = "Triggers when memory exceeds 80%"
+  alarm_actions       = [aws_sns_topic.health_alarm.arn]
+  dimensions = {
+    InstanceName = aws_lightsail_instance.next_app.name
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "health_check" {
+  alarm_name          = "next-app-health-failure"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "HealthStatus"
+  namespace           = "NextApp"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "1"
+  alarm_description   = "Triggers when health check fails"
+  alarm_actions       = [aws_sns_topic.health_alarm.arn]
+  treat_missing_data  = "breaching"
+}
+
+output "instance_ip" {
+  value = aws_lightsail_instance.next_app.public_ip_address
 }
