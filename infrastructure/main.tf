@@ -253,7 +253,8 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
           "iam:PutRolePolicy",
           "iam:DeleteRolePolicy",
           "iam:PassRole",
-          "iam:ListRolePolicies"
+          "iam:ListRolePolicies",
+          "iam:GetRolePolicy"
         ]
         Resource = "arn:aws:iam::027569700913:role/*"
       },
