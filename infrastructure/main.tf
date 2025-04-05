@@ -16,18 +16,61 @@ provider "aws" {
   region = "us-east-2"
 }
 
-# Variables (unchanged)
-variable "image_tag" { description = "Docker image tag from pipeline"; default = "prod" }
-variable "google_tag_manager_id" { description = "Google Tag Manager ID"; type = string; default = "" }
-variable "git_hub_id" { description = "GitHub ID"; type = string; default = "" }
-variable "git_hub_secret" { description = "GitHub Secret"; type = string; default = "" }
-variable "nextauth_secret" { description = "NextAuth Secret"; type = string; default = "" }
-variable "nextauth_url" { description = "NextAuth URL"; type = string; default = "" }
-variable "next_public_api_base_url" { description = "Next Public API Base URL"; type = string; default = "" }
-variable "next_public_log_level" { description = "Next Public Log Level"; type = string; default = "" }
-variable "next_public_store_name" { description = "Next Public Store Name"; type = string; default = "" }
-variable "database_url" { description = "Database URL"; type = string; default = "" }
-variable "lets_encrypt_email" { description = "Email address for Let's Encrypt certificate notifications"; type = string; default = "default@example.com" }
+# Variables (corrected syntax)
+variable "image_tag" {
+  description = "Docker image tag from pipeline"
+  default     = "prod"
+}
+variable "google_tag_manager_id" {
+  description = "Google Tag Manager ID"
+  type        = string
+  default     = ""
+}
+variable "git_hub_id" {
+  description = "GitHub ID"
+  type        = string
+  default     = ""
+}
+variable "git_hub_secret" {
+  description = "GitHub Secret"
+  type        = string
+  default     = ""
+}
+variable "nextauth_secret" {
+  description = "NextAuth Secret"
+  type        = string
+  default     = ""
+}
+variable "nextauth_url" {
+  description = "NextAuth URL"
+  type        = string
+  default     = ""
+}
+variable "next_public_api_base_url" {
+  description = "Next Public API Base URL"
+  type        = string
+  default     = ""
+}
+variable "next_public_log_level" {
+  description = "Next Public Log Level"
+  type        = string
+  default     = ""
+}
+variable "next_public_store_name" {
+  description = "Next Public Store Name"
+  type        = string
+  default     = ""
+}
+variable "database_url" {
+  description = "Database URL"
+  type        = string
+  default     = ""
+}
+variable "lets_encrypt_email" {
+  description = "Email address for Let's Encrypt certificate notifications"
+  type        = string
+  default     = "default@example.com"
+}
 
 # Lightsail Instance (unchanged)
 resource "aws_lightsail_instance" "next_app" {
@@ -235,7 +278,7 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
   })
 }
 
-# SNS Topic and other resources (unchanged)
+# SNS Topic and other resources
 resource "aws_sns_topic" "health_alarm" {
   name = "next-app-health-alarm"
 }
