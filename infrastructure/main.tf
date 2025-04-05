@@ -290,7 +290,7 @@ resource "aws_route53_record" "best_choice_click_a" {
   records = [aws_lightsail_instance.next_app.public_ip_address]
 }
 
-# Add this near your existing IAM resources
+# Updated IAM policy for amazon_associate_account
 resource "aws_iam_user_policy" "amazon_associate_policy" {
   name   = "AmazonAssociatePipelinePolicy"
   user   = "amazon_associate_account"
@@ -300,15 +300,18 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       {
         Effect = "Allow"
         Action = [
-          "lightsail:*",
+          "lightsail:*"
+        ]
+        Resource = "arn:aws:lightsail:us-east-2:027569700913:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject"
         ]
-        Resource = [
-          "arn:aws:lightsail:us-east-2:027569700913:*",
-          "arn:aws:s3:::amazon-associates-terraform-state-bucket/*"
-        ]
+        Resource = "arn:aws:s3:::amazon-associates-terraform-state-bucket/*"
       },
       {
         Effect = "Allow"
@@ -323,17 +326,51 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       {
         Effect = "Allow"
         Action = [
+          "iam:GetRole",
+          "iam:CreateRole",
+          "iam:UpdateRole",
+          "iam:DeleteRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy"
+        ]
+        Resource = "arn:aws:iam::027569700913:role/lambda-lightsail-role"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:GetTopicAttributes",
+          "sns:CreateTopic",
+          "sns:DeleteTopic",
+          "sns:Subscribe",
+          "sns:Unsubscribe",
+          "sns:Publish"
+        ]
+        Resource = "arn:aws:sns:us-east-2:027569700913:next-app-health-alarm"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "lambda:InvokeFunction",
+          "lambda:CreateFunction",
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:DeleteFunction",
+          "lambda:GetFunction",
+          "lambda:AddPermission",
+          "lambda:RemovePermission"
+        ]
+        Resource = "arn:aws:lambda:us-east-2:027569700913:function:reboot_lightsail_instance"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = "sns:Publish"
-        Resource = "arn:aws:sns:us-east-2:027569700913:next-app-health-alarm"
+        Resource = "arn:aws:logs:us-east-2:027569700913:*"
       }
     ]
   })
