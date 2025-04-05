@@ -205,6 +205,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
 #   return { status: 'Instance rebooted' };
 # }
 # Then: zip lambda.zip index.js
+
 # IAM Policy for amazon_associate_account
 resource "aws_iam_user_policy" "amazon_associate_policy" {
   name   = "AmazonAssociatePipelinePolicy"
@@ -251,7 +252,8 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
           "iam:DetachRolePolicy",
           "iam:PutRolePolicy",
           "iam:DeleteRolePolicy",
-          "iam:PassRole"
+          "iam:PassRole",
+          "iam:ListRolePolicies"
         ]
         Resource = "arn:aws:iam::027569700913:role/*"
       },
@@ -273,6 +275,15 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
           "logs:PutLogEvents"
         ]
         Resource = "arn:aws:logs:us-east-2:027569700913:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:DescribeAlarms",
+          "cloudwatch:PutMetricAlarm",
+          "cloudwatch:DeleteAlarms"
+        ]
+        Resource = "arn:aws:cloudwatch:us-east-2:027569700913:*"
       }
     ]
   })
