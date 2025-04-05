@@ -290,7 +290,6 @@ resource "aws_route53_record" "best_choice_click_a" {
   records = [aws_lightsail_instance.next_app.public_ip_address]
 }
 
-# Updated IAM policy for amazon_associate_account
 resource "aws_iam_user_policy" "amazon_associate_policy" {
   name   = "AmazonAssociatePipelinePolicy"
   user   = "amazon_associate_account"
@@ -302,7 +301,7 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
         Action = [
           "lightsail:*"
         ]
-        Resource = "arn:aws:lightsail:us-east-2:027569700913:*"
+        Resource = "*"
       },
       {
         Effect = "Allow"
@@ -333,35 +332,27 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
           "iam:AttachRolePolicy",
           "iam:DetachRolePolicy",
           "iam:PutRolePolicy",
-          "iam:DeleteRolePolicy"
+          "iam:DeleteRolePolicy",
+          "iam:PassRole"
         ]
-        Resource = "arn:aws:iam::027569700913:role/lambda-lightsail-role"
+        Resource = [
+          "arn:aws:iam::027569700913:role/lambda-lightsail-role",
+          "arn:aws:iam::027569700913:role/*"  // Broader scope for flexibility
+        ]
       },
       {
         Effect = "Allow"
         Action = [
-          "sns:GetTopicAttributes",
-          "sns:CreateTopic",
-          "sns:DeleteTopic",
-          "sns:Subscribe",
-          "sns:Unsubscribe",
-          "sns:Publish"
+          "sns:*"
         ]
-        Resource = "arn:aws:sns:us-east-2:027569700913:next-app-health-alarm"
+        Resource = "arn:aws:sns:us-east-2:027569700913:*"
       },
       {
         Effect = "Allow"
         Action = [
-          "lambda:InvokeFunction",
-          "lambda:CreateFunction",
-          "lambda:UpdateFunctionCode",
-          "lambda:UpdateFunctionConfiguration",
-          "lambda:DeleteFunction",
-          "lambda:GetFunction",
-          "lambda:AddPermission",
-          "lambda:RemovePermission"
+          "lambda:*"
         ]
-        Resource = "arn:aws:lambda:us-east-2:027569700913:function:reboot_lightsail_instance"
+        Resource = "arn:aws:lambda:us-east-2:027569700913:function:*"
       },
       {
         Effect = "Allow"
