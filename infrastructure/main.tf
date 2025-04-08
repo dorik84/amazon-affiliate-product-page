@@ -236,6 +236,7 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
   })
 }
 
+
 # SNS Topic and other resources
 resource "aws_sns_topic" "health_alarm" {
   name = "next-app-health-alarm"
