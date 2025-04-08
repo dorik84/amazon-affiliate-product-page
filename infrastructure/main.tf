@@ -233,31 +233,16 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       },
       {
         Effect = "Allow"
-        Action = [
-          "route53:GetHostedZone",
-          "route53:ChangeResourceRecordSets",
-          "route53:ListHostedZones",
-          "route53:ListResourceRecordSets"
-        ]
-        Resource = "arn:aws:route53:::hostedzone/Z07095402QPZ2E2HYCD5J"
+        Action = "route53:*"
+        Resource = "arn:aws:route53:::hostedzone/*"
       },
       {
         Effect = "Allow"
-        Action = [
-          "iam:GetRole",
-          "iam:CreateRole",
-          "iam:UpdateRole",
-          "iam:DeleteRole",
-          "iam:AttachRolePolicy",
-          "iam:DetachRolePolicy",
-          "iam:PutRolePolicy",
-          "iam:DeleteRolePolicy",
-          "iam:PassRole",
-          "iam:ListRolePolicies",
-          "iam:GetRolePolicy",
-          "iam:ListAttachedRolePolicies"
+        Action = "iam:*"
+        Resource = [
+          "arn:aws:iam::027569700913:role/*",
+          "arn:aws:iam::027569700913:user/amazon_associate_account"
         ]
-        Resource = "arn:aws:iam::027569700913:role/*"
       },
       {
         Effect = "Allow"
@@ -267,25 +252,16 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       {
         Effect = "Allow"
         Action = "lambda:*"
-        Resource = "arn:aws:lambda:us-east-2:027569700913:function:*"
+        Resource = "arn:aws:lambda:us-east-2:027569700913:*"
       },
       {
         Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
+        Action = "logs:*"
         Resource = "arn:aws:logs:us-east-2:027569700913:*"
       },
       {
         Effect = "Allow"
-        Action = [
-          "cloudwatch:DescribeAlarms",
-          "cloudwatch:PutMetricAlarm",
-          "cloudwatch:DeleteAlarms",
-          "cloudwatch:ListTagsForResource"
-        ]
+        Action = "cloudwatch:*"
         Resource = "arn:aws:cloudwatch:us-east-2:027569700913:*"
       }
     ]
