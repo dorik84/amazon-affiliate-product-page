@@ -214,8 +214,8 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = [
+        Effect   = "Allow"
+        Action   = [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject",
@@ -227,41 +227,41 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
         ]
       },
       {
-        Effect = "Allow"
-        Action = "lightsail:*"
+        Effect   = "Allow"
+        Action   = "lightsail:*"
         Resource = "*"
       },
       {
-        Effect = "Allow"
-        Action = "route53:*"
-        Resource = "arn:aws:route53:::hostedzone/*"
+        Effect   = "Allow"
+        Action   = "route53:*"
+        Resource = "arn:aws:route53:::hostedzone/Z07095402QPZ2E2HYCD5J"
       },
       {
-        Effect = "Allow"
-        Action = "iam:*"
+        Effect   = "Allow"
+        Action   = "iam:*"
         Resource = [
           "arn:aws:iam::027569700913:role/*",
           "arn:aws:iam::027569700913:user/amazon_associate_account"
         ]
       },
       {
-        Effect = "Allow"
-        Action = "sns:*"
+        Effect   = "Allow"
+        Action   = "sns:*"
         Resource = "arn:aws:sns:us-east-2:027569700913:*"
       },
       {
-        Effect = "Allow"
-        Action = "lambda:*"
-        Resource = "arn:aws:lambda:us-east-2:027569700913:*"
+        Effect   = "Allow"
+        Action   = "lambda:*"
+        Resource = "arn:aws:lambda:us-east-2:027569700913:function:*"
       },
       {
-        Effect = "Allow"
-        Action = "logs:*"
+        Effect   = "Allow"
+        Action   = "logs:*"
         Resource = "arn:aws:logs:us-east-2:027569700913:*"
       },
       {
-        Effect = "Allow"
-        Action = "cloudwatch:*"
+        Effect   = "Allow"
+        Action   = "cloudwatch:*"
         Resource = "arn:aws:cloudwatch:us-east-2:027569700913:*"
       }
     ]
