@@ -215,46 +215,22 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = "s3:*"
-        Resource = "arn:aws:s3:::amazon-associates-terraform-state-bucket*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = "lightsail:*"
+        Action   = [
+          "s3:*",
+          "lightsail:*",
+          "route53:*",
+          "iam:*",
+          "sns:*",
+          "lambda:*",
+          "logs:*",
+          "cloudwatch:*"
+        ]
         Resource = "*"
       },
       {
         Effect   = "Allow"
-        Action   = "route53:*"
-        Resource = "arn:aws:route53:::*"
-      },
-      {
-        Effect   = "Allow"
         Action   = "iam:*"
-        Resource = [
-          "arn:aws:iam::027569700913:role/*",
-          "arn:aws:iam::027569700913:user/amazon_associate_account"
-        ]
-      },
-      {
-        Effect   = "Allow"
-        Action   = "sns:*"
-        Resource = "arn:aws:sns:us-east-2:027569700913:*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = "lambda:*"
-        Resource = "arn:aws:lambda:us-east-2:027569700913:*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = "logs:*"
-        Resource = "arn:aws:logs:us-east-2:027569700913:*"
-      },
-      {
-        Effect   = "Allow"
-        Action   = "cloudwatch:*"
-        Resource = "arn:aws:cloudwatch:us-east-2:027569700913:*"
+        Resource = "arn:aws:iam::027569700913:user/amazon_associate_account"
       }
     ]
   })
