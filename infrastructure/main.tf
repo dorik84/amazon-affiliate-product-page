@@ -215,16 +215,8 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          "arn:aws:s3:::amazon-associates-terraform-state-bucket",
-          "arn:aws:s3:::amazon-associates-terraform-state-bucket/*"
-        ]
+        Action   = "s3:*"
+        Resource = "arn:aws:s3:::amazon-associates-terraform-state-bucket*"
       },
       {
         Effect   = "Allow"
@@ -234,7 +226,7 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       {
         Effect   = "Allow"
         Action   = "route53:*"
-        Resource = "arn:aws:route53:::hostedzone/Z07095402QPZ2E2HYCD5J"
+        Resource = "arn:aws:route53:::*"
       },
       {
         Effect   = "Allow"
@@ -252,7 +244,7 @@ resource "aws_iam_user_policy" "amazon_associate_policy" {
       {
         Effect   = "Allow"
         Action   = "lambda:*"
-        Resource = "arn:aws:lambda:us-east-2:027569700913:function:*"
+        Resource = "arn:aws:lambda:us-east-2:027569700913:*"
       },
       {
         Effect   = "Allow"
