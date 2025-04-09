@@ -3,33 +3,71 @@ name: Build and Deploy to Lightsail
 on:
   push:
     branches:
-      - main
+      - fixing-pipeline
   pull_request:
     branches:
       - main
 
+permissions:
+  packages: write
+  contents: read
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    environment: production
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}:prod
+        env:
+          REGISTRY: ghcr.io/${{ github.repository }}
+          GIT_HUB_ID: ${{ secrets.GIT_HUB_ID }}
+          GIT_HUB_SECRET: ${{ secrets.GIT_HUB_SECRET }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
+          NEXT_PUBLIC_LOG_LEVEL: ${{ vars.NEXT_PUBLIC_LOG_LEVEL }}
+          NEXT_PUBLIC_STORE_NAME: ${{ vars.NEXT_PUBLIC_STORE_NAME }}
+          GOOGLE_TAG_MANAGER_ID: ${{ secrets.GOOGLE_TAG_MANAGER_ID }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "Pushing to: $REGISTRY:${{ github.sha }}"
+          docker build \
+            --build-arg GIT_HUB_ID=$GIT_HUB_ID \
+            --build-arg GIT_HUB_SECRET=$GIT_HUB_SECRET \
+            --build-arg NEXTAUTH_SECRET=$NEXTAUTH_SECRET \
+            --build-arg NEXTAUTH_URL=$NEXTAUTH_URL \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL \
+            --build-arg NEXT_PUBLIC_LOG_LEVEL=$NEXT_PUBLIC_LOG_LEVEL \
+            --build-arg NEXT_PUBLIC_STORE_NAME=$NEXT_PUBLIC_STORE_NAME \
+            --build-arg GOOGLE_TAG_MANAGER_ID=$GOOGLE_TAG_MANAGER_ID \
+            --build-arg DATABASE_URL=$DATABASE_URL \
+            -t $REGISTRY:${{ github.sha }} .
+          docker push $REGISTRY:${{ github.sha }}
+
+      - name: Output Image Tag
+        id: image
+        run: echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      image_tag: ${{ steps.image.outputs.image_tag }}
+
   deploy-infra:
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
       - name: Set up Terraform
@@ -37,31 +75,66 @@ jobs:
         with:
           terraform_version: "1.5.0"
       - name: Terraform Init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         run: terraform init
         working-directory: infrastructure
       - name: Terraform Apply
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+        run: |
+          terraform apply -auto-approve \
+            -var "image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
+            -var "google_tag_manager_id=${{ secrets.GOOGLE_TAG_MANAGER_ID }}" \
+            -var "git_hub_id=${{ secrets.GIT_HUB_ID }}" \
+            -var "git_hub_secret=${{ secrets.GIT_HUB_SECRET }}" \
+            -var "nextauth_secret=${{ secrets.NEXTAUTH_SECRET }}" \
+            -var "nextauth_url=${{ vars.NEXTAUTH_URL }}" \
+            -var "next_public_api_base_url=${{ vars.NEXT_PUBLIC_API_BASE_URL }}" \
+            -var "next_public_log_level=${{ vars.NEXT_PUBLIC_LOG_LEVEL }}" \
+            -var "next_public_store_name=${{ vars.NEXT_PUBLIC_STORE_NAME }}" \
+            -var "database_url=${{ secrets.DATABASE_URL }}" \
+            -var "lets_encrypt_email=${{ secrets.LETS_ENCRYPT_EMAIL }}"
         working-directory: infrastructure
-      - name: Output IP
-        id: terraform
-        run: echo "instance_ip=$(terraform output -raw instance_ip)" >> $GITHUB_OUTPUT
+      - name: Capture Terraform Outputs
+        id: tf-outputs
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+        run: |
+          echo "instance_ip=$(terraform output -raw instance_ip)" >> $GITHUB_OUTPUT
         working-directory: infrastructure
+    outputs:
+      instance_ip: ${{ steps.tf-outputs.outputs.instance_ip }}
+
   deploy-app:
-    needs: deploy-infra
+    needs: [build-and-push, deploy-infra]
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Deploy to Lightsail
         env:
           LIGHTSAIL_HOST: ${{ needs.deploy-infra.outputs.instance_ip }}
-          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          LIGHTSAIL_SSH_KEY: ${{ secrets.NEXT_APP_PRIVATE_KEY }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
           echo "$LIGHTSAIL_SSH_KEY" > key.pem
           chmod 600 key.pem
-          ssh -i key.pem ubuntu@$LIGHTSAIL_HOST << 'EOF'
-            cd /opt/next-app
+          echo "Connecting to: $LIGHTSAIL_HOST"
+          echo "IMAGE_TAG is: '$IMAGE_TAG'"
+          echo "Waiting 180 seconds for user_data to complete..."
+          sleep 180
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$LIGHTSAIL_HOST << 'EOF'
+            pwd
+            ls -la /opt
+            docker-compose --version || echo "docker-compose not found in PATH"
+            cd /opt/next-app || echo "Failed to cd into /opt/next-app"
+            cat docker-compose.yml || echo "docker-compose.yml not found"
             docker-compose pull
             docker-compose up -d
           EOF
