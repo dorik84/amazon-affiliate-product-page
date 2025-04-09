@@ -3,7 +3,7 @@ name: Build and Deploy to Lightsail
 on:
   push:
     branches:
-      - fixing-pipeline
+      - main
   pull_request:
     branches:
       - main
