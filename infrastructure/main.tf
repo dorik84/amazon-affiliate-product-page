@@ -71,6 +71,19 @@ variable "lets_encrypt_email" {
   type        = string
   default     = "default@example.com"
 }
+variable "cw_aws_access_key_id" {
+  description = "AWS Access Key ID for CloudWatch metrics"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "cw_aws_secret_access_key" {
+  description = "AWS Secret Access Key for CloudWatch metrics"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
 
 # Lightsail Instance (unchanged)
 resource "aws_lightsail_instance" "next_app" {
@@ -80,7 +93,7 @@ resource "aws_lightsail_instance" "next_app" {
   blueprint_id      = "ubuntu_22_04"
   bundle_id         = "nano_2_0"
   key_pair_name     = "NextAppKey"
-  user_data         = <<-EOF
+  user_data = <<-EOF
     #!/bin/bash
     set -x
     apt-get update 2>&1 | tee -a /var/log/user-data.log
@@ -131,6 +144,12 @@ resource "aws_lightsail_instance" "next_app" {
     INNER_EOF
     chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     ls -la /opt/next-app >> /var/log/user-data.log
+    mkdir -p /root/.aws
+    echo "[default]" > /root/.aws/credentials
+    echo "aws_access_key_id = ${var.cw_aws_access_key_id}" >> /root/.aws/credentials
+    echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
+    echo "[default]" > /root/.aws/config
+    echo "region = us-east-2" >> /root/.aws/config
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
@@ -292,7 +311,7 @@ resource "aws_cloudwatch_metric_alarm" "health_check" {
   threshold           = "1"
   alarm_description   = "Triggers when health check fails"
   alarm_actions       = [aws_sns_topic.health_alarm.arn]
-  treat_missing_data  = "breaching"
+  treat_missing_data  = "notBreaching"
 }
 
 output "instance_ip" {

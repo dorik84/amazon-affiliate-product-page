@@ -85,11 +85,15 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          CW_AWS_ACCESS_KEY_ID: ${{ secrets.CW_AWS_ACCESS_KEY_ID }}
+          CW_AWS_SECRET_ACCESS_KEY: ${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
         run: |
           terraform apply -auto-approve \
             -var "image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
             -var "google_tag_manager_id=${{ secrets.GOOGLE_TAG_MANAGER_ID }}" \
+            -var "cw_aws_access_key_id=${{ secrets.CW_AWS_ACCESS_KEY_ID }}" \
+            -var "cw_aws_secret_access_key=${{ secrets.CW_AWS_SECRET_ACCESS_KEY }}" \
             -var "git_hub_id=${{ secrets.GIT_HUB_ID }}" \
             -var "git_hub_secret=${{ secrets.GIT_HUB_SECRET }}" \
             -var "nextauth_secret=${{ secrets.NEXTAUTH_SECRET }}" \
