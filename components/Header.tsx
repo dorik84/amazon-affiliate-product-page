@@ -16,7 +16,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold ">
-            BestChoice
+            {process.env.NEXT_PUBLIC_STORE_NAME}
           </Link>
           <div className="flex items-center">
             <div className="md:flex md:items-center md:space-x-8">
