@@ -118,10 +118,24 @@ resource "aws_lightsail_instance" "next_app" {
             proxy_set_header X-Forwarded-Proto \$scheme;
         }
     }
+    server {
+        listen 443 ssl;
+        server_name best-choice.click;
+        ssl_certificate /etc/letsencrypt/live/best-choice.click/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/best-choice.click/privkey.pem;
+        location / {
+            proxy_pass http://localhost:3000;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+        }
+    }
     NGINX_EOF
     ln -sf /etc/nginx/sites-available/best-choice.click /etc/nginx/sites-enabled/ 2>&1 | tee -a /var/log/user-data.log
     systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
     certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/user-data.log
+    systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     cd /opt/next-app || { echo "Failed to cd into /opt/next-app" >> /var/log/user-data.log; exit 1; }
