@@ -159,7 +159,7 @@ resource "aws_lightsail_instance" "next_app" {
     echo "[default]" > /root/.aws/config
     echo "region = us-east-2" >> /root/.aws/config
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    echo '* * * * * root free -m | grep "Mem:" | awk "{print \$3/\$2 * 100}" | aws cloudwatch put-metric-data --namespace "AWS/Lightsail" --metric-name "MemoryUtilization" --value \$1 --region us-east-2 --dimensions InstanceName=next-app-instance' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root free -m | grep "Mem:" | awk "{print ((\$2-\$7)/\$2) * 100}" | xargs -I {} aws cloudwatch put-metric-data --namespace "AWS/Lightsail" --metric-name "MemoryUtilization" --value {} --region us-east-2 --dimensions InstanceName=next-app-instance' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
 }
