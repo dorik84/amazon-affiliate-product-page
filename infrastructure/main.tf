@@ -85,7 +85,7 @@ variable "cw_aws_secret_access_key" {
   default     = ""
 }
 
-# Lightsail Instance (unchanged)
+# Attach role to Lightsail instance (update existing resource)
 resource "aws_lightsail_instance" "next_app" {
   tags = { Name = "next-app-instance" }
   name              = "next-app-instance"
@@ -152,16 +152,22 @@ resource "aws_lightsail_instance" "next_app" {
     INNER_EOF
     chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     ls -la /opt/next-app >> /var/log/user-data.log
-    mkdir -p /root/.aws
-    echo "[default]" > /root/.aws/credentials
-    echo "aws_access_key_id = ${var.cw_aws_access_key_id}" >> /root/.aws/credentials
-    echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
+    # mkdir -p /root/.aws
+    # echo "[default]" > /root/.aws/credentials
+    # echo "aws_access_key_id = ${var.cw_aws_access_key_id}" >> /root/.aws/credentials
+    # echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
     echo "[default]" > /root/.aws/config
     echo "region = us-east-2" >> /root/.aws/config
-    echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    echo '* * * * * root /bin/bash -c "free -m | grep Mem: | awk \"{print (\\\$2-\\\\$7)/\\\\$2*100}\" | xargs -I {} aws cloudwatch put-metric-data --namespace AWS/Lightsail --metric-name MemoryUtilization --value {} --region us-east-2 --dimensions InstanceName=next-app-instance" >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2 >> /var/log/health-check.log 2>&1' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root free -m | grep Mem: | awk "{print (\\\$2-\\\\$7)/\\\\$2*100}" | xargs -I {} aws cloudwatch put-metric-data --namespace AWS/Lightsail --metric-name MemoryUtilization --value {} --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
+}
+
+# Attach IAM role to Lightsail instance
+resource "aws_lightsail_instance_role_attachment" "next_app_role" {
+  instance_name = aws_lightsail_instance.next_app.name
+  role_name     = aws_iam_role.lightsail_instance_role.name
 }
 
 resource "aws_lightsail_instance_public_ports" "next_app_ports" {
@@ -223,6 +229,34 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
+# IAM Role for Lightsail Instance
+resource "aws_iam_role" "lightsail_instance_role" {
+  name = "LightsailInstanceCloudWatchRole"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lightsail.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "lightsail_cloudwatch_policy" {
+  role = aws_iam_role.lightsail_instance_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "cloudwatch:PutMetricData"
+        Resource = "*"
+      }
+    ]
+  })
+}
 
 # Lambda Function Code (create this file locally as index.js, then zip it)
 # mkdir lambda-reboot
