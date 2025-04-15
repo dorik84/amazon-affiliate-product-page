@@ -96,6 +96,7 @@ resource "aws_lightsail_instance" "next_app" {
   user_data = <<-EOF
     #!/bin/bash
     set -x
+    echo "Starting user_data script" > /var/log/user-data.log
     apt-get update 2>&1 | tee -a /var/log/user-data.log
     apt-get install -y docker.io awscli nginx certbot python3-certbot-nginx 2>&1 | tee -a /var/log/user-data.log
     systemctl enable docker 2>&1 | tee -a /var/log/user-data.log
@@ -118,24 +119,16 @@ resource "aws_lightsail_instance" "next_app" {
             proxy_set_header X-Forwarded-Proto \$scheme;
         }
     }
-    server {
-        listen 443 ssl;
-        server_name best-choice.click;
-        ssl_certificate /etc/letsencrypt/live/best-choice.click/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/best-choice.click/privkey.pem;
-        location / {
-            proxy_pass http://localhost:3000;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-        }
-    }
     NGINX_EOF
     ln -sf /etc/nginx/sites-available/best-choice.click /etc/nginx/sites-enabled/ 2>&1 | tee -a /var/log/user-data.log
     systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
-    certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/user-data.log
-    systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
+    certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/certbot.log
+    if [ $? -eq 0 ]; then
+      echo "Certbot succeeded" >> /var/log/user-data.log
+      systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
+    else
+      echo "Certbot failed" >> /var/log/user-data.log
+    fi
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     cd /opt/next-app || { echo "Failed to cd into /opt/next-app" >> /var/log/user-data.log; exit 1; }
@@ -155,6 +148,7 @@ resource "aws_lightsail_instance" "next_app" {
           - NEXTAUTH_URL=${var.nextauth_url}
           - NEXT_PUBLIC_API_BASE_URL=${var.next_public_api_base_url}
         restart: unless-stopped
+        mem_limit: 800m
     INNER_EOF
     chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     ls -la /opt/next-app >> /var/log/user-data.log
