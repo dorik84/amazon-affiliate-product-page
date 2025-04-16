@@ -179,11 +179,6 @@ resource "aws_iam_user_policy" "cloudwatch_metrics_policy" {
   })
 }
 
-# Attach IAM role to Lightsail instance
-resource "aws_lightsail_instance_role_attachment" "next_app_role" {
-  instance_name = aws_lightsail_instance.next_app.name
-  role_name     = aws_iam_role.lightsail_instance_role.name
-}
 
 resource "aws_lightsail_instance_public_ports" "next_app_ports" {
   instance_name = aws_lightsail_instance.next_app.name
@@ -244,34 +239,6 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
-# IAM Role for Lightsail Instance
-resource "aws_iam_role" "lightsail_instance_role" {
-  name = "LightsailInstanceCloudWatchRole"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "lightsail.amazonaws.com"
-      }
-    }]
-  })
-}
-
-resource "aws_iam_role_policy" "lightsail_cloudwatch_policy" {
-  role = aws_iam_role.lightsail_instance_role.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = "cloudwatch:PutMetricData"
-        Resource = "*"
-      }
-    ]
-  })
-}
 
 # Lambda Function Code (create this file locally as index.js, then zip it)
 # mkdir lambda-reboot
