@@ -121,12 +121,13 @@ resource "aws_lightsail_instance" "next_app" {
     NGINX_EOF
     ln -sf /etc/nginx/sites-available/best-choice.click /etc/nginx/sites-enabled/ 2>&1 | tee -a /var/log/user-data.log
     systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
-    certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/certbot.log
+    # Use staging to avoid rate limits
+    certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click --staging 2>&1 | tee -a /var/log/certbot.log
     if [ $? -eq 0 ]; then
       echo "Certbot succeeded" >> /var/log/user-data.log
       systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
     else
-      echo "Certbot failed" >> /var/log/user-data.log
+      echo "Certbot failed, continuing without SSL" >> /var/log/user-data.log
     fi
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log
@@ -157,8 +158,12 @@ resource "aws_lightsail_instance" "next_app" {
     echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
     echo "[default]" > /root/.aws/config
     echo "region = us-east-2" >> /root/.aws/config
+    # Ensure AWS CLI uses credentials
+    export AWS_ACCESS_KEY_ID=${var.cw_aws_access_key_id}
+    export AWS_SECRET_ACCESS_KEY=${var.cw_aws_secret_access_key}
+    export AWS_DEFAULT_REGION=us-east-2
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2 >> /var/log/health-check.log 2>&1' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    echo '* * * * * root free -m | grep Mem: | awk "{print (\\$2-\\$7)/\\$2*100}" > /tmp/mem_usage && aws cloudwatch put-metric-data --namespace "AWS/Lightsail" --metric-name "MemoryUtilization" --value "$(cat /tmp/mem_usage)" --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root free -m | grep Mem: | awk "{print (\\$2-\\$7)/\\$2*100}" > /tmp/mem_usage && AWS_ACCESS_KEY_ID=${var.cw_aws_access_key_id} AWS_SECRET_ACCESS_KEY=${var.cw_aws_secret_access_key} AWS_DEFAULT_REGION=us-east-2 aws cloudwatch put-metric-data --namespace AWS/Lightsail --metric-name MemoryUtilization --value \$(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
 }
