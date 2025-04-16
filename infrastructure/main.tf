@@ -152,16 +152,31 @@ resource "aws_lightsail_instance" "next_app" {
     INNER_EOF
     chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     ls -la /opt/next-app >> /var/log/user-data.log
-    # mkdir -p /root/.aws
-    # echo "[default]" > /root/.aws/credentials
-    # echo "aws_access_key_id = ${var.cw_aws_access_key_id}" >> /root/.aws/credentials
-    # echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
+    mkdir -p /root/.aws
+    echo "[default]" > /root/.aws/credentials
+    echo "aws_access_key_id = ${var.cw_aws_access_key_id}" >> /root/.aws/credentials
+    echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
     echo "[default]" > /root/.aws/config
     echo "region = us-east-2" >> /root/.aws/config
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2 >> /var/log/health-check.log 2>&1' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
     echo '* * * * * root free -m | grep Mem: | awk "{print (\\\$2-\\\\$7)/\\\\$2*100}" | xargs -I {} aws cloudwatch put-metric-data --namespace AWS/Lightsail --metric-name MemoryUtilization --value {} --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
+}
+
+resource "aws_iam_user_policy" "cloudwatch_metrics_policy" {
+  name   = "CloudWatchMetricsPolicy"
+  user   = "cloudwatch"  # Adjust if your IAM user name differs
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "cloudwatch:PutMetricData"
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 # Attach IAM role to Lightsail instance
