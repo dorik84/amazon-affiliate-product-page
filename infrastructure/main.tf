@@ -86,13 +86,13 @@ variable "cw_aws_secret_access_key" {
 }
 
 resource "aws_lightsail_instance" "next_app" {
-  tags = { Name = "next-app-instance" }
+  tags              = { Name = "next-app-instance" }
   name              = "next-app-instance"
   availability_zone = "us-east-2a"
   blueprint_id      = "ubuntu_22_04"
   bundle_id         = "micro_2_0"
   key_pair_name     = "NextAppKey"
-  user_data = <<-EOF
+  user_data         = <<-EOF
     #!/bin/bash
     set -x
     echo "Starting user_data script" > /var/log/user-data.log
@@ -166,7 +166,7 @@ resource "aws_lightsail_instance" "next_app" {
     echo "[default]" > /root/.aws/config
     echo "region = us-east-2" >> /root/.aws/config
     echo '* * * * * root HOME=/root curl http://localhost:3000/api/health | HOME=/root aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2 >> /var/log/health-check.log 2>&1' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    echo '* * * * * root echo "Running memory-check at $(date)" >> /var/log/memory-check.log && HOME=/root free -m | grep Mem: | awk '\''{print ($2-$7)/$2*100}'\'' > /tmp/mem_usage 2>> /var/log/memory-check.log && HOME=/root aws cloudwatch put-metric-data --namespace "AWS/Lightsail" --metric-name "MemoryUtilization" --value $(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root echo "Running memory-check at $(date)" >> /var/log/memory-check.log && HOME=/root AWS_ACCESS_KEY_ID=${var.cw_aws_access_key_id} AWS_SECRET_ACCESS_KEY=${var.cw_aws_secret_access_key} free -m | grep Mem: | awk '\''{print ($2-$7)/$2*100}'\'' > /tmp/mem_usage 2>> /var/log/memory-check.log && HOME=/root AWS_ACCESS_KEY_ID=${var.cw_aws_access_key_id} AWS_SECRET_ACCESS_KEY=${var.cw_aws_secret_access_key} aws cloudwatch put-metric-data --namespace "AWS-Lightsail" --metric-name "MemoryUtilization" --value $(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
 }
