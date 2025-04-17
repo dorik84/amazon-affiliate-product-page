@@ -163,9 +163,9 @@ resource "aws_lightsail_instance" "next_app" {
     echo "aws_access_key_id = ${var.cw_aws_access_key_id}" >> /root/.aws/credentials
     echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
     echo "[default]" > /root/.aws/config
-    echo "region = us-east-2" >> /root/.aws/config
+    echo "region = us-east-2" > /root/.aws/config
     echo '* * * * * root HOME=/root curl http://localhost:3000/api/health | HOME=/root aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2 >> /var/log/health-check.log 2>&1' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    echo '* * * * * root echo "Running memory-check at \$(date)" >> /var/log/memory-check.log 2>&1 && HOME=/root free -m | grep Mem: | awk "{print (\$2-\$7)/\$2*100}" > /tmp/mem_usage 2>&1 | tee -a /var/log/memory-check.log && HOME=/root aws cloudwatch put-metric-data --namespace "AWS/Lightsail" --metric-name "MemoryUtilization" --value \$(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root echo "Running memory-check at $(date)" >> /var/log/memory-check.log && HOME=/root free -m | grep Mem: | awk '\''{print ($2-$7)/$2*100}'\'' > /tmp/mem_usage 2>> /var/log/memory-check.log && HOME=/root aws cloudwatch put-metric-data --namespace "AWS/Lightsail" --metric-name "MemoryUtilization" --value $(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
 }
