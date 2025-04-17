@@ -121,7 +121,6 @@ resource "aws_lightsail_instance" "next_app" {
     NGINX_EOF
     ln -sf /etc/nginx/sites-available/best-choice.click /etc/nginx/sites-enabled/ 2>&1 | tee -a /var/log/user-data.log
     systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
-    # Try production certificate, fallback to staging
     certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/certbot.log
     if [ $? -eq 0 ]; then
       echo "Certbot production succeeded" >> /var/log/user-data.log
@@ -166,7 +165,7 @@ resource "aws_lightsail_instance" "next_app" {
     echo "[default]" > /root/.aws/config
     echo "region = us-east-2" >> /root/.aws/config
     echo '* * * * * root HOME=/root curl http://localhost:3000/api/health | HOME=/root aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2 >> /var/log/health-check.log 2>&1' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    echo '* * * * * root HOME=/root free -m | grep Mem: | awk "{print (\\$2-\\$7)/\\$2*100}" > /tmp/mem_usage && HOME=/root aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "MemoryUtilization" --value \$(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root echo "Running memory-check at \$(date)" >> /var/log/memory-check.log 2>&1 && HOME=/root free -m | grep Mem: | awk "{print (\$2-\$7)/\$2*100}" > /tmp/mem_usage 2>&1 | tee -a /var/log/memory-check.log && HOME=/root aws cloudwatch put-metric-data --namespace "AWS/Lightsail" --metric-name "MemoryUtilization" --value \$(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
 }
