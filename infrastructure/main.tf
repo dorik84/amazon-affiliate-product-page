@@ -179,8 +179,8 @@ resource "aws_iam_user_policy" "cloudwatch_metrics_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "cloudwatch:PutMetricData",
           "cloudwatch:ListMetrics"
         ]
@@ -194,19 +194,19 @@ resource "aws_iam_user_policy" "cloudwatch_metrics_policy" {
 resource "aws_lightsail_instance_public_ports" "next_app_ports" {
   instance_name = aws_lightsail_instance.next_app.name
   port_info {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
+    from_port = 80
+    to_port   = 80
+    protocol  = "tcp"
   }
   port_info {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
+    from_port = 443
+    to_port   = 443
+    protocol  = "tcp"
   }
   port_info {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
   }
 }
 
@@ -224,8 +224,8 @@ resource "aws_iam_role" "lambda_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
       Principal = { Service = "lambda.amazonaws.com" }
     }]
   })
@@ -272,14 +272,14 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
 # IAM Policy for amazon_associate_account
 resource "aws_iam_user_policy" "amazon_associate_policy" {
-  name   = "AmazonAssociatePipelinePolicy"
-  user   = "amazon_associate_account"
+  name = "AmazonAssociatePipelinePolicy"
+  user = "amazon_associate_account"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "s3:*",
           "lightsail:*",
           "route53:*",
@@ -334,7 +334,7 @@ resource "aws_cloudwatch_metric_alarm" "memory_high" {
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
   metric_name         = "MemoryUtilization"
-  namespace           = "AWS/Lightsail"
+  namespace           = "AWS-Lightsail"
   period              = "300"
   statistic           = "Average"
   threshold           = "80"
