@@ -121,20 +121,13 @@ resource "aws_lightsail_instance" "next_app" {
     NGINX_EOF
     ln -sf /etc/nginx/sites-available/best-choice.click /etc/nginx/sites-enabled/ 2>&1 | tee -a /var/log/user-data.log
     systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
-    # Try production certificate, fallback to staging
-    certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click 2>&1 | tee -a /var/log/certbot.log
+    # Try staging certificate due to rate limit
+    certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click --staging 2>&1 | tee -a /var/log/certbot.log
     if [ $? -eq 0 ]; then
-      echo "Certbot production succeeded" >> /var/log/user-data.log
+      echo "Certbot staging succeeded" >> /var/log/user-data.log
       systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
     else
-      echo "Certbot production failed, trying staging" >> /var/log/user-data.log
-      certbot --nginx -n --agree-tos --email ${var.lets_encrypt_email} -d best-choice.click --staging 2>&1 | tee -a /var/log/certbot.log
-      if [ $? -eq 0 ]; then
-        echo "Certbot staging succeeded" >> /var/log/user-data.log
-        systemctl restart nginx 2>&1 | tee -a /var/log/user-data.log
-      else
-        echo "Certbot staging failed, continuing with HTTP" >> /var/log/user-data.log
-      fi
+      echo "Certbot staging failed, continuing with HTTP" >> /var/log/user-data.log
     fi
     mkdir -p /opt/next-app 2>&1 | tee -a /var/log/user-data.log
     chown ubuntu:ubuntu /opt/next-app 2>&1 | tee -a /var/log/user-data.log
@@ -159,16 +152,28 @@ resource "aws_lightsail_instance" "next_app" {
     INNER_EOF
     chown ubuntu:ubuntu docker-compose.yml 2>&1 | tee -a /var/log/user-data.log
     ls -la /opt/next-app >> /var/log/user-data.log
-    mkdir -p /root/.aws
-    echo "[default]" > /root/.aws/credentials
-    echo "aws_access_key_id = ${var.cw_aws_access_key_id}" >> /root/.aws/credentials
-    echo "aws_secret_access_key = ${var.cw_aws_secret_access_key}" >> /root/.aws/credentials
-    echo "[default]" > /root/.aws/config
-    echo "region = us-east-2" >> /root/.aws/config
     echo '* * * * * root curl http://localhost:3000/api/health | aws cloudwatch put-metric-data --namespace "NextApp" --metric-name "HealthStatus" --value $([ $? -eq 0 ] && echo 1 || echo 0) --region us-east-2 >> /var/log/health-check.log 2>&1' > /etc/cron.d/health-check 2>&1 | tee -a /var/log/user-data.log
-    echo '* * * * * root free -m | grep Mem: | awk "{print (\\$2-\\$7)/\\$2*100}" > /tmp/mem_usage && HOME=/root aws cloudwatch put-metric-data --namespace AWS/Lightsail --metric-name MemoryUtilization --value \$(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
+    echo '* * * * * root free -m | grep Mem: | awk "{print (\\$2-\\$7)/\\$2*100}" > /tmp/mem_usage && aws cloudwatch put-metric-data --namespace AWS/Lightsail --metric-name MemoryUtilization --value \$(cat /tmp/mem_usage) --region us-east-2 --dimensions InstanceName=next-app-instance >> /var/log/memory-check.log 2>&1' > /etc/cron.d/memory-check 2>&1 | tee -a /var/log/user-data.log
     sudo -u ubuntu docker-compose up -d 2>&1 | tee -a /var/log/user-data.log || echo "Docker Compose failed" >> /var/log/user-data.log
   EOF
+}
+
+resource "aws_iam_role_policy" "lightsail_cloudwatch_policy" {
+  name   = "LightsailCloudWatchPolicy"
+  role   = "AmazonLightsailInstanceRole"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "cloudwatch:PutMetricData",
+          "cloudwatch:ListMetrics"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 resource "aws_iam_user_policy" "cloudwatch_metrics_policy" {
@@ -179,7 +184,10 @@ resource "aws_iam_user_policy" "cloudwatch_metrics_policy" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = "cloudwatch:PutMetricData"
+        Action   = [
+          "cloudwatch:PutMetricData",
+          "cloudwatch:ListMetrics"
+        ]
         Resource = "*"
       }
     ]
